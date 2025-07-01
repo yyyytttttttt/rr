@@ -1,0 +1,40 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: 'SF-Pro-regular';
+ 
+  src: url('/fonts/SFProDisplay-Regular.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Manrope-Bold';
+ 
+  src: url('/fonts/Manrope-Bold.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Manrope-Light';
+ 
+  src: url('/fonts/Manrope-Light.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Manrope-Medium';
+ 
+  src: url('/fonts/Manrope-Medium.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Manrope-Regular';
+ 
+  src: url('/fonts/Manrope-Regular.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'spaceagecyrillic-regular';
+ 
+  src: url('/fonts/spaceagecyrillic-regular.woff2') format('woff2');
+}
+@theme {
+  --font-sfpro: 'SF-Pro-regular', sans-serif;
+  --font-ManropeBold: 'Manrope-Bold', sans-serif;
+  --font-ManropeLight: 'Manrope-Light', sans-serif;
+  --font-ManropeMedium: 'Manrope-Medium', sans-serif;
+  --font-ManropeRegular: 'Manrope-Regular', sans-serif;
+  --font-spaceagecyrillicRegular: 'spaceagecyrillic-regular', sans-serif;
+}
