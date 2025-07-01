@@ -3,10 +3,10 @@ const nextConfig = {
   reactStrictMode: true,
 
   experimental: {
-    serverActions: {}, // ⬅️ теперь без ошибки
+    serverActions: {},
   },
 
   trailingSlash: true,
 };
 
-module.exports = nextConfig;
+export default nextConfig;
