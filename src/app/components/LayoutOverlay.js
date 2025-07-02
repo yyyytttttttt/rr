@@ -7,7 +7,7 @@ export default function LayoutOverlay({ next, prev, text }) {
     <>
       {/* Верхнее меню */}
       <div className="fixed top-4 left-0 right-0 flex justify-between items-center w-full px-[4%] z-50">
-        <div className="group flex gap-4 transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] w-[20%] sm:w-[15%] md:w-[12%] lg:w-[5%]">
+        <div className="group flex gap-4 transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] w-[20%] sm:w-[15%] md:w-[12%] lg:w-[8%]">
           <Image
             src="/images/Logo.svg"
             alt="Логотип"
