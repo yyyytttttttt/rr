@@ -61,10 +61,10 @@ export default function Propusk({ next, prev, text }) {
       <div className="fixed  top-1/2 px-[4%] transform -translate-y-1/2 flex gap-[6%] items-center  z-50 w-full text-[#414141]">
         <div className="flex flex-col gap-4 w-[11%] sm:w-[7%] lg:w-[4%]">
           {[
-            { src: "/images/loc.svg", alt: "Лок" },
-            { src: "/images/doc.svg", alt: "Док" },
-            { src: "/images/lk.svg", alt: "ЛК" },
-            { src: "/images/zv.svg", alt: "Зв" },
+            { src: "/images/loc1.svg", alt: "Лок" },
+            { src: "/images/doc1.svg", alt: "Док" },
+            { src: "/images/lk1.svg", alt: "ЛК" },
+            { src: "/images/zv1.svg", alt: "Зв" },
           ].map(({ src, alt }, i) => (
             <div key={i}>
               <Image
