@@ -6,7 +6,7 @@ export default function LayoutOverlay({ next, prev, text }) {
   return (
     <>
       {/* Верхнее меню */}
-      <div className="fixed top-4 left-0 right-0 flex justify-between items-center w-full px-[4%] z-50">
+      <div className="fixed  top-4 left-0 right-0 flex justify-between items-center w-full px-[4%] z-50">
         <div className="group flex gap-4 transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] w-[20%] sm:w-[15%] md:w-[12%] lg:w-[8%]">
           <Image
             src="/images/Logo.svg"
@@ -40,13 +40,13 @@ export default function LayoutOverlay({ next, prev, text }) {
       </div>
 
       {/* Левая колонка и текст */}
-      <div className="fixed top-1/2 px-[4%] transform -translate-y-1/2 flex gap-16 z-50 w-full text-[#414141]">
+      <div className="fixed top-1/2 px-[4%] transform -translate-y-1/2 flex justify-between items-center gap-16 z-50 w-full text-[#414141]">
         <div className="flex flex-col gap-4 w-[11%] sm:w-[7%] lg:w-[4%]">
           {[
-            { src: "/images/loc.svg", alt: "Лок" },
-            { src: "/images/doc.svg", alt: "Док" },
-            { src: "/images/lk.svg", alt: "ЛК" },
-            { src: "/images/zv.svg", alt: "Зв" },
+            { src: "/images/loc1.svg", alt: "Лок" },
+            { src: "/images/doc1.svg", alt: "Док" },
+            { src: "/images/lk1.svg", alt: "ЛК" },
+            { src: "/images/zv1.svg", alt: "Зв" },
           ].map(({ src, alt }, i) => (
             <div key={i}>
               <Image
@@ -60,28 +60,55 @@ export default function LayoutOverlay({ next, prev, text }) {
           ))}
         </div>
 
-        {/* Центрированный текст */}
-        <div className="absolute top-1/2 left-[53%] xs:left-1/2 sm:left-1/3 xl:left-1/4 transform -translate-x-1/2 -translate-y-1/2 w-[55%] md:w-[30%] z-50 text-[#414141]">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={text?.title}
-              initial={{ opacity: 0, y: 20, scale: 0.98, filter: "blur(2px)" }}
-              animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
-              exit={{ opacity: 0, y: -20, scale: 0.98, filter: "blur(2px)" }}
-              transition={{ duration: 0.6, ease: [0.33, 1, 0.68, 1] }}
-            >
-              <h2 className="text-[clamp(0.875rem,0.55rem+1.625vw,2.5rem)] font-[Manrope-Bold] mb-4">
-                {text?.title}
-              </h2>
-              <p className="text-[clamp(0.75rem,0.65rem+0.5vw,1.25rem)] font-[Manrope-Regular] mb-4">
-                {text?.desc}
-              </p>
-              <button className="bg-[#414141] rounded-[10px] px-[6%] py-[3%] font-[Manrope-Regular] text-white text-[clamp(0.75rem,0.65rem+0.5vw,1.25rem)]">
-                Написать в чат
-              </button>
-            </motion.div>
-          </AnimatePresence>
-        </div>
+       {/* Центрированный текст */}
+<motion.div
+  className="px-[2%] rounded-[20px] py-[2%] bg-[#CFC4A6] w-[55%] md:w-[30%] z-50 text-[#414141]"
+  initial={{ opacity: 0, y: 20, scale: 0.98, filter: "blur(2px)" }}
+  animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
+  exit={{ opacity: 0, y: -20, scale: 0.98, filter: "blur(2px)" }}
+  transition={{ duration: 0.6, ease: [0.33, 1, 0.68, 1] }}
+>
+  <AnimatePresence mode="wait">
+    <motion.div
+      key={text?.title}
+      initial={{ opacity: 0, y: 20, scale: 0.98, filter: "blur(2px)" }}
+      animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
+      exit={{ opacity: 0, y: -20, scale: 0.98, filter: "blur(2px)" }}
+      transition={{ duration: 0.6, ease: [0.33, 1, 0.68, 1] }}
+    >
+      <h2 className="text-[clamp(0.875rem,0.55rem+1.625vw,2.5rem)] font-[Manrope-Bold] mb-4">
+        {text?.title}
+      </h2>
+      <p className="text-[clamp(0.75rem,0.65rem+0.5vw,1.25rem)] font-[Manrope-Regular] mb-4">
+        {text?.desc}
+      </p>
+      <motion.div
+  variants={{
+    hidden: { opacity: 0, y: 6 },
+    show:   { opacity: 1, y: 0, transition: { duration: 0.28, ease: [0.33,1,0.68,1] } }
+  }}
+  className="flex flex-wrap gap-4"
+>
+  {(text?.buttons ?? []).map((btn, i) => (
+    <motion.button
+      key={i}
+      variants={{ hidden: { opacity: 0, y: 6 }, show: { opacity: 1, y: 0, transition: { duration: 0.24, delay: 0.03 * i } } }}
+      className="rounded-[10px] px-[6%] py-[3%] font-[Manrope-Regular] text-[clamp(0.75rem,0.65rem+0.5vw,1.25rem)]"
+      style={{
+        backgroundColor: btn.bg ?? 'transparent',
+        color:           btn.text ?? '#636846',
+        borderColor:     btn.border ?? 'transparent',
+        borderWidth:     btn.border ? 1 : 0,
+      }}
+      onClick={btn.onClick}
+    >
+      {btn.label}
+    </motion.button>
+  ))}
+</motion.div>
+    </motion.div>
+  </AnimatePresence>
+</motion.div>
       </div>
 
       {/* Bottom Nav */}
