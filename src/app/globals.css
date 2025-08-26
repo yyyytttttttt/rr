@@ -37,5 +37,5 @@
   --font-ManropeMedium: 'Manrope-Medium', sans-serif;
   --font-ManropeRegular: 'Manrope-Regular', sans-serif;
   --font-spaceagecyrillicRegular: 'spaceagecyrillic-regular', sans-serif;
-  --breakpoint-4xl: 1900px; /* пример — для телефонов */
+  --breakpoint-4xl: 120.625rem; /* 1930px при base 16px */
 }

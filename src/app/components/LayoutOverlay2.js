@@ -60,29 +60,11 @@ export default function LayoutOverlay({ text }) {
       </div>
 
       {/* Левая колонка и текст */}
-      <div className="fixed   transform  top-1/2 left-[4%]  -translate-y-1/2 flex justify-between items-center gap-16 z-30 w-[20%] text-[#414141]">
-        <div className="flex flex-col gap-4 w-[11%] sm:w-[7%] lg:w-[18%]">
-          {[
-            { src: "/images/loc1.svg", alt: "Лок" },
-            { src: "/images/doc1.svg", alt: "Док" },
-            { src: "/images/lk1.svg", alt: "ЛК" },
-            { src: "/images/zv1.svg", alt: "Зв" },
-          ].map(({ src, alt }, i) => (
-            <div key={i}>
-              <Image
-                src={src}
-                alt={alt}
-                width={80}
-                height={80}
-                className="h-auto w-full transition cursor-pointer duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] hover:-translate-y-1 hover:scale-110 hover:drop-shadow-[0_0_15px_rgba(167,124,102,0.5)]"
-              />
-            </div>
-          ))}
-        </div>
+     
 
        
 
-      </div>
+      
 
       
     </>
