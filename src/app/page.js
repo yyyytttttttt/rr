@@ -39,19 +39,18 @@ export default function FullPageScroll() {
                              
                               bg-[#CFC4A6] py-[2%] px-[2%]'>
         <p className='text-[#636846] text-[clamp(0.875rem,0.55rem+1.625vw,2.5rem)] font-[Manrope-Bold] mb-4 flex flex-col'>
-          <span>Ты — центр</span>
-          <span>этого пространства</span>
+          <span>Подарок ко дню рождения</span>
+          
         </p>
         <p className='text-[clamp(0.75rem,0.65rem+0.5vw,1.25rem)] font-[Manrope-Regular] flex flex-col mb-4 text-[#636846]'>
-          <span>«Новая Я» — это не просто эстетика и стиль</span>
-          <span>Это сопровождение, поддержка и услуги,</span>
-          <span>которые помогают выбрать себя заново.</span>
-          <span>Запишись — не для того, чтобы изменить себя,</span>
-          <span>а чтобы наконец-то услышать.</span>
+          <span>Твой месяц — твои подарки</span>
+          <span>Мы подготовили для тебя особые сюрпризы, чтобы этот</span>
+          <span>период был наполнен заботой и радостью.</span>
+          
         </p>
         <div className='flex gap-4'>
           <button className='rounded-[5px] bg-[#636846] text-[#F7EFE5] px-[6%] py-[3%] font-[Manrope-Regular] text-[clamp(0.75rem,0.65rem+0.5vw,1.25rem)]'>
-            Выбрать услугу
+            Узнать подробнее
           </button>
           <button className='rounded-[5px] bg-[#F7EFE5] text-[#967450] px-[6%] py-[3%] font-[Manrope-Regular] text-[clamp(0.75rem,0.65rem+0.5vw,1.25rem)]'>
             Написать в чат
@@ -64,13 +63,38 @@ export default function FullPageScroll() {
                              
                               bg-[#CFC4A6] py-[2%] px-[2%]'>
         <p className='text-[#636846] text-[clamp(0.875rem,0.55rem+1.625vw,2.5rem)] font-[Manrope-Bold] mb-4 flex flex-col'>
-          <span>Выбор — в твоих руках</span>
-          <span>и в твоём ритме</span>
+          <span>Сила природы</span>
+          
         </p>
         <p className='text-[clamp(0.75rem,0.65rem+0.5vw,1.25rem)] font-[Manrope-Regular] flex flex-col mb-4 text-[#636846]'>
-          <span>Поддержка, внимание к деталям и забота о тебе —</span>
-          <span>чтобы каждый шаг был комфортным.</span>
-          <span>Найди свою практику и свой баланс.</span>
+          <span>Мы используем только естественные компоненты, </span>
+          <span>чтобы каждая процедура наполняла </span>
+          <span>тебя свежестью и гармонией.</span>
+        </p>
+        <div className='flex gap-4'>
+          <button className='rounded-[5px] bg-[#636846] text-[#F7EFE5] px-[6%] py-[3%] font-[Manrope-Regular] text-[clamp(0.75rem,0.65rem+0.5vw,1.25rem)]'>
+            Узнать подробнее
+          </button>
+          <button className='rounded-[5px] bg-[#F7EFE5] text-[#967450] px-[6%] py-[3%] font-[Manrope-Regular] text-[clamp(0.75rem,0.65rem+0.5vw,1.25rem)]'>
+            Написать в чат
+          </button>
+        </div>
+      </div>
+    ),
+    (
+      <div className='absolute top-1/2 right-[4%] -translate-y-1/2 rounded-[20px]
+                             
+                              bg-[#CFC4A6] py-[2%] px-[2%]'>
+        <p className='text-[#636846] text-[clamp(0.875rem,0.55rem+1.625vw,2.5rem)] font-[Manrope-Bold] mb-4 flex flex-col'>
+          <span>Ты — центр</span>
+          <span>этого пространства</span>
+          
+        </p>
+        <p className='text-[clamp(0.75rem,0.65rem+0.5vw,1.25rem)] font-[Manrope-Regular] flex flex-col mb-4 text-[#636846]'>
+          <span>«Новая Я» — это не просто эстетика и стиль, Это  </span>
+          <span>сопровождение, поддержка и услуги,которые помогают </span>
+          <span>выбрать себя заново. Запишись — не для того, чтобы </span>
+          <span>изменить себя, а чтобы наконец-то услышать.</span>
         </p>
         <div className='flex gap-4'>
           <button className='rounded-[5px] bg-[#636846] text-[#F7EFE5] px-[6%] py-[3%] font-[Manrope-Regular] text-[clamp(0.75rem,0.65rem+0.5vw,1.25rem)]'>
@@ -81,7 +105,7 @@ export default function FullPageScroll() {
           </button>
         </div>
       </div>
-    )
+    ),
   ]}
     />,
      <StaticSection3 src="/images/sl2.png">
