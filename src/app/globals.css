@@ -38,4 +38,9 @@
   --font-ManropeRegular: 'Manrope-Regular', sans-serif;
   --font-spaceagecyrillicRegular: 'spaceagecyrillic-regular', sans-serif;
   --breakpoint-4xl: 120.625rem; /* 1930px при base 16px */
+  --breakpoint-1k: 62.5rem; /* 1000px при base 16px */
+
+  --breakpoint-xs: 30rem; /* 480px при base 16px */
 }
+.swiper-wrapper { align-items: stretch; }   /* тянем слайды по высоте ряда */
+.swiper-slide > * { height: 100%; }         /* контент внутри слайда на всю высоту */
