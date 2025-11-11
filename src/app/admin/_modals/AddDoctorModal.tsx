@@ -65,7 +65,7 @@ export default function AddDoctorModal({ open, onClose, onSuccess }: Props) {
   );
 
   const form = useForm<DoctorFormData>({
-    resolver: zodResolver(doctorSchema),
+    resolver: zodResolver(doctorSchema) as any,
     defaultValues: {
       userId: "",
       email: "",

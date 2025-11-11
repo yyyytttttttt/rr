@@ -75,7 +75,7 @@ export default function AdminDoctorsClient() {
   );
 
   const form = useForm<DoctorFormData>({
-    resolver: zodResolver(doctorSchema),
+    resolver: zodResolver(doctorSchema) as any,
     defaultValues: {
       userId: "",
       email: "",
