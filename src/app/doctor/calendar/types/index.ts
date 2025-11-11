@@ -43,6 +43,7 @@ export interface CalendarApiResponse {
   exceptions?: ApiException[];
   bookings?: ApiBooking[];
   busy?: ApiBooking[]; // альтернативное поле для bookings
+  unavailabilities?: any[]; // недоступности/блокировки
 }
 
 // ================= Calendar Event Types =================
