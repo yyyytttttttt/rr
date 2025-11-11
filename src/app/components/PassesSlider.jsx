@@ -38,7 +38,7 @@ const slideVariants = {
   hidden: { opacity: 0.85, y: 14, scale: 0.985 },
   show: {
     opacity: 1, y: 0, scale: 1,
-    transition: { duration: 0.35, ease: [0.25, 1, 0.5, 1], when: 'beforeChildren', staggerChildren: 0.05 }
+    transition: { duration: 0.35, ease: [0.25, 1, 0.5, 1] as any, when: 'beforeChildren', staggerChildren: 0.05 }
   }
 }
 const itemVariants = {

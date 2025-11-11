@@ -219,7 +219,7 @@ export function usePagedScroll({
       ? { x: 0, y: `-${currentPage * 100}vh` }
       : { y: 0, x: `-${currentPage * 100}vw` }
 
-  const motionTransition = { duration: cfg.duration / 1000, ease: [0.33, 1, 0.68, 1] }
+  const motionTransition = { duration: cfg.duration / 1000, ease: [0.33, 1, 0.68, 1] as any }
 
   return {
     currentPage,

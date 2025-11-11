@@ -51,7 +51,7 @@ export default function LayoutOverlay({ text }) {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.6, ease: [0.33, 1, 0.68, 1] }}
+            transition={{ duration: 0.6, ease: [0.33, 1, 0.68, 1] as any }}
             className="text-[clamp(1.25rem,0.5rem+3.3333vw,1.5rem)] font-[spaceagecyrillic-regular] xs:text-[clamp(1.5rem,1rem+2.5vw,4rem)] w-[60%] text-end text-[#414141]"
           >
             {text?.tit}

@@ -16,7 +16,7 @@ const panelVariants = {
 }
 
 const spring = { type: 'spring', stiffness: 280, damping: 26 }
-const fade   = { duration: 0.25, ease: [0.25, 1, 0.5, 1] }
+const fade   = { duration: 0.25, ease: [0.25, 1, 0.5, 1] as any }
 
 function Menu  ({ setOpen }) {
   return (
