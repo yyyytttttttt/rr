@@ -33,7 +33,11 @@ const MOCK: Doctor[] = Array.from({ length: 6 }).map((_, i) => ({
 
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.25, 1, 0.5, 1] } },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.6, ease: [0.25, 1, 0.5, 1] as any }
+  },
 };
 
 const dropdownVariants = {
@@ -42,7 +46,7 @@ const dropdownVariants = {
     opacity: 1,
     y: 0,
     scale: 1,
-    transition: { duration: 0.2, ease: [0.25, 1, 0.5, 1] }
+    transition: { duration: 0.2, ease: [0.25, 1, 0.5, 1] as any }
   },
   exit: {
     opacity: 0,
