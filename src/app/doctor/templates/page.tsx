@@ -24,7 +24,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ d
 
   // Check if user is admin
   const user = await prisma.user.findUnique({
-    where: { email: session.user.email },
+    where: { email: session.user.email || undefined },
     select: { role: true },
   });
 

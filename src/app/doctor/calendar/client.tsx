@@ -6,7 +6,6 @@ import type {
   EventClickArg,
   EventDropArg,
   EventContentArg,
-  EventResizeDoneArg,
 } from "@fullcalendar/core";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import dayGridPlugin from "@fullcalendar/daygrid";
@@ -677,7 +676,7 @@ export default function ClientCalendar({
   );
 
   const eventResize = useCallback(
-    async (info: EventResizeDoneArg) => {
+    async (info: any) => {
       const { type, backendId } = info.event.extendedProps as {
         type: string;
         backendId: string;
@@ -1866,7 +1865,7 @@ function ExceptionFormModal({
 
 function StatusModal({ open, current, onClose, onSubmit }: StatusModalProps) {
   const form = useForm({
-    resolver: zodResolver(statusSchema),
+    resolver: zodResolver(statusSchema) as any,
     defaultValues: { status: current },
   });
 
