@@ -1,0 +1,64 @@
+
+> my-next-app@0.1.0 dev
+> next dev --turbopack
+
+ ⚠ Port 3000 is in use, using available port 3001 instead.
+   ▲ Next.js 15.3.4 (Turbopack)
+   - Local:        http://localhost:3001
+   - Network:      http://10.8.0.103:3001
+   - Environments: .env.local, .env
+
+ ✓ Starting...
+ ✓ Compiled middleware in 153ms
+ ✓ Ready in 1324ms
+ ○ Compiling /Login ...
+ ✓ Compiled /Login in 2.8s
+ GET /Login 200 in 3101ms
+ ✓ Compiled /api/auth/[...nextauth] in 358ms
+ POST /api/auth/_log 200 in 945ms
+ GET /api/auth/providers 200 in 48ms
+ GET /api/auth/csrf 200 in 43ms
+ POST /api/auth/callback/credentials 200 in 277ms
+ POST /api/auth/_log 200 in 138ms
+ ○ Compiling /profile ...
+ ✓ Compiled /profile in 945ms
+Invalid DOM property `clip-path`. Did you mean `clipPath`?
+Invalid DOM property `stroke-width`. Did you mean `strokeWidth`?
+Invalid DOM property `stroke-linecap`. Did you mean `strokeLinecap`?
+Invalid DOM property `stroke-linejoin`. Did you mean `strokeLinejoin`?
+ GET /profile 200 in 1122ms
+ GET /profile?view=history 200 in 98ms
+ POST /api/auth/_log 200 in 86ms
+ ✓ Compiled /api/bookings in 371ms
+[GET /api/bookings] Returning 7 bookings for user cmgjkhakj0000c5zk6qexd22e
+ GET /api/bookings?mine=1 200 in 491ms
+[GET /api/bookings] Returning 7 bookings for user cmgjkhakj0000c5zk6qexd22e
+ GET /api/bookings?mine=1 200 in 48ms
+ GET /Login 200 in 96ms
+ POST /api/auth/_log 200 in 48ms
+ ○ Compiling / ...
+ ✓ Compiled / in 628ms
+ GET / 200 in 663ms
+ GET /profile 200 in 84ms
+ GET /profile?view=history 200 in 70ms
+ POST /api/auth/_log 200 in 48ms
+[GET /api/bookings] Returning 7 bookings for user cmgjkhakj0000c5zk6qexd22e
+ GET /api/bookings?mine=1 200 in 47ms
+[GET /api/bookings] Returning 7 bookings for user cmgjkhakj0000c5zk6qexd22e
+ GET /api/bookings?mine=1 200 in 49ms
+ ○ Compiling /admin ...
+ ✓ Compiled /admin in 632ms
+ GET /admin 200 in 758ms
+ GET /api/bookings?query=&page=1&pageSize=20 200 in 67ms
+ POST /api/auth/_log 200 in 60ms
+ GET /profile?view=history 200 in 82ms
+[GET /api/bookings] Returning 7 bookings for user cmgjkhakj0000c5zk6qexd22e
+ GET /api/bookings?mine=1 200 in 63ms
+ POST /api/auth/_log 200 in 59ms
+ GET /Login 200 in 79ms
+ POST /api/auth/_log 200 in 50ms
+ GET / 200 in 54ms
+ ✓ Compiled /forgetPassword in 347ms
+ GET /forgetPassword 200 in 381ms
+ GET /Login 200 in 53ms
+ ○ Compiling /forgetPassword ...

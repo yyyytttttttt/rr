@@ -3,6 +3,7 @@ import React from 'react'
 import Image from 'next/image'
 import StaticNav from './menus/StaticNav'
 const isVideo = (src) => /\.(mp4|webm|ogg)$/i.test(src)
+import { useVh100 } from '../hooks/useVh100'
 
 /**
  * props:
@@ -18,9 +19,11 @@ const isVideo = (src) => /\.(mp4|webm|ogg)$/i.test(src)
  */
 export default function StaticSection3({ src = '', images, alt = '', children }) {
   const useResponsiveImage = !!images
+  const vh100 = useVh100()
 
   return (
-    <div className="relative overflow-hidden flex-none !min-h-[100svh] w-screen">
+    <div  
+     className="relative overflow-hidden h-app flex-none w-screen">
       {/* Бэкграунд: Видео или Картинка */}
       {isVideo(src) && !useResponsiveImage ? (
         <video
@@ -79,7 +82,7 @@ export default function StaticSection3({ src = '', images, alt = '', children })
         <div className=" absolute  inset-0">{children}</div>
       )}
 
-      <StaticNav></StaticNav>
+      
     </div>
   )
 }

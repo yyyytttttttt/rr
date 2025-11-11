@@ -3,8 +3,9 @@ import { Swiper, SwiperSlide } from 'swiper/react'
 import { Navigation, A11y } from 'swiper/modules'
 import 'swiper/css'
 import 'swiper/css/navigation'
+import { memo } from 'react'
 
-export default function ImagesSlider({ images = [] }) {
+function ImagesSlider({ images = [] }) {
   return (
     <div className="absolute top-1/2 right-[4%] -translate-y-1/2 w-[45%]">
       <Swiper
@@ -57,3 +58,4 @@ export default function ImagesSlider({ images = [] }) {
     </div>
   )
 }
+export default memo(ImagesSlider)

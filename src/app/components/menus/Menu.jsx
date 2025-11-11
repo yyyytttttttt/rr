@@ -1,5 +1,5 @@
 // Menu.jsx
-import React from 'react'
+import React, { memo } from 'react'
 import { motion } from 'framer-motion'
 import MenuItem from '../MenuItem'
 
@@ -18,7 +18,7 @@ const panelVariants = {
 const spring = { type: 'spring', stiffness: 280, damping: 26 }
 const fade   = { duration: 0.25, ease: [0.25, 1, 0.5, 1] }
 
-const Menu = ({ setOpen }) => {
+function Menu  ({ setOpen }) {
   return (
     <div>
       <div className="fixed hidden 1k:flex inset-0 z-[999]" role="dialog" aria-modal="true">
@@ -446,4 +446,4 @@ const Menu = ({ setOpen }) => {
   )
 }
 
-export default Menu
+export default memo(Menu)

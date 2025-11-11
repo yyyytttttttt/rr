@@ -1,0 +1,342 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum BookingStatus { 
+  PENDING 
+  CONFIRMED 
+  CANCELED 
+  COMPLETED 
+  NO_SHOW 
+}
+enum PaymentStatus { 
+  REQUIRES_PAYMENT 
+PAID 
+REFUNDED 
+CANCELED 
+}
+enum Role {
+  USER
+DOCTOR
+ADMIN
+}
+
+enum UnavailabilityType {
+  VACATION      // отпуск (диапазон дат)
+  DAY_OFF       // обычный выходной (один день)
+  NO_BOOKINGS   // админ-блок: день/период без записей
+}
+
+model User {
+  id                 String   @id @default(cuid())
+  email              String?  @unique
+  emailVerified      DateTime?
+  name               String?
+  phone              String?
+  birthDate          DateTime?
+  password           String?
+  role               Role     @default(USER)
+  tokenVersion       Int      @default(0)
+  image              String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  passwordUpdatedAt  DateTime? @default(now())
+
+  doctor    Doctor?
+  accounts  Account[]
+  bookings  Booking[] @relation("UserBookings")
+}
+
+model Doctor {
+  id              String @id @default(cuid())
+  userId          String @unique
+  user            User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  title           String?
+  rating          Float?  @default(5.0)
+  reviewCount     Int     @default(0)
+  slotDurationMin Int    @default(30)
+  bufferMin       Int    @default(0)
+  tzid        String  @default("UTC")
+  minLeadMin  Int     @default(60)
+  gridStepMin Int     @default(10)
+  createdAt   DateTime @default(now())
+  schedules  Schedule[]
+  exceptions Exception[]
+
+  openings   Opening[]   @relation("DoctorOpenings")
+  bookings   Booking[]   @relation("DoctorBookings")
+  weeklyTemplates WeeklyTemplate[]
+  unavailabilities Unavailability[]
+  doctorServices DoctorService[]
+
+}
+
+model ServiceCategory {
+  id          String    @id @default(cuid())
+  name        String
+  description String?
+  icon        String?   // Название иконки или URL
+  sortOrder   Int       @default(0)
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+
+  services    Service[]
+}
+
+model Service {
+  id          String  @id @default(cuid())
+  categoryId  String?
+  category    ServiceCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  name        String
+  description String?
+  priceCents  Int
+  currency    String
+  durationMin Int
+  isActive    Boolean @default(true)
+  createdAt   DateTime @default(now())
+  bufferMinOverride Int?
+
+  bookings        Booking[]
+  doctorServices  DoctorService[]
+
+  @@index([categoryId])
+}
+
+model DoctorService {
+  doctorId    String
+  serviceId   String
+  doctor      Doctor  @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  service     Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  isActive    Boolean @default(true)
+  createdAt   DateTime @default(now())
+
+  @@id([doctorId, serviceId])
+  @@index([doctorId])
+  @@index([serviceId])
+}
+
+model Schedule {
+  id        String @id @default(cuid())
+  doctorId  String
+  doctor    Doctor @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  byWeekday Int[]
+  startTime String
+  endTime   String
+  rrule     String? 
+  tzid      String?
+  
+
+  @@index([doctorId])
+}
+
+model Opening {
+  id        String   @id @default(cuid())
+  doctorId  String
+  doctor    Doctor   @relation("DoctorOpenings", fields: [doctorId], references: [id], onDelete: Cascade)
+  startUtc  DateTime
+  endUtc    DateTime
+
+  @@index([doctorId])
+  @@index([startUtc])
+  @@index([endUtc])
+}
+
+model Exception {
+  id        String   @id @default(cuid())
+  doctorId  String
+  doctor    Doctor   @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  startUtc  DateTime
+  endUtc    DateTime
+  reason    String?
+  kind String?
+
+  @@index([doctorId])
+  @@index([startUtc])
+  @@index([endUtc])
+}
+
+model Booking {
+  id         String   @id @default(cuid())
+
+  doctorId   String
+  doctor     Doctor   @relation("DoctorBookings", fields: [doctorId], references: [id], onDelete: Cascade)
+
+  userId     String?  // ← SetNull требует опционального FK
+  user       User?    @relation("UserBookings", fields: [userId], references: [id], onDelete: SetNull)
+
+  serviceId  String
+  service    Service  @relation(fields: [serviceId], references: [id], onDelete: Restrict)
+
+  startUtc   DateTime
+  endUtc     DateTime
+  status     BookingStatus @default(PENDING)
+  note       String?
+
+  // NOTE: Client info for bookings without user account (admin-created)
+  clientName  String?
+  clientEmail String?
+  clientPhone String?
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  payment    Payment?
+
+  // NOTE: Partial unique index created manually via migration
+  // CREATE UNIQUE INDEX "Booking_doctorId_startUtc_active_key"
+  // ON "Booking" ("doctorId", "startUtc")
+  // WHERE "status" IN ('PENDING', 'CONFIRMED');
+  // This allows rebooking canceled/completed slots while preventing double-booking
+  @@index([doctorId])
+  @@index([userId])
+  @@index([startUtc])
+  @@index([endUtc])
+}
+
+model Payment {
+  id               String        @id @default(cuid())
+  bookingId        String        @unique
+  booking          Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  amountCents      Int
+  currency         String
+  provider         String
+  providerIntentId String?
+  status           PaymentStatus @default(REQUIRES_PAYMENT)
+  capturedAt       DateTime?
+  refundedAt       DateTime?
+  createdAt        DateTime @default(now())
+}
+
+model Account {
+  id                 String @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String? @db.Text
+  access_token       String? @db.Text
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String? @db.Text
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@unique([provider, providerAccountId])
+}
+
+model PasswordResetToken {
+  id          String   @id @default(cuid())
+  identifier  String
+  token       String
+  expires     DateTime
+
+  @@unique([identifier, token], name: "identifier_token")
+  @@index([identifier])
+  @@index([expires])
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@id([identifier, token])
+}
+
+// ================= Шаблоны недельного расписания =================
+
+model WeeklyTemplate {
+  id          String   @id @default(cuid())
+  doctorId    String
+  doctor      Doctor   @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+
+  name        String   // Название шаблона, например "Обычная неделя", "Летний график"
+  description String?  // Опциональное описание
+  isActive    Boolean  @default(true) // Активен ли шаблон
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  slots       TemplateSlot[]
+
+  @@index([doctorId])
+}
+
+model TemplateSlot {
+  id               String   @id @default(cuid())
+  templateId       String
+  template         WeeklyTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  dayOfWeek        Int      // 0 = Понедельник, 6 = Воскресенье
+  startTime        String   // Формат "HH:MM", например "09:00"
+  endTime          String   // Формат "HH:MM", например "18:00"
+  slotDurationMin  Int      @default(30) // Длительность одного приема в минутах
+  bufferMinOverride Int?    // Кастомный буфер для этого слота (если null - используется Doctor.bufferMin или 15 мин по умолчанию)
+
+  createdAt        DateTime @default(now())
+
+  @@index([templateId])
+  @@index([dayOfWeek])
+}
+
+// ================= Недоступность / Блокировки =================
+
+model Unavailability {
+  id          String   @id @default(cuid())
+  doctorId    String
+  doctor      Doctor   @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+
+  type        UnavailabilityType
+  tzid        String   // IANA timezone, например "Europe/Moscow"
+
+  // Базовое событие/диапазон (хранится в UTC)
+  start       DateTime // начало блокировки
+  end         DateTime // конец блокировки (не включительно)
+
+  // Повторение (опционально)
+  rrule       String?  // RFC5545 RRULE, например: FREQ=WEEKLY;BYDAY=MO;COUNT=4
+  rruleUntil  DateTime? // ограничитель повторения
+
+  // Метаданные
+  reason      String?  // причина блокировки
+  createdBy   String?  // ID пользователя, создавшего блокировку (для аудита)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([doctorId])
+  @@index([doctorId, start, end])
+  @@index([start])
+  @@index([end])
+}
+
+// ================= Промокоды =================
+
+model PromoCode {
+  id              String   @id @default(cuid())
+  code            String   @unique
+  discountPercent Int?     // Процент скидки (например, 10 = 10%)
+  discountCents   Int?     // Фиксированная скидка в центах
+  currency        String   @default("RUB")
+
+  validFrom       DateTime?
+  validUntil      DateTime?
+  maxUses         Int?     // Максимальное количество использований
+  usedCount       Int      @default(0)
+
+  isActive        Boolean  @default(true)
+  description     String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([code])
+  @@index([validFrom, validUntil])
+}

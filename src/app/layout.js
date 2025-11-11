@@ -1,5 +1,6 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { Providers } from "./components/Providers";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -22,7 +23,23 @@ export default function RootLayout({ children }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <Providers>
+         {children}
+        </Providers>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+      (function(){
+        function set(){
+          var vh = window.innerHeight * 0.01;
+          document.documentElement.style.setProperty('--app-vh', vh + 'px');
+        }
+        set();
+        window.addEventListener('resize', set, { passive:true });
+        window.addEventListener('orientationchange', set, { passive:true });
+      })();`,
+          }}
+        />
       </body>
     </html>
   );

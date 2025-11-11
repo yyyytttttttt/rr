@@ -1,11 +1,12 @@
 'use client'
+import { useRef, useState, memo } from 'react'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { Navigation, A11y } from 'swiper/modules'
 import 'swiper/css'
 import 'swiper/css/navigation'
-import { useState } from 'react'
-import { motion } from 'framer-motion'
+import { motion, MotionConfig } from 'framer-motion'
 
+/* ---------- данные ---------- */
 const CARDS = [
   { title: 'Что ты получаешь', color: 'bg-[#757F64]', text: 'text-[#F5F0E4]', items: [
     'Доступ к закрытому челленджу',
@@ -19,116 +20,129 @@ const CARDS = [
     'Выполняй задания, следи за прогрессом',
     'Заверши и получи бонус',
   ]},
-  { title: 'Контент и бонусы', color: 'bg-[#5C757A]' ,text: 'text-[#F5F0E4]',  items: [
+  { title: 'Контент и бонусы', color: 'bg-[#5C757A]', text: 'text-[#F5F0E4]', items: [
     'Темы на выбор',
     'Ежедневные напоминания',
     'Поддержка кураторов',
     'Ясные инструкции',
   ]},
   { title: 'Что это такое', color: 'bg-[#F5F0E4]', text: 'text-[#636846]', items: [
-    'Это электронный пропуск, который открывает доступ к эксклюзивному  28-дневному челленджу. ',
-    'Каждый день ты получаешь персональные задания, вдохновляющие советы и поддержку. ',
+    'Это электронный пропуск, который открывает доступ к эксклюзивному 28-дневному челленджу.',
+    'Каждый день ты получаешь персональные задания, вдохновляющие советы и поддержку.',
     'А в финале — приятный подарок в знак благодарности за заботу о себе.',
   ]},
 ]
 
-// анимационные пресеты
-const slide = {
-  hidden: { opacity: 0.8, y: 18, scale: 0.98 },
+/* ---------- анимации (один раз) ---------- */
+const slideVariants = {
+  hidden: { opacity: 0.85, y: 14, scale: 0.985 },
   show: {
     opacity: 1, y: 0, scale: 1,
-    transition: { duration: 0.45, ease: [0.25,1,0.5,1], staggerChildren: 0.06, when: 'beforeChildren' }
+    transition: { duration: 0.35, ease: [0.25, 1, 0.5, 1], when: 'beforeChildren', staggerChildren: 0.05 }
   }
 }
-const item = {
-  hidden: { opacity: 0.8, y: 25 },
-  show:   { opacity: 1, y: 0, transition: { duration: 0.32, ease: 'easeOut' } }
+const itemVariants = {
+  hidden: { opacity: 0.8, y: 12 },
+  show:   { opacity: 1, y: 0, transition: { duration: 0.25, ease: 'easeOut' } }
 }
 
-export default function PassesSlider() {
+/* ---------- карточка (мемо) ---------- */
+const SlideCard = memo(function SlideCard({ card, active }) {
+  return (
+    <motion.article
+      variants={slideVariants}
+      initial="hidden"
+      animate={active ? 'show' : 'hidden'}
+      className={`${card.color} ${card.text} w-full h-full rounded-[10px] xs:rounded-[30px] shadow-lg
+                  px-[6%] py-[6%] flex flex-col will-change-transform translate-z-0`}
+    >
+      <motion.h3 variants={itemVariants}
+        className="mb-4 font-[Manrope-Bold] text-[clamp(1rem,0.8571rem+0.7143vw,2rem)]">
+        {card.title}
+      </motion.h3>
+
+      <ul className="text-[clamp(0.75rem,0.6429rem+0.5357vw,1.5rem)] font-ManropeRegular">
+        {card.items.map((t, j) => (
+          <motion.li key={j} variants={itemVariants} className="mb-[2%]">{t}</motion.li>
+        ))}
+      </ul>
+
+      <div className="mt-auto" />
+    </motion.article>
+  )
+})
+
+function PassesSlider() {
   const [active, setActive] = useState(0)
+  const prevRef = useRef(null)
+  const nextRef = useRef(null)
 
   return (
-    <div className="absolute top-[30%] xs:top-1/2 right-[4%] -translate-y-1/2 w-[70%] xs:w-[45%]">
-      <Swiper
-        modules={[Navigation, A11y]}
-        loop
-        spaceBetween={20}
-        slidesPerView={2.5}
-        breakpoints={{
-          320:  { slidesPerView: 1.1, spaceBetween: 2 },
-          768:  { slidesPerView: 2,   spaceBetween: 4},
-          1150: { slidesPerView: 2, spaceBetween: 8 },
-        }}
-        navigation={{ nextEl: '.nav-next', prevEl: '.nav-prev' }}
-        onInit={(s) => setActive(s.realIndex)}
-        onSlideChange={(s) => setActive(s.realIndex)}
-        className="equalize-swiper"
-      >
-        {CARDS.map((c, i) => (
-          <SwiperSlide key={i} className="!h-auto">
-            {/* article заменили на motion.article, классы/вёрстка сохранены */}
-            <motion.article
-              variants={slide}
-              initial="hidden"
-              animate={active % CARDS.length === i ? 'show' : 'hidden'}
-              className={`${c.color} w-full h-full rounded-[10px] xs:rounded-[30px] shadow-lg ${c.text} px-[6%] py-[6%] flex flex-col`}
-            >
-              <motion.h3
-                variants={item}
-                className="mb-4 font-[Manrope-Bold] text-[clamp(1rem,0.8571rem+0.7143vw,2rem)]"
-              >
-                {c.title}
-              </motion.h3>
-
-              <ul className={`${c.text} text-[clamp(0.75rem,0.6429rem+0.5357vw,1.5rem)] font-ManropeRegular`}>
-                {c.items.map((t, j) => (
-                  <motion.li key={j} variants={item} className="mb-[2%]">
-                    {t}
-                  </motion.li>
-                ))}
-              </ul>
-
-              <div className="mt-auto" />
-            </motion.article>
-          </SwiperSlide>
-        ))}
-      </Swiper>
-
-      {/* стрелки — добавил лёгкий hover/tap, разметку не меняю */}
-      <div className="absolute left-4 sm:left-6 bottom-[-15%]   4xl:bottom-[-12%] z-10 flex gap-8">
-        <motion.button
-          whileHover={{ scale: 1.05, y: -2 }}
-          whileTap={{ scale: 0.96 }}
-          className="nav-prev transition hover:scale-105"
-          aria-label="Предыдущий"
+    <div className="absolute top-[36%] xs:top-1/2   xs:right-[4%] px-[4%] -translate-y-1/2 w-full xs:px-0 xs:w-[45%]">
+      {/* framer-motion глобальные настройки (без излишеств) */}
+      <MotionConfig reducedMotion="user">
+        <Swiper
+          modules={[Navigation, A11y]}
+          onBeforeInit={(s) => {
+            // навигация через refs, чтобы не искать элементы в DOM
+            s.params.navigation.prevEl = prevRef.current
+            s.params.navigation.nextEl = nextRef.current
+          }}
+          navigation={{ prevEl: prevRef.current, nextEl: nextRef.current }}
+          onInit={(s) => s.navigation.update()}
+          // производительность
+          loop={true}               // вместо loop (без клонов)
+          resistanceRatio={0.5}
+          threshold={6}                       // игнорируем мелкие дрожания
+          speed={420}
+          allowTouchMove
+          watchOverflow
+          preloadImages={false}
+          lazyPreloadPrevNext={1}
+          spaceBetween={14}
+          slidesPerView={2.2}
+          breakpoints={{
+            320:  { slidesPerView: 1.6, spaceBetween: 8 },
+            480:  { slidesPerView: 1.5,  spaceBetween: 10 },
+            768:  { slidesPerView: 1.9,  spaceBetween: 12 },
+            1150: { slidesPerView: 2.2,  spaceBetween: 14 },
+          }}
+          onSlideChange={(s) => setActive(s.realIndex)}
+          className="equalize-swiper will-change-transform"
         >
-          <div className='w-[100%]'>
-            <svg className='w-[30px] h-[30px] xs:h-auto xs:w-auto' xmlns="http://www.w3.org/2000/svg" width="51" height="50" viewBox="0 0 51 50" fill="none">
+          {CARDS.map((c, i) => (
+            <SwiperSlide key={i} className="!h-auto">
+              <SlideCard card={c} active={active % CARDS.length === i} />
+            </SwiperSlide>
+          ))}
+        </Swiper>
+
+        {/* стрелки (refs) */}
+        <div className="absolute left-4 sm:left-6 bottom-[-15%] 4xl:bottom-[-12%] z-10 flex gap-8">
+          <button ref={prevRef} className="transition hover:scale-105" aria-label="Предыдущий">
+            <svg className="w-[30px] h-[30px] xs:h-auto xs:w-auto" viewBox="0 0 51 50" fill="none">
               <rect x="50.668" y="50" width="50" height="50" rx="25" transform="rotate(-180 50.668 50)" fill="#F7EFE5"/>
-              <path d="M19.306 25.0001L28.793 34.4871L27.4466 35.8657L16.5815 25.0001L27.4466 14.1345L28.793 15.5131L19.306 25.0001Z" fill="#967450"/>
+              <path d="M19.306 25L28.793 34.4871L27.4466 35.8657L16.5815 25L27.4466 14.1345L28.793 15.5131L19.306 25Z" fill="#967450"/>
             </svg>
-          </div>
-        </motion.button>
+          </button>
 
-        <motion.button
-          whileHover={{ scale: 1.05, y: -2 }}
-          whileTap={{ scale: 0.96 }}
-          className="nav-next transition hover:scale-105"
-          aria-label="Следующий"
-        >
-          <svg className='w-[30px] h-[30px] xs:h-auto xs:w-auto' xmlns="http://www.w3.org/2000/svg" width="51" height="50" viewBox="0 0 51 50" fill="none">
-            <rect x="0.667969" width="50" height="50" rx="25" fill="#F7EFE5"/>
-            <path d="M32.0299 24.9999L22.543 15.5129L23.8893 14.1343L34.7544 24.9999L23.8893 35.8655L22.543 34.4869L32.0299 24.9999Z" fill="#967450"/>
-          </svg>
-        </motion.button>
-      </div>
+          <button ref={nextRef} className="transition hover:scale-105" aria-label="Следующий">
+            <svg className="w-[30px] h-[30px] xs:h-auto xs:w-auto" viewBox="0 0 51 50" fill="none">
+              <rect width="50" height="50" rx="25" fill="#F7EFE5"/>
+              <path d="M32.03 25L22.543 15.5129L23.8893 14.1343L34.7544 25L23.8893 35.8655L22.543 34.4869L32.03 25Z" fill="#967450"/>
+            </svg>
+          </button>
+        </div>
+      </MotionConfig>
 
-      {/* equal height для слайдов — как было */}
+      {/* выравнивание высоты карточек */}
       <style jsx global>{`
         .equalize-swiper .swiper-wrapper { align-items: stretch; }
         .equalize-swiper .swiper-slide { height: auto; display: flex; }
+        .translate-z-0 { transform: translateZ(0); }
       `}</style>
     </div>
   )
 }
+
+export default memo(PassesSlider)

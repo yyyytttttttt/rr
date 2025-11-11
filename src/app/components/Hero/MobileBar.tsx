@@ -1,5 +1,10 @@
 'use client'
-export default function MobileBar({ title, text, buttons }) {
+
+import { memo } from "react"
+import { mobileBarType } from "../../types/GlavProps"
+
+
+function MobileBar({ title, text, buttons }:mobileBarType) {
   return (
     <div className="absolute bottom-0 z-[10] w-full">
       <div className="mx-auto w-full max-w-[1410px]">
@@ -31,3 +36,4 @@ export default function MobileBar({ title, text, buttons }) {
     </div>
   )
 }
+export default memo(MobileBar)

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    @import url("./src/app/admin/admin-tokens.css");
+    
+    .test {
+      color: var(--admin-text-primary);
+      background: var(--admin-bg-primary);
+      border: 1px solid var(--admin-border);
+    }
+    
+    .test-secondary {
+      color: var(--admin-text-secondary);
+    }
+    
+    .test-accent {
+      color: var(--admin-text-accent);
+    }
+  </style>
+</head>
+<body style="padding: 20px; font-family: sans-serif;">
+  <h1>Admin Colors Test</h1>
+  <div class="test" style="padding: 20px; margin: 10px 0;">
+    <p class="test">Primary text (#4F5338) - обычный текст</p>
+    <p class="test-secondary">Secondary text (#636846) - неактивный текст</p>
+    <p class="test-accent">Accent text (#967450) - активный текст</p>
+  </div>
+  <div style="margin-top: 20px;">
+    <p>Если цвета отображаются корректно, CSS переменные работают!</p>
+  </div>
+</body>
+</html>

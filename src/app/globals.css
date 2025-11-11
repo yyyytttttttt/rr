@@ -30,17 +30,38 @@
  
   src: url('/fonts/spaceagecyrillic-regular.woff2') format('woff2');
 }
+@font-face {
+  font-family: 'Manrope-SemiBold';
+ 
+  src: url('/fonts/manrope-semibold.woff2') format('woff2');
+}
 @theme {
   --font-sfpro: 'SF-Pro-regular', sans-serif;
   --font-ManropeBold: 'Manrope-Bold', sans-serif;
   --font-ManropeLight: 'Manrope-Light', sans-serif;
   --font-ManropeMedium: 'Manrope-Medium', sans-serif;
   --font-ManropeRegular: 'Manrope-Regular', sans-serif;
+  --font-ManropeSemiBold: 'Manrope-SemiBold', sans-serif;
   --font-spaceagecyrillicRegular: 'spaceagecyrillic-regular', sans-serif;
   --breakpoint-4xl: 120.625rem; /* 1930px при base 16px */
   --breakpoint-1k: 62.5rem; /* 1000px при base 16px */
 
   --breakpoint-xs: 30rem; /* 480px при base 16px */
 }
+/* Высота приложения с учетом мобильных браузеров */
+.h-app {
+  height: calc(var(--app-vh, 1vh) * 100);
+}
+
 .swiper-wrapper { align-items: stretch; }   /* тянем слайды по высоте ряда */
 .swiper-slide > * { height: 100%; }         /* контент внутри слайда на всю высоту */
+
+/* Admin & Doctor container with responsive padding */
+.admin-container {
+  width: 100%;
+  max-width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: clamp(1rem, 2vw, 2rem);
+  padding-right: clamp(1rem, 2vw, 2rem);
+}

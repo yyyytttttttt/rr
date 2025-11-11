@@ -1,0 +1,255 @@
+"use client";
+
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import Image from "next/image";
+import Menu from '../../components/menus/Menu'
+import { motion, AnimatePresence } from "framer-motion"
+
+export type MenuItem<T extends string = string> = {
+  view: T;
+  label: string;
+  badge?: number;
+};
+
+type Props<T extends string = string> = {
+  currentView: T;
+  userName: string;
+  userImage: string;
+  menuItems: MenuItem<T>[];
+  basePath: string;
+  storageKey: string;
+  renderIcon: (name: T, active: boolean) => React.ReactNode;
+  logoSrc?: string;
+  showMenuButton?: boolean;
+  colors?: {
+    olive: string;
+    text: string;
+    chip: string;
+    activeBg: string;
+    border: string;
+  };
+};
+
+export default function SideNav<T extends string = string>({
+  currentView,
+  userName,
+  userImage,
+  menuItems,
+  basePath,
+  storageKey,
+  renderIcon,
+  logoSrc = "/images/logo.png",
+  showMenuButton = true,
+  colors = {
+    olive: "#6B6A58",
+    text: "#967450",
+    chip: "#6B6A58",
+    activeBg: "#F5F0E4",
+    border: "#EFE9DF",
+  }
+}: Props<T>) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [activeView, setActiveView] = useState<T>(currentView);
+  const [open,setOpen]=useState(false)
+
+  useEffect(() => setActiveView(currentView), [currentView]);
+
+  const setView = (view: T) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("view", view);
+    router.replace(`${basePath}?${params.toString()}`, { scroll: false });
+    setActiveView(view);
+    if (typeof window !== "undefined") localStorage.setItem(storageKey, view);
+  };
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && !searchParams.get("view")) {
+      const last = localStorage.getItem(storageKey) as T | null;
+      const validViews = menuItems.map(item => item.view);
+      if (last && validViews.includes(last)) setView(last);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const COL = colors; // Использую colors из пропсов
+
+  return (
+        return (
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
+            <path d="M27.2375 13.7626L17.2375 3.76263C17.075 3.6001 16.8821 3.47118 16.6697 3.38323C16.4574 3.29527 16.2298 3.25 16 3.25C15.7702 3.25 15.5426 3.29527 15.3303 3.38323C15.1179 3.47118 14.925 3.6001 14.7625 3.76263L4.76251 13.7626C4.59956 13.9248 4.47037 14.1177 4.38241 14.3301C4.29444 14.5425 4.24944 14.7702 4.25001 15.0001V27.0001C4.25001 27.199 4.32902 27.3898 4.46968 27.5305C4.61033 27.6711 4.80109 27.7501 5.00001 27.7501H27C27.1989 27.7501 27.3897 27.6711 27.5303 27.5305C27.671 27.3898 27.75 27.199 27.75 27.0001V15.0001C27.7506 14.7702 27.7056 14.5425 27.6176 14.3301C27.5296 14.1177 27.4004 13.9248 27.2375 13.7626ZM26.25 26.2501H5.75001V15.0001C5.74981 14.9672 5.75612 14.9346 5.76856 14.9042C5.781 14.8737 5.79934 14.846 5.82251 14.8226L15.8225 4.82263C15.8457 4.79919 15.8734 4.7806 15.9039 4.7679C15.9343 4.75521 15.967 4.74868 16 4.74868C16.033 4.74868 16.0657 4.75521 16.0961 4.7679C16.1266 4.7806 16.1543 4.79919 16.1775 4.82263L26.1775 14.8226C26.2007 14.846 26.219 14.8737 26.2314 14.9042C26.2439 14.9346 26.2502 14.9672 26.25 15.0001V26.2501Z" fill="#636846"/>
+          </svg>
+        );
+      case "booking":
+        return (
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
+            <g clip-path="url(#clip0_10064_124)">
+            <path d="M28 11V25.1112C28 25.347 27.9064 25.573 27.7397 25.7397C27.573 25.9064 27.347 26 27.1112 26H5C4.73478 26 4.48043 25.8946 4.29289 25.7071C4.10536 25.5196 4 25.2652 4 25V8C4 7.73478 4.10536 7.48043 4.29289 7.29289C4.48043 7.10536 4.73478 7 5 7H11.6663C11.8826 7 12.0932 7.07018 12.2662 7.2L16 10H27C27.2652 10 27.5196 10.1054 27.7071 10.2929C27.8946 10.4804 28 10.7348 28 11Z" stroke="#636846" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </g>
+            <defs>
+            <clipPath id="clip0_10064_124">
+            <rect width="32" height="32" fill="white"/>
+            </clipPath>
+            </defs>
+          </svg>
+        );
+      case "healthpasses":
+        return (
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
+            <g clip-path="url(#clip0_10064_820)">
+            <path d="M16 28C16 28 3 21 3 12.75C3 10.9598 3.71116 9.2429 4.97703 7.97703C6.2429 6.71116 7.95979 6 9.75 6C12.5738 6 14.9925 7.53875 16 10C17.0075 7.53875 19.4262 6 22.25 6C24.0402 6 25.7571 6.71116 27.023 7.97703C28.2888 9.2429 29 10.9598 29 12.75C29 21 16 28 16 28Z" stroke="#636846" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </g>
+            <defs>
+            <clipPath id="clip0_10064_820">
+            <rect width="32" height="32" fill="white"/>
+            </clipPath>
+            </defs>
+            </svg>
+        );
+      case "history":
+        return (
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
+<g clip-path="url(#clip0_10064_332)">
+<path d="M16 10V16L21 19" stroke="#967450" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M9 13H4V8" stroke="#967450" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M8.45 24.0005C10.0225 25.4843 11.9973 26.4718 14.1278 26.8396C16.2583 27.2075 18.4499 26.9393 20.4289 26.0687C22.4078 25.1981 24.0864 23.7636 25.2547 21.9445C26.4231 20.1254 27.0295 18.0023 26.9982 15.8406C26.9668 13.6788 26.2991 11.5742 25.0785 9.78968C23.8579 8.0052 22.1385 6.61999 20.1351 5.80711C18.1318 4.99424 15.9333 4.78975 13.8144 5.21919C11.6954 5.64864 9.75004 6.69298 8.22125 8.22173C6.75 9.71173 5.535 11.1167 4 13.0005" stroke="#967450" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+<defs>
+<clipPath id="clip0_10064_332">
+<rect width="32" height="32" fill="white"/>
+</clipPath>
+</defs>
+</svg>
+        );
+      case "gifts":
+        return (
+         <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
+            <g clip-path="url(#clip0_10064_2848)">
+            <path d="M27 10H5C4.44772 10 4 10.4477 4 11V15C4 15.5523 4.44772 16 5 16H27C27.5523 16 28 15.5523 28 15V11C28 10.4477 27.5523 10 27 10Z" stroke="#636846" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M26 16V25C26 25.2652 25.8946 25.5196 25.7071 25.7071C25.5196 25.8946 25.2652 26 25 26H7C6.73478 26 6.48043 25.8946 6.29289 25.7071C6.10536 25.5196 6 25.2652 6 25V16" stroke="#636846" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M16 10V26" stroke="#636846" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M22.0987 3.90159C23.2662 5.06909 23.335 7.03409 22.0987 8.12909C19.985 10.0003 16 10.0003 16 10.0003C16 10.0003 16 6.01534 17.875 3.90159C18.9662 2.66534 20.9312 2.73409 22.0987 3.90159Z" stroke="#636846" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M9.90159 3.90159C8.73409 5.06909 8.66534 7.03409 9.90159 8.12909C12.0153 10.0003 16.0003 10.0003 16.0003 10.0003C16.0003 10.0003 16.0003 6.01534 14.1253 3.90159C13.0341 2.66534 11.0691 2.73409 9.90159 3.90159Z" stroke="#636846" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </g>
+            <defs>
+            <clipPath id="clip0_10064_2848">
+            <rect width="32" height="32" fill="white"/>
+            </clipPath>
+            </defs>
+            </svg>
+        );
+      case "settings":
+        return (
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
+            <g clip-path="url(#clip0_10064_792)">
+            <path d="M16 21C18.7614 21 21 18.7614 21 16C21 13.2386 18.7614 11 16 11C13.2386 11 11 13.2386 11 16C11 18.7614 13.2386 21 16 21Z" stroke="#636846" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M5.17867 22.2612C4.62614 21.3095 4.20283 20.2884 3.91992 19.2249L6.01742 16.5999C5.99367 16.1986 5.99367 15.7962 6.01742 15.3949L3.92117 12.7699C4.2036 11.7063 4.62604 10.6848 5.17742 9.73242L8.51617 9.35742C8.78279 9.05704 9.06704 8.77279 9.36742 8.50617L9.74242 5.16867C10.6935 4.61992 11.7132 4.19999 12.7749 3.91992L15.3999 6.01742C15.8012 5.99367 16.2036 5.99367 16.6049 6.01742L19.2299 3.92117C20.2936 4.2036 21.315 4.62604 22.2674 5.17742L22.6424 8.51617C22.9428 8.78279 23.2271 9.06704 23.4937 9.36742L26.8312 9.74242C27.3837 10.6941 27.807 11.7152 28.0899 12.7787L25.9924 15.4037C26.0162 15.805 26.0162 16.2074 25.9924 16.6087L28.0887 19.2337C27.8082 20.297 27.3879 21.3184 26.8387 22.2712L23.4999 22.6462C23.2333 22.9466 22.9491 23.2308 22.6487 23.4974L22.2737 26.8349C21.322 27.3875 20.3009 27.8108 19.2374 28.0937L16.6124 25.9962C16.2111 26.0199 15.8087 26.0199 15.4074 25.9962L12.7824 28.0924C11.7191 27.812 10.6977 27.3916 9.74492 26.8424L9.36992 23.5037C9.06954 23.2371 8.78529 22.9528 8.51867 22.6524L5.17867 22.2612Z" stroke="#636846" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </g>
+            <defs>
+            <clipPath id="clip0_10064_792">
+            <rect width="32" height="32" fill="white"/>
+            </clipPath>
+            </defs>
+            </svg>
+        );
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <>
+      {/* Desktop sidebar */}
+      <aside
+        className="hidden md:block w-[18%] bg-white border-r"
+        style={{ borderColor: COL.border }}
+      >
+        <div className="px-6 py-8">
+          {/* Лого-заглушка */}
+          <div className="mb-25 flex items-center gap-3">
+            <Image
+              src="/images/logo.png"
+              alt="Логотип"
+              width={80}
+              height={80}
+              className=""
+            />
+            <div>
+              <Image onClick={()=>setOpen(!open)}
+                            src="/images/Menu1.svg"
+                            alt="Меню"
+                            width={80}
+                            height={80}
+                             className=""
+                          />
+            </div>
+                        
+                         
+                          
+                        <AnimatePresence>
+                          {open && <Menu key="menu" setOpen={setOpen} />}
+                        </AnimatePresence>
+
+            
+            
+          </div>
+
+          {/* Навигация */}
+          <nav className="flex flex-col gap-8" role="navigation" aria-label="Навигация личного кабинета">
+            {MENU_ITEMS.map((item) => {
+              const active = activeView === item.view;
+              return (
+                <button
+                  key={item.view}
+                  onClick={() => setView(item.view)}
+                  aria-current={active ? "page" : undefined}
+                  className="w-[80%] text-left"
+                >
+                  <div
+                    className={[
+                      "flex items-center  justify-between rounded-xl px-4 py-3 transition-colors",
+                      active ? "shadow-none" : "hover:shadow-none",
+                    ].join(" ")}
+                    style={{
+                      backgroundColor: active ? COL.activeBg : "transparent",
+                    }}
+                  >
+                    <div className="flex items-center gap-3">
+                      <Icon name={item.view} active={active} />
+                      <span
+                        className="text-[clamp(0.625rem,0.4808rem+0.641vw,1.25rem)] font-ManropeMedium text-[#636846]"
+                        style={{ color: COL.olive, fontWeight: 500 }}
+                      >
+                        {item.label}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      {item.badge ? (
+                        <span
+                          className="h-5 min-w-[20px] px-1.5 rounded-full text-[11px] grid place-items-center text-white"
+                          style={{ backgroundColor: COL.chip }}
+                        >
+                          {item.badge}
+                        </span>
+                      ) : null}
+
+                      {active && (
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={COL.olive} strokeWidth="2">
+                          <path d="M9 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      )}
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </nav>
+        </div>
+      </aside>
+
+    
+    </>
+  );
+}

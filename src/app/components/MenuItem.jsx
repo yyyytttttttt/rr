@@ -1,8 +1,8 @@
 
 import Link from 'next/link'
-import React from 'react'
+import React, { memo } from 'react'
 
-const MenuItem = ({ svg, children, href }) => {
+function MenuItem ({ svg, children, href })  {
   const safeHref = href || '#'
   const preventIfEmpty = (e) => { if (!href) e.preventDefault() }
 
@@ -22,4 +22,4 @@ const MenuItem = ({ svg, children, href }) => {
   )
 }
 
-export default MenuItem
+export default memo(MenuItem)

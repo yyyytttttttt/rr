@@ -1,12 +1,10 @@
-// components/OverlayCard.jsx
+
 'use client'
 
-export default function DesktopCard({
-  title,            // string | string[]
-  lines = [],       // string[] — строки подзаголовка/описания
-  buttons = [],     // [{label, variant:'primary'|'ghost'}]
-  pos = 'left',     // 'left' | 'right'
-}) {
+import { JSX, memo } from "react"
+import { DescProps } from "../../types/GlavProps"
+
+function DesktopCard({title,buttons, lines ,pos }:DescProps):JSX.Element {
   const side = pos === 'right' ? 'right-[4%]' : 'left-[14%]'
 
   return (
@@ -38,3 +36,4 @@ export default function DesktopCard({
     </div>
   )
 }
+export default memo(DesktopCard)
