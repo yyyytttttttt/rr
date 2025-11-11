@@ -328,9 +328,16 @@ export async function GET(req: Request) {
     // услуга
     const service = await prisma.service.findUnique({
       where: { id: serviceId },
-      select: { doctorId: true, durationMin: true, isActive: true },
+      select: {
+        durationMin: true,
+        isActive: true,
+        doctorServices: {
+          where: { doctorId },
+          select: { doctorId: true, isActive: true }
+        }
+      },
     });
-    if (!service || service.doctorId !== doctorId || !service.isActive) {
+    if (!service || service.doctorServices.length === 0 || !service.doctorServices[0].isActive || !service.isActive) {
       return NextResponse.json({ error: "SERVICE_NOT_FOUND" }, { status: 404 });
     }
     if (!Number.isFinite(service.durationMin) || service.durationMin! <= 0) {
