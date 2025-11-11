@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
+import toast, { Toaster } from 'react-hot-toast';
 
 const schema = z.object({
   name: z.string().trim().min(1, { message: 'укажите имя' }).max(50),
@@ -78,7 +79,7 @@ export default function RegisterPage() {
 
     if (res.ok && (body as any).needVerify) {
       setServerError('');
-      alert('Мы отправили письмо с подтверждением. Проверьте почту.');
+      toast.success('Мы отправили письмо с подтверждением. Проверьте почту.');
       return;
     }
 
@@ -92,7 +93,9 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2">
+    <>
+      <Toaster position="top-center" />
+      <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2">
       {/* Левая панель (форма) */}
       <div className="relative flex items-center justify-center bg-[#FFFCF3] px-6 py-10 lg:px-12">
         {/* Назад */}
@@ -250,5 +253,6 @@ export default function RegisterPage() {
         <div className="pointer-events-none absolute left-0 top-0 h-full w-[120px] bg-gradient-to-r from-[#FBF6EA] to-transparent" />
       </div>
     </div>
+    </>
   );
 }
