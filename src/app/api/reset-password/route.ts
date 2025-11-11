@@ -16,10 +16,10 @@ export async function POST(req: Request) {
   const body = await req.json().catch(() => null);
   const parsed = schema.safeParse(body);
   if (!parsed.success) {
-    console.error("Validation failed:", parsed.error.errors);
+    console.error("Validation failed:", parsed.error.issues);
     return NextResponse.json({
       error: "VALIDATION",
-      details: parsed.error.errors
+      details: parsed.error.issues
     }, { status: 400 });
   }
   const email = parsed.data?.email.toLowerCase();
