@@ -18,14 +18,6 @@ const nextConfig = {
 
   // В продакшне полезно: сорсмапы на сервере выключить (по желанию)
   productionBrowserSourceMaps: false,
-
-  // Отключаем проверку TypeScript и ESLint при сборке
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
 };
 
 export default nextConfig;
