@@ -1,9 +1,9 @@
 'use client'
 
 import React from 'react'
-import LayoutOverlay3 from '@/app/components/LayoutOverlay3'
-import FirstBlock from '@/app/components/propuski/FirstBlock'
-import NewsItem from '@/app/components/News/NewsItem'
+import LayoutOverlay3 from '../../components/LayoutOverlay3'
+import FirstBlock from '../../components/propuski/FirstBlock'
+import NewsItem from '../../components/News/NewsItem'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { Navigation, EffectCoverflow } from 'swiper/modules'
 import Image from 'next/image'
