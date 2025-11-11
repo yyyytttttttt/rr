@@ -30,7 +30,16 @@ const doctorSchema = z
     path: ["userId"],
   });
 
-type DoctorFormData = z.infer<typeof doctorSchema>;
+type DoctorFormData = {
+  userId?: string;
+  email?: string;
+  title?: string;
+  tzid: string;
+  minLeadMin: number;
+  gridStepMin: number;
+  slotDurationMin: number;
+  bufferMin: number;
+};
 
 export default function AddDoctorModal({ open, onClose, onSuccess }: Props) {
   const [loading, setLoading] = useState(false);
