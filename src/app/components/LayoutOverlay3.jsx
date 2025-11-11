@@ -59,7 +59,7 @@ export default function Layout({ children, title }) {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.6, ease: [0.33, 1, 0.68, 1] as any }}
+                  transition={{ duration: 0.6, ease: [0.33, 1, 0.68, 1] }}
                   className="font-[spaceagecyrillic-regular] w-[50%] text-end text-[clamp(1.25rem,0.9615rem+1.2821vw,2.5rem)] text-[#967450]"
                 >
                   {title}

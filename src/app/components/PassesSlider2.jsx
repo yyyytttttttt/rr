@@ -19,12 +19,12 @@ const slide = {
   hidden: { opacity: 0, y: 16, scale: 0.98 },
   show: {
     opacity: 1, y: 0, scale: 1,
-    transition: { duration: 0.45, ease: [0.25,1,0.5,1] as any }
+    transition: { duration: 0.45, ease: [0.25,1,0.5,1] }
   }
 }
 const imageIn = {
   hidden: { opacity: 0, scale: 1.03 },
-  show:   { opacity: 1, scale: 1, transition: { duration: 0.6, ease: [0.25,1,0.5,1] as any } }
+  show:   { opacity: 1, scale: 1, transition: { duration: 0.6, ease: [0.25,1,0.5,1] } }
 }
 
 export default function PassesSlider2() {

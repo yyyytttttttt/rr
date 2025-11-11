@@ -11,7 +11,7 @@ const TopTitle = memo(function TopTitle({ active, texts }) {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
-          transition={{ duration: 0.6, ease: [0.33, 1, 0.68, 1] as any }}
+          transition={{ duration: 0.6, ease: [0.33, 1, 0.68, 1] }}
           className="font-[spaceagecyrillic-regular] text-end text-[clamp(1.5rem,1rem+2.5vw,4rem)] text-[#414141]"
         >
           {texts[active]}

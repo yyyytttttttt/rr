@@ -32,11 +32,11 @@ export default function Propusk({ next, prev, text }) {
       hidden: { opacity: 0, y: 12, scale: 0.99, filter: "blur(1.5px)" },
       show: {
         opacity: 1, y: 0, scale: 1, filter: "blur(0px)",
-        transition: { duration: 0.45, ease: [0.33, 1, 0.68, 1] as any }
+        transition: { duration: 0.45, ease: [0.33, 1, 0.68, 1] }
       },
       exit: {
         opacity: 0, y: -10, scale: 0.99, filter: "blur(1.5px)",
-        transition: { duration: 0.3, ease: [0.33, 1, 0.68, 1] as any }
+        transition: { duration: 0.3, ease: [0.33, 1, 0.68, 1] }
       }
     }}
     initial="hidden"
@@ -46,8 +46,8 @@ export default function Propusk({ next, prev, text }) {
     <motion.p
       variants={{
         hidden: { opacity: 0, y: 8 },
-        show: { opacity: 1, y: 0, transition: { duration: 0.32, ease: [0.33, 1, 0.68, 1] as any } },
-        exit: { opacity: 0, y: -6, transition: { duration: 0.26, ease: [0.33, 1, 0.68, 1] as any } }
+        show: { opacity: 1, y: 0, transition: { duration: 0.32, ease: [0.33, 1, 0.68, 1] } },
+        exit: { opacity: 0, y: -6, transition: { duration: 0.26, ease: [0.33, 1, 0.68, 1] } }
       }}
       className="font-[spaceagecyrillic-regular] text-[clamp(1.5rem,1rem+2.5vw,4rem)] text-[#414141]"
     >
@@ -89,7 +89,7 @@ export default function Propusk({ next, prev, text }) {
         opacity: 1, y: 0, scale: 1, filter: "blur(0px)",
         transition: {
           duration: 0.45,
-          ease: [0.33, 1, 0.68, 1] as any,
+          ease: [0.33, 1, 0.68, 1],
           when: "beforeChildren",
           staggerChildren: 0.035,
           delayChildren: 0.02
@@ -97,7 +97,7 @@ export default function Propusk({ next, prev, text }) {
       },
       exit: {
         opacity: 0, y: -12, scale: 0.99, filter: "blur(1.5px)",
-        transition: { duration: 0.3, ease: [0.33, 1, 0.68, 1] as any }
+        transition: { duration: 0.3, ease: [0.33, 1, 0.68, 1] }
       }
     }}
     initial="hidden"
@@ -108,7 +108,7 @@ export default function Propusk({ next, prev, text }) {
     <motion.h2
       variants={{
         hidden: { opacity: 0, y: 8 },
-        show: { opacity: 1, y: 0, transition: { duration: 0.32, ease: [0.33, 1, 0.68, 1] as any } }
+        show: { opacity: 1, y: 0, transition: { duration: 0.32, ease: [0.33, 1, 0.68, 1] } }
       }}
       className="text-[clamp(0.875rem,0.55rem+1.625vw,2.5rem)] font-[Manrope-Bold] mb-4"
     >
@@ -118,7 +118,7 @@ export default function Propusk({ next, prev, text }) {
     <motion.p
       variants={{
         hidden: { opacity: 0, y: 8 },
-        show: { opacity: 1, y: 0, transition: { duration: 0.3, ease: [0.33, 1, 0.68, 1] as any } }
+        show: { opacity: 1, y: 0, transition: { duration: 0.3, ease: [0.33, 1, 0.68, 1] } }
       }}
       className="text-[clamp(0.75rem,0.65rem+0.5vw,1.25rem)] font-[Manrope-Regular] mb-4"
     >
@@ -128,7 +128,7 @@ export default function Propusk({ next, prev, text }) {
    <motion.div
   variants={{
     hidden: { opacity: 0, y: 6 },
-    show:   { opacity: 1, y: 0, transition: { duration: 0.28, ease: [0.33,1,0.68,1] as any } }
+    show:   { opacity: 1, y: 0, transition: { duration: 0.28, ease: [0.33,1,0.68,1] } }
   }}
   className="flex flex-wrap  gap-4"
 >
