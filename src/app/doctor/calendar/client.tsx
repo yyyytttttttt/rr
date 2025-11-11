@@ -6,6 +6,7 @@ import type {
   EventClickArg,
   EventDropArg,
   EventContentArg,
+  EventResizeDoneArg,
 } from "@fullcalendar/core";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import dayGridPlugin from "@fullcalendar/daygrid";
@@ -675,7 +676,45 @@ export default function ClientCalendar({
     [doctorId, refetchEvents]
   );
 
-  const eventResize = eventDrop;
+  const eventResize = useCallback(
+    async (info: EventResizeDoneArg) => {
+      const { type, backendId } = info.event.extendedProps as {
+        type: string;
+        backendId: string;
+      };
+      if (!info.event.start || !info.event.end) {
+        info.revert();
+        return;
+      }
+      try {
+        if (type === "opening") {
+          await mutateOpening("update", {
+            id: backendId,
+            doctorId,
+            start: info.event.start.toISOString(),
+            end: info.event.end.toISOString(),
+          });
+          toast.success("Окно изменено");
+        } else if (type === "exception") {
+          await mutateException("update", {
+            id: backendId,
+            doctorId,
+            start: info.event.start.toISOString(),
+            end: info.event.end.toISOString(),
+          });
+          toast.success("Перерыв изменён");
+        } else {
+          info.revert();
+          return;
+        }
+        refetchEvents();
+      } catch (e) {
+        info.revert();
+        toast.error((e as Error).message);
+      }
+    },
+    [doctorId, refetchEvents]
+  );
 
   // Шапка дней: выходные красные
   const dayHeaderContent = useCallback((arg: any) => {
