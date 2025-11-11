@@ -56,7 +56,7 @@ export default function ManageDoctorsModal({
       const linkedRes = await fetch(`/api/services/${serviceId}/doctors`);
       if (linkedRes.ok) {
         const linkedData = await linkedRes.json();
-        const ids = new Set(linkedData.doctors.map((d: Doctor) => d.id));
+        const ids = new Set<string>(linkedData.doctors.map((d: Doctor) => d.id));
         setLinkedDoctorIds(ids);
       }
     } catch (error) {
