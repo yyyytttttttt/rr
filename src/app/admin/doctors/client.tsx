@@ -24,7 +24,16 @@ const doctorSchema = z
     path: ["userId"],
   });
 
-type DoctorFormData = z.infer<typeof doctorSchema>;
+type DoctorFormData = {
+  userId?: string;
+  email?: string;
+  title?: string;
+  tzid: string;
+  minLeadMin: number;
+  gridStepMin: number;
+  slotDurationMin: number;
+  bufferMin: number;
+};
 
 type Doctor = {
   id: string;
