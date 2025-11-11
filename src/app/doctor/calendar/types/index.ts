@@ -47,7 +47,7 @@ export interface CalendarApiResponse {
 
 // ================= Calendar Event Types =================
 
-export type CalendarEventType = "opening" | "exception" | "booking";
+export type CalendarEventType = "opening" | "exception" | "booking" | "unavailability";
 
 export interface CalendarEventExtendedProps {
   type: CalendarEventType;
