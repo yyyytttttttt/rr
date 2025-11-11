@@ -22,9 +22,9 @@ const UpdateUnavailabilitySchema = z.object({
 
 export async function PATCH(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const id = params.id;
+  const { id } = await params;
 
   const body = await req.json().catch(() => null);
   if (!body) {
@@ -151,9 +151,9 @@ export async function PATCH(
 
 export async function DELETE(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const id = params.id;
+  const { id } = await params;
 
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
