@@ -15,9 +15,9 @@ export default function ModalWrapper({ open, onClose, title, children, maxWidth 
   return (
     <Dialog.Root open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50" />
+        <Dialog.Overlay className="fixed inset-0 bg-black/30 backdrop-blur-sm z-[9999]" />
         <Dialog.Content
-          className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-[clamp(1rem,0.8846rem+0.5128vw,1.5rem)] shadow-2xl z-50 w-[calc(100%-2rem)] max-h-[90vh] overflow-hidden"
+          className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-[clamp(1rem,0.8846rem+0.5128vw,1.5rem)] shadow-2xl z-[10000] w-[calc(100%-2rem)] max-h-[90vh] overflow-hidden"
           style={{ maxWidth: `clamp(36rem,32rem+16vw,${maxWidth})` }}
         >
           {/* Header */}

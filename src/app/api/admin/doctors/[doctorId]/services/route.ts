@@ -21,14 +21,24 @@ export async function GET(
 
   const user = await prisma.user.findUnique({
     where: { email: session.user.email },
-    select: { role: true },
+    select: {
+      role: true,
+      doctor: { select: { id: true } }
+    },
   });
 
-  if (!user || user.role !== "ADMIN") {
+  if (!user) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   const { doctorId } = await params;
+
+  // ADMIN can access any doctor's services, DOCTOR can only access their own
+  if (user.role !== "ADMIN") {
+    if (user.role !== "DOCTOR" || user.doctor?.id !== doctorId) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+  }
 
   // Verify doctor exists
   const doctor = await prisma.doctor.findUnique({
@@ -92,14 +102,24 @@ export async function POST(
 
   const user = await prisma.user.findUnique({
     where: { email: session.user.email },
-    select: { role: true },
+    select: {
+      role: true,
+      doctor: { select: { id: true } }
+    },
   });
 
-  if (!user || user.role !== "ADMIN") {
+  if (!user) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   const { doctorId } = await params;
+
+  // ADMIN can access any doctor's services, DOCTOR can only access their own
+  if (user.role !== "ADMIN") {
+    if (user.role !== "DOCTOR" || user.doctor?.id !== doctorId) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+  }
   const body = await req.json();
   console.log("POST /api/admin/doctors/[doctorId]/services - doctorId:", doctorId, "body:", body);
 

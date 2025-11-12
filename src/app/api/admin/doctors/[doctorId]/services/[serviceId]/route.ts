@@ -16,14 +16,24 @@ export async function DELETE(
 
   const user = await prisma.user.findUnique({
     where: { email: session.user.email },
-    select: { role: true },
+    select: {
+      role: true,
+      doctor: { select: { id: true } }
+    },
   });
 
-  if (!user || user.role !== "ADMIN") {
+  if (!user) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
   const { doctorId, serviceId } = await params;
+
+  // ADMIN can access any doctor's services, DOCTOR can only access their own
+  if (user.role !== "ADMIN") {
+    if (user.role !== "DOCTOR" || user.doctor?.id !== doctorId) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+  }
 
   // Verify link exists
   const link = await prisma.doctorService.findUnique({
