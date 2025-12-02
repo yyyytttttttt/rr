@@ -10,12 +10,12 @@ function LayoutOverlay({active}) {
     <>
       <TopBar/>
 
-      
-        <LeftMenu/>
-        <BottomNav/>
-        
 
-      
+        {active === 0 && <LeftMenu/>}
+        <BottomNav/>
+
+
+
     </>
   )
 }

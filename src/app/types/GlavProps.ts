@@ -29,15 +29,33 @@ export type Slider2 ={
   desktop:DescProps
   mobile:mobileBarType
 }
+export type Slider4 ={
+  id:string
+  type:'slider4'
+  desktop:DescProps
+  mobile:mobileBarType
+}
+export type Slider5 ={
+  id:string
+  type:'slider5'
+  desktop:DescProps
+  mobile:mobileBarType
+}
+export type Slider6 ={
+  id:string
+  type:'slider6'
+  desktop:DescProps
+  mobile:mobileBarType
+}
 export type StaticSlide = {
   type:'static'
   images: { default: string; xs: string; oneK: string; fourXL: string }
   desktop:DescProps
   mobile:mobileBarType
   src?: string
-  
+
   id:string
-  
+
 
 }
- export type Slide = ComponentSlide | Slider2 | StaticSlide
+ export type Slide = ComponentSlide | Slider2 | Slider4 | Slider5 | Slider6 |StaticSlide

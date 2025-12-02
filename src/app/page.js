@@ -15,8 +15,8 @@ import Navigation from './components/Navigation'
 export default function FullPageSwiper() {
   const texts = useMemo(
     () => [
-      'Новая я', 'новости', 'услуги', 'пропуск к здоровью',
-      'Контакты', 'Факультет психологии', 'Личный кабинет',
+      'Новая я', 'новости', 'пропуск к здоровью', 'услуги',
+      'Наша команда', 'галерея', 'Личный кабинет',
       'галерея', 'приложение', 'специалисты', 'онлайн-оплата',
     ],
     []
@@ -34,7 +34,7 @@ export default function FullPageSwiper() {
         <Swiper
           direction="vertical"
           slidesPerView={1}
-          speed={700}
+          speed={1000}
           resistanceRatio={0.5}
           threshold={6}
           longSwipesMs={220}
@@ -42,8 +42,6 @@ export default function FullPageSwiper() {
           touchAngle={45}
           followFinger
           allowTouchMove
-          preloadImages={false}
-          lazyPreloadPrevNext={1}
           mousewheel={{ forceToAxis: true, releaseOnEdges: true }}
           keyboard={{ enabled: true, onlyInViewport: true }}
           onSwiper={(s) => (swiperRef.current = s)}
@@ -60,7 +58,7 @@ export default function FullPageSwiper() {
           ))}
         </Swiper>
 
-        <LayoutOverlay />
+        <LayoutOverlay active={active} />
 
         <style jsx global>{`
           .translate-z-0 { transform: translateZ(0); }

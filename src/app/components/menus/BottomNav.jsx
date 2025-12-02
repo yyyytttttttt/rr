@@ -4,7 +4,7 @@ import { memo } from "react"
 function BottomNav() {
     return(
 
-            <div className="fixed max-w-[1410px] mx-auto bottom-0  xs:bottom-12 left-1/2 transform -translate-x-1/2 w-full  xs:w-3/4 flex items-center justify-between bg-[#e5dccb] px-2 py-1 pb-4 xs:pb-0 rounded-0 xs:rounded-full z-50">
+            <div className="fixed max-w-[1410px] mx-auto bottom-0  xl:bottom-12 left-1/2 transform -translate-x-1/2 w-full  xl:w-3/4 flex items-center justify-between bg-[#e5dccb] px-2 py-1 pb-4 xl:pb-0 rounded-0 xl:rounded-full z-50">
               <button className=" swiper-button-custom-prev-2
            w-[5.4%] sm:w-[3.2%] cursor-pointer
           transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)]

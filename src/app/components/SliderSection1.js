@@ -53,8 +53,6 @@ function SliderSection({ images = [], overlays = [] }) {
         // плавность и отсутствие "миганий"
         loopAdditionalSlides={2}
         watchSlidesProgress
-        preloadImages={false}
-        lazyPreloadPrevNext={2}
         spaceBetween={0}
         speed={500}
         slidesPerView={1}

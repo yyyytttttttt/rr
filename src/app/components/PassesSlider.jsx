@@ -97,8 +97,6 @@ function PassesSlider() {
           speed={420}
           allowTouchMove
           watchOverflow
-          preloadImages={false}
-          lazyPreloadPrevNext={1}
           spaceBetween={14}
           slidesPerView={2.2}
           breakpoints={{

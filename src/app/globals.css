@@ -1,4 +1,7 @@
 @import "tailwindcss";
+@import "swiper/css";
+@import "swiper/css/navigation";
+@import "swiper/css/effect-coverflow";
 
 @font-face {
   font-family: 'SF-Pro-regular';
@@ -48,6 +51,42 @@
 
   --breakpoint-xs: 30rem; /* 480px при base 16px */
 }
+/* Твои глобальные стили для слайдера вместо <style jsx global> */
+/* scale (loop-safe) */
+.projects-swiper .projects-card {
+  transform: scale(0.9);
+  opacity: 0.6;
+  transition: transform 600ms ease, opacity 600ms ease;
+  will-change: transform;
+}
+
+.projects-swiper .swiper-slide-prev .projects-card,
+.projects-swiper .swiper-slide-next .projects-card {
+  transform: scale(0.94);
+  opacity: 0.8;
+}
+
+.projects-swiper .swiper-slide-active .projects-card {
+  transform: scale(1);
+  opacity: 1;
+}
+
+/* pagination bullets */
+.projects-pagination .projects-bullet {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  display: inline-block;
+  background: rgba(234, 189, 94, 0.35);
+  border: 1px solid rgba(234, 189, 94, 0.7);
+  transition: transform 250ms ease, background 250ms ease;
+}
+
+.projects-pagination .swiper-pagination-bullet-active.projects-bullet {
+  background: rgba(234, 189, 94, 1);
+  transform: scale(1.2);
+}
+
 /* Высота приложения с учетом мобильных браузеров */
 .h-app {
   height: calc(var(--app-vh, 1vh) * 100);

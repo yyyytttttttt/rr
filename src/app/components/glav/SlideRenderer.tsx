@@ -6,6 +6,10 @@ import DesktopCard from '../Hero/DesktopCard'
 import MobileBar from '../Hero/MobileBar'
 import Fsection from './Fsection'
 import SliderSection2 from '../SliderSection2'
+import SliderSection4 from '../SliderSection4'
+import SliderSection5 from "../SliderSection5"
+import SliderSection6 from '../SliderSection6'
+
 import { DescProps, mobileBarType, Slide } from '../../types/GlavProps'
 
 function SlideRenderer({ slide }:{slide:Slide}) {
@@ -15,7 +19,7 @@ function SlideRenderer({ slide }:{slide:Slide}) {
     return null
   }
 
-  
+
   if (slide.type === 'slider2') {
     const d = slide.desktop
     const m = slide.mobile
@@ -27,7 +31,24 @@ function SlideRenderer({ slide }:{slide:Slide}) {
     )
   }
 
-  
+  if (slide.type === 'slider4') {
+    return <SliderSection4 />
+  }
+  if (slide.type === 'slider5') {
+    return <SliderSection5 />
+  }
+  if (slide.type === 'slider6') {
+    const d = slide.desktop
+    const m = slide.mobile
+    return (
+    <SliderSection6>
+      
+
+    </SliderSection6>
+    )
+  }
+
+
   const d = slide.desktop
   const m = slide.mobile
   return (

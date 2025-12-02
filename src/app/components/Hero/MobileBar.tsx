@@ -6,10 +6,10 @@ import { mobileBarType } from "../../types/GlavProps"
 
 function MobileBar({ title, text, buttons }:mobileBarType) {
   return (
-    <div className="absolute bottom-0 z-[10] w-full">
-      <div className="mx-auto w-full max-w-[1410px]">
-        <div className="bg-white flex flex-col xs:hidden w-full py-6 px-6
-                        shadow-[0_8px_40px_rgba(0,0,0,0.12)]">
+    <div className="absolute bottom-0 z-[10]  w-full rounded-t-[12px]">
+      <div className="mx-auto w-full max-w-[1410px] flex items-center justify-center">
+        <div className="bg-white flex flex-col  xl:hidden w-[95%] xl:w-full py-6 px-6
+                        shadow-[0_8px_40px_rgba(0,0,0,0.12)] rounded-[12px]">
           <p className="text-[#636846] text-[clamp(0.875rem,0.55rem+1.625vw,2.5rem)]
                        font-[Manrope-Bold] mb-4 flex flex-col">
             {Array.isArray(title) ? title.map((t,i)=><span key={i}>{t}</span>) : <span>{title}</span>}
@@ -21,7 +21,7 @@ function MobileBar({ title, text, buttons }:mobileBarType) {
           <div className="flex gap-4">
             {buttons?.map((b,i)=>(
               <button key={i}
-                className={`rounded-[5px] px-[6%] py-[3%] w-full font-[Manrope-Regular]
+                className={`rounded-[5px] px-[6%] py-[3%] xs:py-[1%] w-[60%] xl:w-full  font-[Manrope-Regular]
                            text-[clamp(0.75rem,0.65rem+0.5vw,1.25rem)]
                            ${b.variant==='primary'
                               ? 'bg-[#636846] text-[#F7EFE5]'
