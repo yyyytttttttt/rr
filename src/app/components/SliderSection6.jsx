@@ -41,16 +41,18 @@ const SliderSection6 = () => {
   },
 ]
   return (
-    <div className='relative h-app min-h-0 flex-none w-screen bg-[#FFFCF3]'>
+    <div className='relative h-app min-h-0 flex-none w-screen bg-[#FFFCF3] overflow-hidden'>
       <div className="absolute inset-0" />
 
       {/* Центрированный контейнер */}
-      <div className="absolute inset-0 flex items-center justify-center px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 py-8 md:py-12">
-        <div className="w-full max-w-[90%] sm:max-w-[85%] md:max-w-[80%] lg:max-w-[75%] xl:max-w-[70%] 2xl:max-w-[1400px]">
-          <BeforeAfter
-            items={items}
-            onButtonClick={() => console.log('go to section')}
-          />
+      <div className="absolute inset-0 flex items-center justify-center px-3 py-6 sm:px-4 sm:py-8 md:px-6 md:py-10 lg:px-8 lg:py-12">
+        <div className="w-full h-full flex items-center justify-center max-w-[95%] sm:max-w-[90%] md:max-w-[85%] lg:max-w-[80%] xl:max-w-[75%] 2xl:max-w-[84%]">
+          <div className="w-full scale-[0.85] sm:scale-90 md:scale-95 lg:scale-100 origin-center">
+            <BeforeAfter
+              items={items}
+              onButtonClick={() => console.log('go to section')}
+            />
+          </div>
         </div>
       </div>
     </div>

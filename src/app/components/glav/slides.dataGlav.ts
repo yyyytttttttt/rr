@@ -147,4 +147,105 @@ export const slides = [
       ],
     },
   },
+  {
+    id: 'news',
+    type: 'static',
+    images: {
+      default: '/images/sl1000.png',
+      xs: '/images/sl1000.png',
+      oneK: '/images/sl1000.png',
+      fourXL: '/images/sl1000.png',
+    },
+   
+    desktop: {
+      pos: 'left',
+      title: 'Личный кабинет',
+      lines: [
+        'Запись на приём, история процедур, персональные',
+        'рекомендации, напоминания и дневник —     ',
+        'всё в одном месте. На сайте и в приложении.',
+        'Всегда под рукой.',
+        
+      ],
+      buttons: [{ label: 'Перейти в раздел', variant: 'ghost' }],
+      
+    },
+    mobile: {
+      title: 'Личный кабинет',
+      text: [
+        'Запись на приём, история процедур, ',
+        'персональные рекомендации, ',
+        'напоминания и дневник — всё в одном  ',
+        'месте. На сайте и в приложении. Всегда ',
+        'под рукой. '
+      ],
+      buttons: [{ label: 'Перейти в раздел', variant: 'ghost' }],
+    },
+  },
+  {
+    id: 'news',
+    type: 'static',
+    images: {
+      default: '/images/sl901.png',
+      xs: '/images/sl90.png',
+      oneK: '/images/sl90.png',
+      fourXL: '/images/sl90.png',
+    },
+
+    desktop: {
+      pos: 'left',
+      title: ['Контакты и адрес —', 'в одном месте'],
+      lines: [
+        'Мы сделали электронную визитку,',
+        'которую удобно сохранить',
+        'и легко отправить.',
+      ],
+      buttons: [{ label: 'Скачать', variant: 'ghost' },{label:'Перейти в раздел',variant:'primary'}],
+
+    },
+    mobile: {
+      title: ['Контакты — одним касанием'],
+      text: [
+        'Мы сделали электронную визитку, ',
+        'которую удобно сохранить и легко  ',
+        'отправить.  ',
+
+      ],
+      buttons: [{ label: 'Перейти в раздел', variant: 'ghost' },],
+    },
+
+  },
+  {
+    id: 'news',
+    type: 'static',
+    images: {
+      default: '/images/sl902.png',
+      xs: '/images/sl902.png',
+      oneK: '/images/sl902.png',
+      fourXL: '/images/sl902.png',
+    },
+
+    desktop: {
+      pos: 'left',
+      title: ['Новая Я —', 'в формате приложения'],
+      lines: [
+        'Мы создали приложение для удобной записи на',
+        'прием и онлайн-оплаты. Доступно в App store',
+        'и Google play',
+      ],
+      buttons: [{ label: 'Скачать на IOS', variant: 'primary', icon: 'apple' },{label:'Скачать на Android',variant:'ghost', icon: 'android'}],
+      buttonsVertical: true,
+    },
+    mobile: {
+      title: ['Новая Я —', 'в формате приложения'],
+      text: [
+        'Мы создали приложение для удобной записи на',
+        'прием и онлайн-оплаты. Доступно в App store',
+        'и Google play',
+      ],
+      buttons: [{ label: 'Скачать на IOS', variant: 'primary', icon: 'apple' },{ label: 'Скачать на Android', variant: 'ghost', icon: 'android' }],
+      buttonsVertical: true,
+    },
+    
+  },
 ] as const satisfies readonly Slide[];

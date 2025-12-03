@@ -1,11 +1,12 @@
 
 
-export type button ={label:string,variant:string}
+export type button ={label:string,variant:string, icon?:'apple' | 'android'}
 export type DescProps ={
   title:string | string[]
   lines:string[]
   buttons:button[]
   pos:'left' |'right'
+  buttonsVertical?:boolean
 }
 export type MobileButton ={
   label:string
@@ -15,7 +16,7 @@ export type mobileBarType = {
   title:string | string[]
   text:string[]
   buttons:button[]
-  
+  buttonsVertical?:boolean
 }
 export type ComponentSlide ={
   type: 'component'; 

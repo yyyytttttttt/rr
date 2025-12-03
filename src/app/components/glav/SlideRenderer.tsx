@@ -25,8 +25,8 @@ function SlideRenderer({ slide }:{slide:Slide}) {
     const m = slide.mobile
     return (
       <SliderSection2>
-        <DesktopCard pos={d.pos} title={d.title} lines={d.lines} buttons={d.buttons} />
-        <MobileBar title={m.title} text={m.text} buttons={m.buttons} />
+        <DesktopCard pos={d.pos} title={d.title} lines={d.lines} buttons={d.buttons} buttonsVertical={d.buttonsVertical} />
+        <MobileBar title={m.title} text={m.text} buttons={m.buttons} buttonsVertical={m.buttonsVertical} />
       </SliderSection2>
     )
   }
@@ -53,8 +53,8 @@ function SlideRenderer({ slide }:{slide:Slide}) {
   const m = slide.mobile
   return (
     <StaticSection3 src={slide.src} images={slide.images}>
-      <DesktopCard pos={d.pos} title={d.title} lines={d.lines} buttons={d.buttons} />
-      <MobileBar title={m.title} text={m.text} buttons={m.buttons} />
+      <DesktopCard pos={d.pos} title={d.title} lines={d.lines} buttons={d.buttons} buttonsVertical={d.buttonsVertical} />
+      <MobileBar title={m.title} text={m.text} buttons={m.buttons} buttonsVertical={m.buttonsVertical} />
     </StaticSection3>
   )
 }

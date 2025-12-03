@@ -58,7 +58,7 @@ export default function StaticSection3({ src = '', images, alt = '', children })
           {images.xs && <source media="(min-width: 480px)" srcSet={images.xs} />}
 
           {/* Fallback: default или src */}
-          {/* Использую next/image для оптимизаций, но внутри picture — обычный img: 
+          {/* Использую next/image для оптимизаций, но внутри picture — обычный img:
               next/image не должен быть дочерним <picture>/<source>. */}
           <img
             src={images.default || src}

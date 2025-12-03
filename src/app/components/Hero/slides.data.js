@@ -4,16 +4,7 @@ const btnsGift = [
 ]
 
 export const slides = [
-  {
-    media: { desktop: '/video/sl2.mp4', mobile: '/images/mobile1.png' },
-    title: 'Подарок ко дню рождения',
-    lines: [
-      'Твой месяц — твои подарки',
-      'Мы подготовили для тебя особые сюрпризы, чтобы этот',
-      'период был наполнен заботой и радостью.',
-    ],
-    buttons: btnsGift,
-  },
+  
   {
     media: { desktop: '/video/ad.mp4', mobile: '/video/ad.mp4' },
     title: 'Сила природы',
