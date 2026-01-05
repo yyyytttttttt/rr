@@ -3,6 +3,7 @@ import Image from "next/image"
 import { motion, AnimatePresence } from "framer-motion"
 import { useState } from "react"
 import Menu from "./menus/Menu"
+import BottomNav from "./menus/BottomNav"
 
 export default function LayoutOverlay({ text }) {
   const [open,setOpen]=useState(false)
@@ -60,13 +61,13 @@ export default function LayoutOverlay({ text }) {
       </div>
 
       {/* Левая колонка и текст */}
-     
 
-       
 
-      
 
-      
+
+
+
+      <BottomNav/>
     </>
   )
 }
