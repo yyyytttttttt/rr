@@ -70,8 +70,6 @@ export default withAuth(
  const ALLOWED_ORIGINS = [
    'https://mobileapp-mobileappfront-xo0l93-b56dfe-46-149-71-119.traefik.me',
    'http://localhost:3000',
-   'capacitor://localhost',
-   'http://localhost', // Для Capacitor
  ];
 
  export function middleware(request: NextRequest) {
