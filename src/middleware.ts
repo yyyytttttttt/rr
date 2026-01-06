@@ -12,6 +12,14 @@ type AppJWT = JWT & {
   role?: Role;
 };
 
+// Домены, которым разрешен доступ к API
+const ALLOWED_ORIGINS = [
+  'https://mobileapp-mobileappfront-xo0l93-b56dfe-46-149-71-119.traefik.me',
+  'http://app-app-0yooux-1c3358-176-124-197-94.traefik.me',
+  'http://localhost:3000',
+  'https://novay-y.com',
+];
+
 // Матрица доступа (обрати внимание: БЕЗ "as const" у массивов allow)
 const roleMap: ReadonlyArray<{ prefix: `/${string}`; allow: readonly Role[] }> = [
   { prefix: "/admin",   allow: ["ADMIN", "DOCTOR"] },
@@ -23,15 +31,59 @@ function findRule(pathname: string) {
   return roleMap.find((r) => pathname.startsWith(r.prefix));
 }
 
+// Функция для добавления CORS заголовков
+function addCorsHeaders(response: NextResponse, origin: string | null): NextResponse {
+  if (origin && ALLOWED_ORIGINS.includes(origin)) {
+    response.headers.set('Access-Control-Allow-Origin', origin);
+    response.headers.set('Access-Control-Allow-Credentials', 'true');
+    response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+    response.headers.set(
+      'Access-Control-Allow-Headers',
+      'Content-Type, Authorization, X-Requested-With, Accept, Origin'
+    );
+  }
+  return response;
+}
+
 export default withAuth(
   function middleware(req: NextRequestWithAuth) {
     const { pathname } = req.nextUrl;
+    const origin = req.headers.get('origin');
+
+    // Обработка preflight запросов (OPTIONS)
+    if (req.method === 'OPTIONS') {
+      const response = new NextResponse(null, { status: 200 });
+      return addCorsHeaders(response, origin);
+    }
 
     // JWT из withAuth (см. callbacks в authOptions)
     const token = req.nextauth?.token as AppJWT | undefined;
     const role: Role | undefined = token?.role;
 
     const rule = findRule(pathname);
+
+    // Для API роутов всегда добавляем CORS заголовки
+    if (pathname.startsWith('/api/')) {
+      if (!rule) {
+        // API путь не защищён — пропускаем с CORS заголовками
+        const response = NextResponse.next();
+        return addCorsHeaders(response, origin);
+      }
+
+      // API путь защищён — проверяем роль
+      if (!role || !rule.allow.includes(role)) {
+        const response = NextResponse.json(
+          { error: 'Unauthorized' },
+          { status: 401 }
+        );
+        return addCorsHeaders(response, origin);
+      }
+
+      const response = NextResponse.next();
+      return addCorsHeaders(response, origin);
+    }
+
+    // Для не-API роутов
     if (!rule) {
       // путь не защищён — пропускаем
       return NextResponse.next();
@@ -63,46 +115,6 @@ export default withAuth(
   }
 );
 
- 
- import type { NextRequest } from 'next/server';
-
- // Домены, которым разрешен доступ к API
- const ALLOWED_ORIGINS = [
-   'https://mobileapp-mobileappfront-xo0l93-b56dfe-46-149-71-119.traefik.me',
-   'http://localhost:3000',
- ];
-
- export function middleware(request: NextRequest) {
-   const origin = request.headers.get('origin');
-   const response = NextResponse.next();
-
-   // Проверяем разрешен ли origin
-   if (origin && ALLOWED_ORIGINS.includes(origin)) {
-     response.headers.set('Access-Control-Allow-Origin', origin);
-     response.headers.set('Access-Control-Allow-Credentials', 'true');
-     response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-     response.headers.set(
-       'Access-Control-Allow-Headers',
-       'Content-Type, Authorization, X-Requested-With, Accept, Origin'
-     );
-   }
-
-   // Обработка preflight запросов
-   if (request.method === 'OPTIONS') {
-     return new NextResponse(null, {
-       status: 200,
-       headers: response.headers,
-     });
-   }
-
-   return response;
- }
-
-
- 
-
-
-//
 export const config = {
   matcher: [
     "/profile",
