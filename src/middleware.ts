@@ -50,7 +50,7 @@ export default withAuth(
     const { pathname } = req.nextUrl;
     const origin = req.headers.get('origin');
 
-    // Обработка preflight запросов (OPTIONS)
+    // Обработка preflight запросов (OPTIONS) - отвечаем сразу с CORS headers
     if (req.method === 'OPTIONS') {
       const response = new NextResponse(null, { status: 200 });
       return addCorsHeaders(response, origin);
@@ -109,8 +109,12 @@ export default withAuth(
   },
   {
     callbacks: {
-      // пускаем только если токен есть (залогинен)
-      authorized: ({ token }) => Boolean(token),
+      // пускаем OPTIONS запросы без авторизации (для CORS preflight)
+      // остальные запросы - только если токен есть (залогинен)
+      authorized: ({ req, token }) => {
+        if (req.method === 'OPTIONS') return true;
+        return Boolean(token);
+      },
     },
   }
 );
