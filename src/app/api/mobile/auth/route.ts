@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../../../../lib/prizma';
+import { createCorsResponse } from '../../../../lib/jwt';
 
 const JWT_SECRET = process.env.NEXTAUTH_SECRET || 'your-secret-key';
 
@@ -33,15 +34,7 @@ setInterval(() => {
 
 // Обработка OPTIONS для CORS preflight
 export async function OPTIONS(request: NextRequest) {
-  return new NextResponse(null, {
-    status: 200,
-    headers: {
-      'Access-Control-Allow-Origin': 'https://nikropolis.ru',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-      'Access-Control-Allow-Credentials': 'true',
-    },
-  });
+  return createCorsResponse(request);
 }
 
 export async function POST(request: NextRequest) {

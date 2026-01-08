@@ -3,6 +3,36 @@ import { NextRequest, NextResponse } from 'next/server';
 
 const JWT_SECRET = process.env.NEXTAUTH_SECRET || 'your-secret-key';
 
+// Разрешенные origins для мобильного приложения
+const ALLOWED_ORIGINS = [
+  'https://nikropolis.ru',
+  'http://localhost:3000',
+  'http://localhost:3001',
+  'http://192.168.0.156:3000',
+];
+
+/**
+ * Добавить CORS headers к ответу
+ */
+export function addCorsHeaders(response: NextResponse, origin: string | null): NextResponse {
+  if (origin && ALLOWED_ORIGINS.includes(origin)) {
+    response.headers.set('Access-Control-Allow-Origin', origin);
+    response.headers.set('Access-Control-Allow-Credentials', 'true');
+    response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+    response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+  }
+  return response;
+}
+
+/**
+ * Создать CORS preflight ответ
+ */
+export function createCorsResponse(request: NextRequest): NextResponse {
+  const origin = request.headers.get('origin');
+  const response = new NextResponse(null, { status: 200 });
+  return addCorsHeaders(response, origin);
+}
+
 export interface JWTPayload {
   userId: string;
   email: string;
