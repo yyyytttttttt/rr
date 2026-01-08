@@ -18,8 +18,9 @@ export async function OPTIONS(request: NextRequest) {
 // GET - Получить конкретное бронирование
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  props: { params: Promise<{ id: string }> }
 ) {
+  const params = await props.params;
   const auth = requireAuth(request);
 
   if ('error' in auth) {
@@ -88,8 +89,9 @@ export async function GET(
 // PATCH - Обновить бронирование (например, изменить note или статус)
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  props: { params: Promise<{ id: string }> }
 ) {
+  const params = await props.params;
   const auth = requireAuth(request);
 
   if ('error' in auth) {
@@ -188,8 +190,9 @@ export async function PATCH(
 // DELETE - Отменить бронирование
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  props: { params: Promise<{ id: string }> }
 ) {
+  const params = await props.params;
   const auth = requireAuth(request);
 
   if ('error' in auth) {
