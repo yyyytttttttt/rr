@@ -22,27 +22,35 @@ const nextConfig = {
 
   // CORS headers для мобильного приложения
   async headers() {
+    const corsHeaders = [
+      {
+        key: 'Access-Control-Allow-Origin',
+        value: 'https://nikropolis.ru',
+      },
+      {
+        key: 'Access-Control-Allow-Methods',
+        value: 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
+      },
+      {
+        key: 'Access-Control-Allow-Headers',
+        value: 'Content-Type, Authorization, X-Requested-With, Accept, Origin, X-CSRF-Token',
+      },
+      {
+        key: 'Access-Control-Allow-Credentials',
+        value: 'true',
+      },
+    ];
+
     return [
       {
+        // API endpoints (включая NextAuth)
         source: '/api/:path*',
-        headers: [
-          {
-            key: 'Access-Control-Allow-Origin',
-            value: 'https://nikropolis.ru',
-          },
-          {
-            key: 'Access-Control-Allow-Methods',
-            value: 'GET, POST, PUT, DELETE, PATCH, OPTIONS',
-          },
-          {
-            key: 'Access-Control-Allow-Headers',
-            value: 'Content-Type, Authorization, X-Requested-With, Accept, Origin, X-CSRF-Token',
-          },
-          {
-            key: 'Access-Control-Allow-Credentials',
-            value: 'true',
-          },
-        ],
+        headers: corsHeaders,
+      },
+      {
+        // Все публичные страницы и маршруты
+        source: '/:path*',
+        headers: corsHeaders,
       },
     ];
   },
