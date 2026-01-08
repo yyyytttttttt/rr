@@ -28,7 +28,7 @@ const nextConfig = {
         headers: [
           {
             key: 'Access-Control-Allow-Origin',
-            value: 'http://app-app-0yooux-1c3358-176-124-197-94.traefik.me',
+            value: 'https://nikropolis.ru',
           },
           {
             key: 'Access-Control-Allow-Methods',

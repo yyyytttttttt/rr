@@ -14,10 +14,10 @@ type AppJWT = JWT & {
 
 // Домены, которым разрешен доступ к API
 const ALLOWED_ORIGINS = [
-  'https://mobileapp-mobileappfront-xo0l93-b56dfe-46-149-71-119.traefik.me',
-  'http://app-app-0yooux-1c3358-176-124-197-94.traefik.me',
-  'http://localhost:3000',
+  'https://nikropolis.ru',
   'https://novay-y.com',
+  'http://localhost:3000',
+  'http://192.168.0.156:3000', // для локальной разработки
 ];
 
 // Матрица доступа (обрати внимание: БЕЗ "as const" у массивов allow)
