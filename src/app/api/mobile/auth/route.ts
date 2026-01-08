@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 import { prisma } from '../../../../lib/prizma';
+
+const JWT_SECRET = process.env.NEXTAUTH_SECRET || 'your-secret-key';
 
 // Rate limiting - в памяти (для production лучше использовать Redis)
 interface RateLimitEntry {
@@ -158,9 +161,22 @@ export async function POST(request: NextRequest) {
 
     console.info(`[MOBILE_AUTH] Successful login for email: ${email} from IP: ${ip}`);
 
-    // Вернуть данные пользователя (без пароля!)
+    // Создаем JWT токен для авторизации последующих запросов
+    const token = jwt.sign(
+      {
+        userId: user.id,
+        email: user.email,
+        role: user.role,
+        tokenVersion: user.tokenVersion,
+      },
+      JWT_SECRET,
+      { expiresIn: '7d' } // Токен действителен 7 дней
+    );
+
+    // Вернуть данные пользователя и JWT токен (без пароля!)
     return NextResponse.json({
       success: true,
+      token, // JWT токен для последующих запросов
       user: {
         id: user.id,
         email: user.email,
