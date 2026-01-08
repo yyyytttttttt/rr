@@ -117,12 +117,16 @@ export default withAuth(
 
         // Публичные API endpoints (доступны без авторизации)
         const publicPaths = [
-          '/api/mobile/',              // Мобильное приложение
+          '/api/mobile/',              // Мобильное приложение (JWT проверка внутри)
           '/api/auth/',                // NextAuth endpoints
           '/api/services/categories',  // Категории услуг
           '/api/services/catalog',     // Каталог услуг
           '/api/services/list',        // Список услуг
+          '/api/services/',            // Все публичные services endpoints
           '/api/doctors/list',         // Список докторов
+          '/api/doctors/',             // Все публичные doctor endpoints
+          '/api/availability',         // Доступность врачей
+          '/api/doctor/slots',         // Доступные слоты для бронирования
           '/api/register',             // Регистрация
           '/api/resend',               // Повторная отправка письма
           '/api/request-password-reset', // Запрос сброса пароля

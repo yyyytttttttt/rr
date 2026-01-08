@@ -176,7 +176,7 @@ export async function POST(request: NextRequest) {
     // Вернуть данные пользователя и JWT токен (без пароля!)
     return NextResponse.json({
       success: true,
-      token, // JWT токен для последующих запросов
+      jwtToken: token, // JWT токен для последующих запросов
       user: {
         id: user.id,
         email: user.email,
