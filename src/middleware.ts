@@ -56,12 +56,6 @@ export default withAuth(
       return addCorsHeaders(response, origin);
     }
 
-    // Пропускаем публичные мобильные API без проверки авторизации
-    if (pathname.startsWith('/api/mobile/')) {
-      const response = NextResponse.next();
-      return addCorsHeaders(response, origin);
-    }
-
     // JWT из withAuth (см. callbacks в authOptions)
     const token = req.nextauth?.token as AppJWT | undefined;
     const role: Role | undefined = token?.role;
@@ -115,10 +109,33 @@ export default withAuth(
   },
   {
     callbacks: {
-      // пускаем OPTIONS запросы без авторизации (для CORS preflight)
-      // остальные запросы - только если токен есть (залогинен)
       authorized: ({ req, token }) => {
+        const path = req.nextUrl.pathname;
+
+        // Всегда разрешаем OPTIONS для CORS preflight
         if (req.method === 'OPTIONS') return true;
+
+        // Публичные API endpoints (доступны без авторизации)
+        const publicPaths = [
+          '/api/mobile/',              // Мобильное приложение
+          '/api/auth/',                // NextAuth endpoints
+          '/api/services/categories',  // Категории услуг
+          '/api/services/catalog',     // Каталог услуг
+          '/api/services/list',        // Список услуг
+          '/api/doctors/list',         // Список докторов
+          '/api/register',             // Регистрация
+          '/api/resend',               // Повторная отправка письма
+          '/api/request-password-reset', // Запрос сброса пароля
+          '/api/reset-password',       // Сброс пароля
+          '/api/health',               // Health check
+        ];
+
+        // Разрешаем публичные endpoints без токена
+        if (publicPaths.some(p => path.startsWith(p))) {
+          return true;
+        }
+
+        // Остальные требуют авторизацию
         return Boolean(token);
       },
     },
