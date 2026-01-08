@@ -56,6 +56,12 @@ export default withAuth(
       return addCorsHeaders(response, origin);
     }
 
+    // Пропускаем публичные мобильные API без проверки авторизации
+    if (pathname.startsWith('/api/mobile/')) {
+      const response = NextResponse.next();
+      return addCorsHeaders(response, origin);
+    }
+
     // JWT из withAuth (см. callbacks в authOptions)
     const token = req.nextauth?.token as AppJWT | undefined;
     const role: Role | undefined = token?.role;
