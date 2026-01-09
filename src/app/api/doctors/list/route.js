@@ -1,5 +1,10 @@
 import { NextResponse } from "next/server";
 import { prisma } from "../../../../lib/prizma";
+import { createCorsResponse } from "../../../../lib/jwt";
+
+export async function OPTIONS(request) {
+  return createCorsResponse(request);
+}
 
 export async function GET() {
   try {
