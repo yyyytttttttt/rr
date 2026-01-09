@@ -127,6 +127,7 @@ export default withAuth(
           '/api/doctors/',             // Все публичные doctor endpoints
           '/api/availability',         // Доступность врачей
           '/api/doctor/slots',         // Доступные слоты для бронирования
+          '/api/bookings/guest',       // Гостевое бронирование БЕЗ регистрации ✨
           '/api/register',             // Регистрация
           '/api/resend',               // Повторная отправка письма
           '/api/request-password-reset', // Запрос сброса пароля

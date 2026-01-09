@@ -1,8 +1,13 @@
 'use client'
 import Image from "next/image"
-import { memo } from "react"
+import { memo, useState } from "react"
+import GuestBookingModal from '../modals/GuestBookingModal'
+
 function BottomNav() {
+    const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
+
     return(
+        <>
 
             <div className="fixed max-w-[1410px] mx-auto bottom-0  xl:bottom-12 left-1/2 transform -translate-x-1/2 w-full  xl:w-3/4 flex items-center justify-between bg-[#e5dccb] px-2 py-1 pb-4 xl:pb-0 rounded-0 xl:rounded-full z-50">
               <button className=" swiper-button-custom-prev-2
@@ -72,21 +77,22 @@ function BottomNav() {
       
                 </button>
                <button
+        onClick={() => setIsBookingModalOpen(true)}
         className="
           relative w-[10%] sm:w-[7.4%] flex-shrink-0 scale-[1.5] cursor-pointer
           transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)]
           hover:scale-[1.65] hover:opacity-95 active:scale-[1.4]
           before:content-[''] before:absolute before:inset-0
-          before:rounded-full before:bg-gradient-to-r 
+          before:rounded-full before:bg-gradient-to-r
           before:from-[#A77C66]/40 before:to-[#A77C66]/10
           before:blur-lg before:opacity-0 hover:before:opacity-100
           before:transition-all before:duration-700
         "
       >
-        <Image 
-          src="/images/pl.svg" 
-          alt="Зв" 
-          width={60} 
+        <Image
+          src="/images/pl.svg"
+          alt="Записаться"
+          width={60}
           height={60}
           className="relative z-10 drop-shadow-[0_0_6px_#A77C6680] hover:drop-shadow-[0_0_12px_#A77C66]"
         />
@@ -147,6 +153,12 @@ function BottomNav() {
     </svg>
       </button>
             </div>
+
+            <GuestBookingModal
+              isOpen={isBookingModalOpen}
+              onClose={() => setIsBookingModalOpen(false)}
+            />
+        </>
     )
 }
 export default memo(BottomNav)
