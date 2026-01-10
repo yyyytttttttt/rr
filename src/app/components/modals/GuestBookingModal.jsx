@@ -80,12 +80,17 @@ export default function GuestBookingModal({ isOpen, onClose }) {
   const [activeTab, setActiveTab] = useState('service');
   const [loading, setLoading] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [tabDirection, setTabDirection] = useState('forward');
 
   // Списки для выбора
   const [categories, setCategories] = useState([]);
   const [services, setServices] = useState([]);
   const [doctors, setDoctors] = useState([]);
   const [slots, setSlots] = useState([]);
+
+  // Для календаря и времени
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [currentMonth, setCurrentMonth] = useState(new Date());
 
   // Данные формы
   const [formData, setFormData] = useState({
@@ -210,10 +215,26 @@ export default function GuestBookingModal({ isOpen, onClose }) {
     }
   };
 
+  const handleTabChange = (newTab) => {
+    const tabOrder = ['service', 'doctor', 'time', 'contact'];
+    const currentIndex = tabOrder.indexOf(activeTab);
+    const newIndex = tabOrder.indexOf(newTab);
+    setTabDirection(newIndex > currentIndex ? 'forward' : 'backward');
+
+    // Сброс выбранной даты при возврате на вкладку "Время"
+    if (newTab === 'time' && activeTab !== 'time') {
+      setSelectedDate(null);
+    }
+
+    setActiveTab(newTab);
+  };
+
   const handleClose = () => {
     setIsAnimating(false);
     setTimeout(() => {
       setActiveTab('service');
+      setSelectedDate(null);
+      setCurrentMonth(new Date());
       setFormData({
         categoryId: '',
         serviceId: '',
@@ -228,7 +249,7 @@ export default function GuestBookingModal({ isOpen, onClose }) {
       setDoctors([]);
       setSlots([]);
       onClose();
-    }, 300); // Длительность анимации
+    }, 300);
   };
 
   const formatPhoneNumber = (value) => {
@@ -252,6 +273,72 @@ export default function GuestBookingModal({ isOpen, onClose }) {
   const handlePhoneChange = (value) => {
     const formatted = formatPhoneNumber(value);
     setFormData({ ...formData, clientPhone: formatted });
+  };
+
+  // Функции для календаря
+  const getDaysInMonth = (date) => {
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    const startingDayOfWeek = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1; // Понедельник = 0
+
+    const days = [];
+
+    // Пустые ячейки для выравнивания
+    for (let i = 0; i < startingDayOfWeek; i++) {
+      days.push(null);
+    }
+
+    // Дни месяца
+    for (let day = 1; day <= daysInMonth; day++) {
+      days.push(new Date(year, month, day));
+    }
+
+    return days;
+  };
+
+  const changeMonth = (offset) => {
+    const newMonth = new Date(currentMonth);
+    newMonth.setMonth(newMonth.getMonth() + offset);
+    setCurrentMonth(newMonth);
+  };
+
+  const handleDateSelect = (date) => {
+    setSelectedDate(date);
+    setFormData({ ...formData, start: '' }); // Сброс выбранного времени
+  };
+
+  // Фильтрация слотов по выбранной дате
+  const getTimeSlotsForSelectedDate = () => {
+    if (!selectedDate) return [];
+
+    const selectedDateStr = selectedDate.toLocaleDateString('ru-RU');
+    return slots.filter(slot => {
+      const slotDate = new Date(slot.start);
+      return slotDate.toLocaleDateString('ru-RU') === selectedDateStr;
+    });
+  };
+
+  // Получить уникальные даты из слотов
+  const getAvailableDates = () => {
+    const dates = new Set();
+    slots.forEach(slot => {
+      const date = new Date(slot.start);
+      date.setHours(0, 0, 0, 0);
+      dates.add(date.toISOString());
+    });
+    return Array.from(dates).map(d => new Date(d));
+  };
+
+  const isDateAvailable = (date) => {
+    if (!date) return false;
+    const dateStr = date.toLocaleDateString('ru-RU');
+    return slots.some(slot => {
+      const slotDate = new Date(slot.start);
+      return slotDate.toLocaleDateString('ru-RU') === dateStr;
+    });
   };
 
   if (!isOpen) return null;
@@ -304,8 +391,8 @@ export default function GuestBookingModal({ isOpen, onClose }) {
         <div className="flex border-b border-[#EEE7DC] px-4 sm:px-6">
           <button
             type="button"
-            onClick={() => setActiveTab('service')}
-            className={`px-3 sm:px-4 py-3 sm:py-4 text-sm sm:text-base font-ManropeMedium transition relative ${
+            onClick={() => handleTabChange('service')}
+            className={`px-3 sm:px-4 py-3 sm:py-4 text-sm sm:text-base font-ManropeMedium transition-all duration-300 relative ${
               activeTab === 'service'
                 ? 'text-[#4F5338]'
                 : 'text-[#636846] hover:text-[#4F5338]'
@@ -313,14 +400,14 @@ export default function GuestBookingModal({ isOpen, onClose }) {
           >
             Услуга
             {activeTab === 'service' && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#5C6744]"></div>
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#5C6744] transition-all duration-300"></div>
             )}
           </button>
           <button
             type="button"
-            onClick={() => canGoToDoctor && setActiveTab('doctor')}
+            onClick={() => canGoToDoctor && handleTabChange('doctor')}
             disabled={!canGoToDoctor}
-            className={`px-3 sm:px-4 py-3 sm:py-4 text-sm sm:text-base font-ManropeMedium transition relative ${
+            className={`px-3 sm:px-4 py-3 sm:py-4 text-sm sm:text-base font-ManropeMedium transition-all duration-300 relative ${
               activeTab === 'doctor'
                 ? 'text-[#4F5338]'
                 : canGoToDoctor
@@ -330,14 +417,14 @@ export default function GuestBookingModal({ isOpen, onClose }) {
           >
             Врач
             {activeTab === 'doctor' && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#5C6744]"></div>
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#5C6744] transition-all duration-300"></div>
             )}
           </button>
           <button
             type="button"
-            onClick={() => canGoToTime && setActiveTab('time')}
+            onClick={() => canGoToTime && handleTabChange('time')}
             disabled={!canGoToTime}
-            className={`px-3 sm:px-4 py-3 sm:py-4 text-sm sm:text-base font-ManropeMedium transition relative ${
+            className={`px-3 sm:px-4 py-3 sm:py-4 text-sm sm:text-base font-ManropeMedium transition-all duration-300 relative ${
               activeTab === 'time'
                 ? 'text-[#4F5338]'
                 : canGoToTime
@@ -347,14 +434,14 @@ export default function GuestBookingModal({ isOpen, onClose }) {
           >
             Время
             {activeTab === 'time' && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#5C6744]"></div>
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#5C6744] transition-all duration-300"></div>
             )}
           </button>
           <button
             type="button"
-            onClick={() => canGoToContact && setActiveTab('contact')}
+            onClick={() => canGoToContact && handleTabChange('contact')}
             disabled={!canGoToContact}
-            className={`px-3 sm:px-4 py-3 sm:py-4 text-sm sm:text-base font-ManropeMedium transition relative ${
+            className={`px-3 sm:px-4 py-3 sm:py-4 text-sm sm:text-base font-ManropeMedium transition-all duration-300 relative ${
               activeTab === 'contact'
                 ? 'text-[#4F5338]'
                 : canGoToContact
@@ -364,7 +451,7 @@ export default function GuestBookingModal({ isOpen, onClose }) {
           >
             Контакты
             {activeTab === 'contact' && (
-              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#5C6744]"></div>
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#5C6744] transition-all duration-300"></div>
             )}
           </button>
         </div>
@@ -372,7 +459,7 @@ export default function GuestBookingModal({ isOpen, onClose }) {
         <form onSubmit={handleSubmit} className="p-4 sm:p-6">
           {/* Вкладка: Услуга */}
           {activeTab === 'service' && (
-            <div className="space-y-3 sm:space-y-4">
+            <div className={`space-y-3 sm:space-y-4 ${tabDirection === 'forward' ? 'animate-slideInRight' : 'animate-slideInLeft'}`}>
               <label className="block">
                 <span className="mb-1.5 sm:mb-2 block text-sm sm:text-base font-ManropeMedium text-[#4F5338]">
                   Категория
@@ -401,7 +488,7 @@ export default function GuestBookingModal({ isOpen, onClose }) {
 
               <button
                 type="button"
-                onClick={() => setActiveTab('doctor')}
+                onClick={() => handleTabChange('doctor')}
                 disabled={!formData.serviceId}
                 className="w-full mt-2 sm:mt-3 rounded-[8px] sm:rounded-[10px] bg-[#5C6744] px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base font-ManropeMedium text-white hover:bg-[#4F5338] disabled:opacity-50 disabled:cursor-not-allowed transition"
               >
@@ -412,7 +499,7 @@ export default function GuestBookingModal({ isOpen, onClose }) {
 
           {/* Вкладка: Врач */}
           {activeTab === 'doctor' && (
-            <div className="space-y-3 sm:space-y-4">
+            <div className={`space-y-3 sm:space-y-4 ${tabDirection === 'forward' ? 'animate-slideInRight' : 'animate-slideInLeft'}`}>
               <h3 className="text-base sm:text-lg font-Manrope-SemiBold text-[#4F5338]">Выберите врача</h3>
 
               <div className="space-y-2 sm:space-y-3 max-h-[400px] overflow-y-auto">
@@ -448,14 +535,14 @@ export default function GuestBookingModal({ isOpen, onClose }) {
               <div className="flex gap-2 sm:gap-3 mt-4">
                 <button
                   type="button"
-                  onClick={() => setActiveTab('service')}
+                  onClick={() => handleTabChange('service')}
                   className="flex-1 rounded-[8px] sm:rounded-[10px] border border-[#5C6744] text-[#5C6744] px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base font-ManropeMedium hover:bg-[#5C6744]/5 transition"
                 >
                   Назад
                 </button>
                 <button
                   type="button"
-                  onClick={() => setActiveTab('time')}
+                  onClick={() => handleTabChange('time')}
                   disabled={!formData.doctorId}
                   className="flex-1 rounded-[8px] sm:rounded-[10px] bg-[#5C6744] text-white px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base font-ManropeMedium hover:bg-[#4F5338] disabled:opacity-50 disabled:cursor-not-allowed transition"
                 >
@@ -467,41 +554,131 @@ export default function GuestBookingModal({ isOpen, onClose }) {
 
           {/* Вкладка: Время */}
           {activeTab === 'time' && (
-            <div className="space-y-3 sm:space-y-4">
-              <h3 className="text-base sm:text-lg font-Manrope-SemiBold text-[#4F5338]">Выберите время</h3>
+            <div className={`space-y-4 sm:space-y-5 ${tabDirection === 'forward' ? 'animate-slideInRight' : 'animate-slideInLeft'}`}>
+              {!selectedDate ? (
+                <>
+                  <h3 className="text-base sm:text-lg font-Manrope-SemiBold text-[#4F5338]">Выберите дату</h3>
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3 max-h-[400px] overflow-y-auto">
-                {slots.map((slot) => {
-                  const date = new Date(slot.start);
-                  return (
+                  {/* Календарь */}
+                  <div>
+                    {/* Заголовок календаря */}
+                    <div className="flex items-center justify-between mb-3 sm:mb-4">
+                      <button
+                        type="button"
+                        onClick={() => changeMonth(-1)}
+                        className="p-2 hover:bg-[#5C6744]/10 rounded-lg transition"
+                      >
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                          <path d="M12.5 15L7.5 10L12.5 5" stroke="#5C6744" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </button>
+                      <h4 className="text-base sm:text-lg font-ManropeMedium text-[#4F5338]">
+                        {currentMonth.toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' })}
+                      </h4>
+                      <button
+                        type="button"
+                        onClick={() => changeMonth(1)}
+                        className="p-2 hover:bg-[#5C6744]/10 rounded-lg transition"
+                      >
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                          <path d="M7.5 5L12.5 10L7.5 15" stroke="#5C6744" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </button>
+                    </div>
+
+                    {/* Дни недели */}
+                    <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-2">
+                      {['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'].map(day => (
+                        <div key={day} className="text-center text-xs sm:text-sm font-ManropeMedium text-[#636846] py-1">
+                          {day}
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Дни месяца */}
+                    <div className="grid grid-cols-7 gap-1 sm:gap-2">
+                      {getDaysInMonth(currentMonth).map((day, index) => {
+                        if (!day) {
+                          return <div key={`empty-${index}`} />;
+                        }
+
+                        const isAvailable = isDateAvailable(day);
+                        const isToday = day.toDateString() === new Date().toDateString();
+                        const isPast = day < new Date(new Date().setHours(0, 0, 0, 0));
+
+                        return (
+                          <button
+                            key={day.toISOString()}
+                            type="button"
+                            onClick={() => isAvailable && !isPast && handleDateSelect(day)}
+                            disabled={!isAvailable || isPast}
+                            className={`
+                              aspect-square p-1 sm:p-2 rounded-lg text-xs sm:text-sm font-ManropeMedium transition-all duration-200
+                              ${isAvailable && !isPast
+                                ? 'bg-[#5C6744]/5 text-[#4F5338] hover:bg-[#5C6744] hover:text-white cursor-pointer'
+                                : 'text-[#636846]/30 cursor-not-allowed'
+                              }
+                              ${isToday && isAvailable ? 'ring-2 ring-[#5C6744]' : ''}
+                            `}
+                          >
+                            {day.getDate()}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-base sm:text-lg font-Manrope-SemiBold text-[#4F5338]">
+                      {selectedDate.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })}
+                    </h3>
                     <button
-                      key={slot.start}
                       type="button"
-                      onClick={() => setFormData({ ...formData, start: slot.start })}
-                      className={`p-2.5 sm:p-3 border-2 rounded-[8px] sm:rounded-[10px] text-sm transition ${
-                        formData.start === slot.start
-                          ? 'border-[#5C6744] bg-[#5C6744]/5'
-                          : 'border-[#EEE7DC] hover:border-[#5C6744]/50'
-                      }`}
+                      onClick={() => setSelectedDate(null)}
+                      className="text-sm text-[#5C6744] hover:text-[#4F5338] font-ManropeMedium transition"
                     >
-                      <div className="font-ManropeMedium text-[#4F5338] text-xs sm:text-sm">{date.toLocaleDateString('ru-RU')}</div>
-                      <div className="text-xs text-[#636846]">{date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}</div>
+                      Изменить дату
                     </button>
-                  );
-                })}
-              </div>
+                  </div>
+
+                  {/* Список времени */}
+                  <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 sm:gap-3 max-h-[350px] overflow-y-auto">
+                    {getTimeSlotsForSelectedDate().map((slot) => {
+                      const time = new Date(slot.start);
+                      return (
+                        <button
+                          key={slot.start}
+                          type="button"
+                          onClick={() => setFormData({ ...formData, start: slot.start })}
+                          className={`p-3 sm:p-4 border-2 rounded-[8px] sm:rounded-[10px] text-sm sm:text-base transition-all duration-200 ${
+                            formData.start === slot.start
+                              ? 'border-[#5C6744] bg-[#5C6744] text-white'
+                              : 'border-[#EEE7DC] text-[#636846] hover:border-[#5C6744] hover:bg-[#5C6744]/5'
+                          }`}
+                        >
+                          <div className="font-ManropeMedium">
+                            {time.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
 
               <div className="flex gap-2 sm:gap-3 mt-4">
                 <button
                   type="button"
-                  onClick={() => setActiveTab('doctor')}
+                  onClick={() => handleTabChange('doctor')}
                   className="flex-1 rounded-[8px] sm:rounded-[10px] border border-[#5C6744] text-[#5C6744] px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base font-ManropeMedium hover:bg-[#5C6744]/5 transition"
                 >
                   Назад
                 </button>
                 <button
                   type="button"
-                  onClick={() => setActiveTab('contact')}
+                  onClick={() => handleTabChange('contact')}
                   disabled={!formData.start}
                   className="flex-1 rounded-[8px] sm:rounded-[10px] bg-[#5C6744] text-white px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base font-ManropeMedium hover:bg-[#4F5338] disabled:opacity-50 disabled:cursor-not-allowed transition"
                 >
@@ -513,7 +690,7 @@ export default function GuestBookingModal({ isOpen, onClose }) {
 
           {/* Вкладка: Контакты */}
           {activeTab === 'contact' && (
-            <div className="space-y-3 sm:space-y-4">
+            <div className={`space-y-3 sm:space-y-4 ${tabDirection === 'forward' ? 'animate-slideInRight' : 'animate-slideInLeft'}`}>
               <h3 className="text-base sm:text-lg font-Manrope-SemiBold text-[#4F5338]">Ваши контакты</h3>
 
               <label className="block">
@@ -574,7 +751,7 @@ export default function GuestBookingModal({ isOpen, onClose }) {
               <div className="flex gap-2 sm:gap-3 mt-4">
                 <button
                   type="button"
-                  onClick={() => setActiveTab('time')}
+                  onClick={() => handleTabChange('time')}
                   className="flex-1 rounded-[8px] sm:rounded-[10px] border border-[#5C6744] text-[#5C6744] px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base font-ManropeMedium hover:bg-[#5C6744]/5 transition"
                 >
                   Назад
