@@ -39,8 +39,12 @@ const BLOCKING_STATUSES = ["PENDING", "CONFIRMED"] as const;
 
 // ====== утилиты времени ======
 function dayBoundsUtc(dayYYYYMMDD: string, tzid: string) {
-  const localStart = new Date(`${dayYYYYMMDD}T00:00:00`);
-  const startUtc = fromZonedTime(localStart, tzid);
+  // Создаём дату явно через компоненты, чтобы избежать проблем с парсингом
+  const [year, month, day] = dayYYYYMMDD.split('-').map(Number);
+  // Создаём дату, представляющую полночь в указанной timezone
+  const localDate = new Date(year, month - 1, day, 0, 0, 0, 0);
+  // fromZonedTime интерпретирует это как время в tzid и конвертирует в UTC
+  const startUtc = fromZonedTime(localDate, tzid);
   const endUtc = addDays(startUtc, 1);
   return { startUtc, endUtc };
 }
@@ -403,12 +407,13 @@ export async function GET(req: Request) {
     for (const win of openings) {
       // выравниваем старт по сетке в ЛОКАЛЬНОЙ TZ
       const localWinStart = toZonedTime(win.startUtc, tzid);
-      const alignedLocal = new Date(localWinStart);
-      const minutes = alignedLocal.getMinutes();
+      // toZonedTime возвращает Date где UTC компоненты = локальное время
+      const minutes = localWinStart.getUTCMinutes();
       const alignedMinutes = Math.ceil(minutes / gridStepMin) * gridStepMin;
-      alignedLocal.setMinutes(alignedMinutes, 0, 0);
+      const deltaMin = alignedMinutes - minutes;
 
-      let t = fromZonedTime(alignedLocal, tzid).getTime();
+      // Сдвигаем от начала окна на выравнивание
+      let t = win.startUtc.getTime() + deltaMin * 60_000;
 
       while (t + visitMs <= win.endUtc.getTime()) {
         const s = new Date(t);
