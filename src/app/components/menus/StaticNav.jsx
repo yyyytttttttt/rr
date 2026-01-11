@@ -7,13 +7,6 @@ import GuestBookingModal from '../modals/GuestBookingModal';
 export default function StaticNav (){
     const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
 
-    const handleOpenModal = () => {
-        console.log('Кнопка нажата, открываем модалку');
-        setIsBookingModalOpen(true);
-    };
-
-    console.log('StaticNav render, isBookingModalOpen:', isBookingModalOpen);
-
     return (
         <>
             {/* Bottom Nav */}
@@ -68,7 +61,7 @@ export default function StaticNav (){
 
                                  </button>
                                 <button
-                         onClick={handleOpenModal}
+                         onClick={() => setIsBookingModalOpen(true)}
                          className="
                            relative w-[10%] sm:w-[7.4%] flex-shrink-0 scale-[1.5] cursor-pointer
                            transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)]

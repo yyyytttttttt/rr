@@ -1,6 +1,7 @@
 // app/api/slots/route.ts
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "../../../../lib/prizma";
+import { createCorsResponse } from "../../../../lib/jwt";
 import { z } from "zod";
 import { RRule, RRuleSet } from "rrule";
 import {
@@ -17,6 +18,11 @@ import {
   parseISO,
 } from "date-fns";
 import { generateOccurrences } from "../../../../lib/rrule";
+
+// Обработка OPTIONS для CORS preflight
+export async function OPTIONS(request: NextRequest) {
+  return createCorsResponse(request);
+}
 
 const q = z.object({
   doctorId: z.string().min(1),

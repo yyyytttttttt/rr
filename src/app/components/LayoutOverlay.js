@@ -11,8 +11,9 @@ function LayoutOverlay({active}) {
       <TopBar/>
 
 
-        {active === 0 && <LeftMenu/>}
+       
         <BottomNav/>
+        {active === 0 && <LeftMenu/>}
 
 
 

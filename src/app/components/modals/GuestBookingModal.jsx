@@ -2,8 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://novay-y.com';
+import toast from 'react-hot-toast';
 
 // Кастомный Select компонент
 function CustomSelect({ value, onChange, options, placeholder, disabled }) {
@@ -82,6 +81,9 @@ export default function GuestBookingModal({ isOpen, onClose }) {
   const [isAnimating, setIsAnimating] = useState(false);
   const [tabDirection, setTabDirection] = useState('forward');
 
+  // API URL (определяется после монтирования)
+  const [apiUrl, setApiUrl] = useState('');
+
   // Списки для выбора
   const [categories, setCategories] = useState([]);
   const [services, setServices] = useState([]);
@@ -94,8 +96,8 @@ export default function GuestBookingModal({ isOpen, onClose }) {
 
   // Данные формы
   const [formData, setFormData] = useState({
-    categoryId: '',
-    serviceId: '',
+    categoryIds: [], // Массив выбранных категорий
+    serviceIds: [], // Массив выбранных услуг
     doctorId: '',
     start: '',
     clientName: '',
@@ -104,40 +106,52 @@ export default function GuestBookingModal({ isOpen, onClose }) {
     note: ''
   });
 
+  // Определение API URL после монтирования (избегаем hydration mismatch)
+  useEffect(() => {
+    const isLocalhost = window.location.hostname === 'localhost';
+    setApiUrl(isLocalhost ? '' : (process.env.NEXT_PUBLIC_API_URL || 'https://novay-y.com'));
+  }, []);
+
   // Анимация и загрузка при открытии
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && apiUrl !== null) {
       setIsAnimating(true);
       loadCategories();
     } else {
       setIsAnimating(false);
     }
-  }, [isOpen]);
+  }, [isOpen, apiUrl]);
 
-  // Загрузка услуг при выборе категории
+  // Загрузка услуг при выборе категорий
   useEffect(() => {
-    if (formData.categoryId) {
-      loadServices(formData.categoryId);
+    if (formData.categoryIds && formData.categoryIds.length > 0) {
+      loadServices(formData.categoryIds);
+    } else {
+      setServices([]);
     }
-  }, [formData.categoryId]);
+  }, [formData.categoryIds]);
 
-  // Загрузка врачей при выборе услуги
+  // Загрузка врачей при выборе услуг
   useEffect(() => {
-    if (formData.serviceId) {
-      loadDoctors(formData.serviceId);
+    if (formData.serviceIds && formData.serviceIds.length > 0) {
+      loadDoctors(formData.serviceIds);
+    } else {
+      setDoctors([]);
     }
-  }, [formData.serviceId]);
+  }, [formData.serviceIds]);
 
   // Загрузка слотов при выборе врача
   useEffect(() => {
-    if (formData.serviceId && formData.doctorId) {
+    if (formData.serviceIds.length > 0 && formData.doctorId) {
       loadSlots();
+    } else {
+      setSlots([]);
     }
-  }, [formData.serviceId, formData.doctorId]);
+  }, [formData.serviceIds, formData.doctorId]);
 
   const loadCategories = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/services/categories`);
+      const response = await fetch(`${apiUrl}/api/services/categories`);
       const data = await response.json();
       setCategories(data.categories || []);
     } catch (error) {
@@ -145,21 +159,49 @@ export default function GuestBookingModal({ isOpen, onClose }) {
     }
   };
 
-  const loadServices = async (categoryId) => {
+  const loadServices = async (categoryIds) => {
     try {
-      const response = await fetch(`${API_URL}/api/services/catalog?categoryId=${categoryId}`);
-      const data = await response.json();
-      setServices(data.services || []);
+      // Загружаем услуги из всех выбранных категорий
+      const allServices = [];
+
+      for (const categoryId of categoryIds) {
+        const response = await fetch(`${apiUrl}/api/services/catalog?categoryId=${categoryId}`);
+        const data = await response.json();
+        if (data.services) {
+          allServices.push(...data.services);
+        }
+      }
+
+      // Убираем дубликаты по ID
+      const uniqueServices = Array.from(
+        new Map(allServices.map(service => [service.id, service])).values()
+      );
+
+      setServices(uniqueServices);
     } catch (error) {
       console.error('Ошибка загрузки услуг:', error);
     }
   };
 
-  const loadDoctors = async (serviceId) => {
+  const loadDoctors = async (serviceIds) => {
     try {
-      const response = await fetch(`${API_URL}/api/services/${serviceId}/doctors`);
-      const data = await response.json();
-      setDoctors(data.doctors || []);
+      // Загружаем врачей которые могут делать хотя бы одну из выбранных услуг
+      const allDoctors = [];
+
+      for (const serviceId of serviceIds) {
+        const response = await fetch(`${apiUrl}/api/services/${serviceId}/doctors`);
+        const data = await response.json();
+        if (data.doctors) {
+          allDoctors.push(...data.doctors);
+        }
+      }
+
+      // Убираем дубликаты по ID
+      const uniqueDoctors = Array.from(
+        new Map(allDoctors.map(doctor => [doctor.id, doctor])).values()
+      );
+
+      setDoctors(uniqueDoctors);
     } catch (error) {
       console.error('Ошибка загрузки врачей:', error);
     }
@@ -167,17 +209,48 @@ export default function GuestBookingModal({ isOpen, onClose }) {
 
   const loadSlots = async () => {
     try {
-      const from = new Date();
-      const to = new Date();
-      to.setDate(to.getDate() + 14);
+      // Загружаем слоты на 14 дней вперед
+      // Используем первую выбранную услугу для расчета длительности
+      const firstServiceId = formData.serviceIds[0];
+      if (!firstServiceId) return;
 
-      const response = await fetch(
-        `${API_URL}/api/doctor/slots?doctorId=${formData.doctorId}&serviceId=${formData.serviceId}&from=${from.toISOString()}&to=${to.toISOString()}`
-      );
-      const data = await response.json();
-      setSlots(data.slots || []);
+      const allSlots = [];
+      const today = new Date();
+
+      // Делаем запросы для каждого дня (API требует day, а не диапазон)
+      for (let i = 0; i < 14; i++) {
+        const day = new Date(today);
+        day.setDate(day.getDate() + i);
+        const dayStr = day.toISOString().split('T')[0]; // YYYY-MM-DD
+
+        const response = await fetch(
+          `${apiUrl}/api/doctor/slots?doctorId=${formData.doctorId}&serviceId=${firstServiceId}&day=${dayStr}`
+        );
+        const data = await response.json();
+
+        if (data.slots && data.slots.length > 0) {
+          // Преобразуем в нужный формат
+          const daySlots = data.slots.map(slot => ({
+            start: slot.startUtc,
+            end: slot.startUtc // API не возвращает end, рассчитаем при необходимости
+          }));
+          allSlots.push(...daySlots);
+        }
+      }
+
+      console.log('Загружено слотов:', allSlots.length);
+      setSlots(allSlots);
+
+      if (allSlots.length === 0) {
+        toast.error('У выбранного специалиста нет доступных слотов', {
+          duration: 4000,
+        });
+      }
     } catch (error) {
       console.error('Ошибка загрузки слотов:', error);
+      toast.error('Не удалось загрузить доступное время', {
+        duration: 4000,
+      });
     }
   };
 
@@ -186,12 +259,15 @@ export default function GuestBookingModal({ isOpen, onClose }) {
     setLoading(true);
 
     try {
-      const response = await fetch(`${API_URL}/api/bookings/guest`, {
+      // Используем первую выбранную услугу (в будущем можно создавать несколько записей)
+      const firstServiceId = formData.serviceIds[0];
+
+      const response = await fetch(`${apiUrl}/api/bookings/guest`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           doctorId: formData.doctorId,
-          serviceId: formData.serviceId,
+          serviceId: firstServiceId,
           start: formData.start,
           clientName: formData.clientName,
           clientEmail: formData.clientEmail,
@@ -202,14 +278,29 @@ export default function GuestBookingModal({ isOpen, onClose }) {
 
       const data = await response.json();
 
-      if (data.success) {
-        alert('✅ ' + data.message);
+      if (response.ok && data.success) {
+        toast.success(data.message || 'Вы успешно записались!', {
+          duration: 5000,
+        });
         handleClose();
       } else {
-        alert('❌ ' + (data.error || 'Ошибка записи'));
+        // Обработка ошибок валидации
+        if (data.details) {
+          const errors = Object.values(data.details).flat();
+          toast.error(errors[0] || data.error || 'Ошибка валидации данных', {
+            duration: 5000,
+          });
+        } else {
+          toast.error(data.error || 'Ошибка при создании записи', {
+            duration: 5000,
+          });
+        }
       }
     } catch (error) {
-      alert('❌ Ошибка связи с сервером');
+      console.error('Ошибка при создании записи:', error);
+      toast.error('Ошибка связи с сервером. Попробуйте позже.', {
+        duration: 5000,
+      });
     } finally {
       setLoading(false);
     }
@@ -236,8 +327,8 @@ export default function GuestBookingModal({ isOpen, onClose }) {
       setSelectedDate(null);
       setCurrentMonth(new Date());
       setFormData({
-        categoryId: '',
-        serviceId: '',
+        categoryIds: [],
+        serviceIds: [],
         doctorId: '',
         start: '',
         clientName: '',
@@ -312,12 +403,16 @@ export default function GuestBookingModal({ isOpen, onClose }) {
 
   // Фильтрация слотов по выбранной дате
   const getTimeSlotsForSelectedDate = () => {
-    if (!selectedDate) return [];
+    if (!selectedDate || !slots || slots.length === 0) return [];
 
-    const selectedDateStr = selectedDate.toLocaleDateString('ru-RU');
+    // Сравниваем по дате без учета времени
+    const checkDate = new Date(selectedDate);
+    checkDate.setHours(0, 0, 0, 0);
+
     return slots.filter(slot => {
       const slotDate = new Date(slot.start);
-      return slotDate.toLocaleDateString('ru-RU') === selectedDateStr;
+      slotDate.setHours(0, 0, 0, 0);
+      return slotDate.getTime() === checkDate.getTime();
     });
   };
 
@@ -333,33 +428,54 @@ export default function GuestBookingModal({ isOpen, onClose }) {
   };
 
   const isDateAvailable = (date) => {
-    if (!date) return false;
-    const dateStr = date.toLocaleDateString('ru-RU');
+    if (!date || !slots || slots.length === 0) return false;
+
+    // Сравниваем по дате без учета времени
+    const checkDate = new Date(date);
+    checkDate.setHours(0, 0, 0, 0);
+
     return slots.some(slot => {
       const slotDate = new Date(slot.start);
-      return slotDate.toLocaleDateString('ru-RU') === dateStr;
+      slotDate.setHours(0, 0, 0, 0);
+      return slotDate.getTime() === checkDate.getTime();
     });
   };
 
   if (!isOpen) return null;
 
-  const canGoToDoctor = formData.serviceId;
+  const canGoToDoctor = formData.serviceIds.length > 0;
   const canGoToTime = formData.doctorId;
   const canGoToContact = formData.start;
 
-  // Опции для селектов
-  const categoryOptions = [
-    { value: '', label: 'Выберите категорию' },
-    ...categories.map(cat => ({ value: cat.id, label: cat.name }))
-  ];
+  // Функция для переключения категории
+  const toggleCategory = (categoryId) => {
+    setFormData(prev => {
+      const categoryIds = prev.categoryIds.includes(categoryId)
+        ? prev.categoryIds.filter(id => id !== categoryId)
+        : [...prev.categoryIds, categoryId];
 
-  const serviceOptions = [
-    { value: '', label: 'Выберите услугу' },
-    ...services.map(service => ({
-      value: service.id,
-      label: `${service.name} - ${(service.priceCents / 100).toFixed(0)} ₽`
-    }))
-  ];
+      return {
+        ...prev,
+        categoryIds,
+        serviceIds: [] // Сбрасываем выбранные услуги при смене категорий
+      };
+    });
+  };
+
+  // Функция для переключения услуги
+  const toggleService = (serviceId) => {
+    setFormData(prev => {
+      const serviceIds = prev.serviceIds.includes(serviceId)
+        ? prev.serviceIds.filter(id => id !== serviceId)
+        : [...prev.serviceIds, serviceId];
+
+      return {
+        ...prev,
+        serviceIds
+      };
+    });
+  };
+
 
   return (
     <div
@@ -460,36 +576,90 @@ export default function GuestBookingModal({ isOpen, onClose }) {
           {/* Вкладка: Услуга */}
           {activeTab === 'service' && (
             <div className={`space-y-3 sm:space-y-4 ${tabDirection === 'forward' ? 'animate-slideInRight' : 'animate-slideInLeft'}`}>
-              <label className="block">
+              <div className="block">
                 <span className="mb-1.5 sm:mb-2 block text-sm sm:text-base font-ManropeMedium text-[#4F5338]">
-                  Категория
+                  Категории {formData.categoryIds.length > 0 && `(${formData.categoryIds.length})`}
                 </span>
-                <CustomSelect
-                  value={formData.categoryId}
-                  onChange={(value) => setFormData({ ...formData, categoryId: value, serviceId: '' })}
-                  options={categoryOptions}
-                  placeholder="Выберите категорию"
-                />
-              </label>
+                <div className="space-y-2">
+                  {categories.map((category) => {
+                    const isSelected = formData.categoryIds.includes(category.id);
+                    return (
+                      <label
+                        key={category.id}
+                        className={`flex items-center gap-3 p-3 border-2 rounded-[8px] sm:rounded-[10px] cursor-pointer transition-all duration-200 ${
+                          isSelected
+                            ? 'border-[#5C6744] bg-[#5C6744]/5'
+                            : 'border-[#EEE7DC] bg-white hover:border-[#5C6744]/50'
+                        }`}
+                      >
+                      <input
+                        type="checkbox"
+                        checked={formData.categoryIds.includes(category.id)}
+                        onChange={() => toggleCategory(category.id)}
+                        className="w-5 h-5 rounded border-[#EEE7DC] text-[#5C6744] focus:ring-[#5C6744] focus:ring-offset-0 cursor-pointer"
+                      />
+                      <span className="text-sm sm:text-base font-ManropeRegular text-[#636846] flex-1">
+                        {category.icon && <span className="mr-2">{category.icon}</span>}
+                        {category.name}
+                      </span>
+                    </label>
+                  );
+                  })}
+                </div>
+              </div>
 
-              {formData.categoryId && (
-                <label className="block">
-                  <span className="mb-1.5 sm:mb-2 block text-sm sm:text-base font-ManropeMedium text-[#4F5338]">
-                    Услуга
-                  </span>
-                  <CustomSelect
-                    value={formData.serviceId}
-                    onChange={(value) => setFormData({ ...formData, serviceId: value })}
-                    options={serviceOptions}
-                    placeholder="Выберите услугу"
-                  />
-                </label>
-              )}
+              <div className="block">
+                <span className="mb-1.5 sm:mb-2 block text-sm sm:text-base font-ManropeMedium text-[#4F5338]">
+                  Услуги {formData.serviceIds.length > 0 && `(${formData.serviceIds.length})`}
+                </span>
+                {formData.categoryIds.length === 0 ? (
+                  <div className="p-4 bg-[#EEE7DC]/30 rounded-[8px] sm:rounded-[10px] text-center">
+                    <p className="text-sm text-[#636846]/60">
+                      Сначала выберите категорию
+                    </p>
+                  </div>
+                ) : services.length === 0 ? (
+                  <div className="p-4 bg-[#EEE7DC]/30 rounded-[8px] sm:rounded-[10px] text-center">
+                    <p className="text-sm text-[#636846]/60">
+                      Загрузка услуг...
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-2 max-h-[300px] overflow-y-auto">
+                    {services.map((service) => {
+                      const isSelected = formData.serviceIds.includes(service.id);
+                      return (
+                        <label
+                          key={service.id}
+                          className={`flex items-center gap-3 p-3 border-2 rounded-[8px] sm:rounded-[10px] cursor-pointer transition-all duration-200 ${
+                            isSelected
+                              ? 'border-[#5C6744] bg-[#5C6744]/5'
+                              : 'border-[#EEE7DC] bg-white hover:border-[#5C6744]/50'
+                          }`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={formData.serviceIds.includes(service.id)}
+                            onChange={() => toggleService(service.id)}
+                            className="w-5 h-5 rounded border-[#EEE7DC] text-[#5C6744] focus:ring-[#5C6744] focus:ring-offset-0 cursor-pointer"
+                          />
+                          <span className="text-sm sm:text-base font-ManropeRegular text-[#636846] flex-1">
+                            {service.name}
+                          </span>
+                          <span className="text-sm sm:text-base font-ManropeMedium text-[#5C6744]">
+                            {(service.priceCents / 100).toFixed(0)} ₽
+                          </span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
 
               <button
                 type="button"
                 onClick={() => handleTabChange('doctor')}
-                disabled={!formData.serviceId}
+                disabled={formData.serviceIds.length === 0}
                 className="w-full mt-2 sm:mt-3 rounded-[8px] sm:rounded-[10px] bg-[#5C6744] px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base font-ManropeMedium text-white hover:bg-[#4F5338] disabled:opacity-50 disabled:cursor-not-allowed transition"
               >
                 Далее
@@ -610,10 +780,15 @@ export default function GuestBookingModal({ isOpen, onClose }) {
                           <button
                             key={day.toISOString()}
                             type="button"
-                            onClick={() => isAvailable && !isPast && handleDateSelect(day)}
+                            onClick={() => {
+                              console.log('Date clicked:', day, 'Available:', isAvailable, 'Past:', isPast);
+                              if (isAvailable && !isPast) {
+                                handleDateSelect(day);
+                              }
+                            }}
                             disabled={!isAvailable || isPast}
                             className={`
-                              aspect-square p-1 sm:p-2 rounded-lg text-xs sm:text-sm font-ManropeMedium transition-all duration-200
+                              relative aspect-square p-1 sm:p-2 rounded-lg text-xs sm:text-sm font-ManropeMedium transition-all duration-200 z-10
                               ${isAvailable && !isPast
                                 ? 'bg-[#5C6744]/5 text-[#4F5338] hover:bg-[#5C6744] hover:text-white cursor-pointer'
                                 : 'text-[#636846]/30 cursor-not-allowed'
@@ -626,6 +801,15 @@ export default function GuestBookingModal({ isOpen, onClose }) {
                         );
                       })}
                     </div>
+
+                    {/* Сообщение если нет доступных дат */}
+                    {slots.length === 0 && (
+                      <div className="mt-4 p-4 bg-[#5C6744]/5 rounded-lg text-center">
+                        <p className="text-sm text-[#636846]">
+                          У выбранного специалиста нет доступных слотов. Попробуйте выбрать другого врача.
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </>
               ) : (
@@ -644,27 +828,38 @@ export default function GuestBookingModal({ isOpen, onClose }) {
                   </div>
 
                   {/* Список времени */}
-                  <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 sm:gap-3 max-h-[350px] overflow-y-auto">
-                    {getTimeSlotsForSelectedDate().map((slot) => {
-                      const time = new Date(slot.start);
-                      return (
-                        <button
-                          key={slot.start}
-                          type="button"
-                          onClick={() => setFormData({ ...formData, start: slot.start })}
-                          className={`p-3 sm:p-4 border-2 rounded-[8px] sm:rounded-[10px] text-sm sm:text-base transition-all duration-200 ${
-                            formData.start === slot.start
-                              ? 'border-[#5C6744] bg-[#5C6744] text-white'
-                              : 'border-[#EEE7DC] text-[#636846] hover:border-[#5C6744] hover:bg-[#5C6744]/5'
-                          }`}
-                        >
-                          <div className="font-ManropeMedium">
-                            {time.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
+                  {getTimeSlotsForSelectedDate().length > 0 ? (
+                    <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 sm:gap-3 max-h-[350px] overflow-y-auto">
+                      {getTimeSlotsForSelectedDate().map((slot) => {
+                        const time = new Date(slot.start);
+                        return (
+                          <button
+                            key={slot.start}
+                            type="button"
+                            onClick={() => {
+                              console.log('Time slot clicked:', slot.start);
+                              setFormData({ ...formData, start: slot.start });
+                            }}
+                            className={`relative z-10 p-3 sm:p-4 border-2 rounded-[8px] sm:rounded-[10px] text-sm sm:text-base transition-all duration-200 ${
+                              formData.start === slot.start
+                                ? 'border-[#5C6744] bg-[#5C6744] text-white'
+                                : 'border-[#EEE7DC] text-[#636846] hover:border-[#5C6744] hover:bg-[#5C6744]/5'
+                            }`}
+                          >
+                            <div className="font-ManropeMedium">
+                              {time.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="p-4 bg-[#5C6744]/5 rounded-lg text-center">
+                      <p className="text-sm text-[#636846]">
+                        На выбранную дату нет доступного времени
+                      </p>
+                    </div>
+                  )}
                 </>
               )}
 
