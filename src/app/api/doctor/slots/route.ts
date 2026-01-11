@@ -389,6 +389,18 @@ export async function GET(req: Request) {
       openings = await openingsFromClassicScheduleForDay(doctorId, day, tzid);
     }
 
+    // ВРЕМЕННЫЙ DEBUG
+    console.log('[SLOTS_DEBUG]', {
+      day,
+      tzid,
+      doctorId,
+      openingsCount: openings.length,
+      openings: openings.map(o => ({
+        start: o.startUtc.toISOString(),
+        end: o.endUtc.toISOString(),
+      })),
+    });
+
     // защита: если вообще нет окон — вернуть пусто
     if (!openings.length) {
       return NextResponse.json({ slots: [], meta: { tzid, durationMin, bufferMin, gridStepMin, minLeadMin } });
