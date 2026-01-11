@@ -85,6 +85,7 @@ export async function POST(req: NextRequest) {
         startUtc: true,
         endUtc: true,
         clientName: true,
+        note: true,
         service: {
           select: { name: true }
         }
