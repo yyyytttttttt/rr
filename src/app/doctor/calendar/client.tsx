@@ -63,10 +63,11 @@ function dateToLocalInputValueTZ(d: Date | null | undefined, tzid: string): stri
 }
 
 function localValueTZToISOString(localValue: string, tzid: string): string {
-  // localValue = "2025-10-16T16:30" (московское время из формы)
-  // FullCalendar хранит московское время как UTC
-  // Просто добавляем :00.000Z к строке
-  return `${localValue}:00.000Z`;
+  // localValue = "2025-10-16T16:30" (локальное время из формы в timezone врача)
+  // Конвертируем локальное время в UTC с учётом timezone
+  const dateString = `${localValue}:00`;
+  const utcDate = fromZonedTime(dateString, tzid);
+  return utcDate.toISOString();
 }
 
 /* ===============================
