@@ -39,12 +39,10 @@ const BLOCKING_STATUSES = ["PENDING", "CONFIRMED"] as const;
 
 // ====== утилиты времени ======
 function dayBoundsUtc(dayYYYYMMDD: string, tzid: string) {
-  // Создаём дату явно через компоненты, чтобы избежать проблем с парсингом
-  const [year, month, day] = dayYYYYMMDD.split('-').map(Number);
-  // Создаём дату, представляющую полночь в указанной timezone
-  const localDate = new Date(year, month - 1, day, 0, 0, 0, 0);
-  // fromZonedTime интерпретирует это как время в tzid и конвертирует в UTC
-  const startUtc = fromZonedTime(localDate, tzid);
+  // Создаём строку полночь в формате ISO без timezone
+  const dateString = `${dayYYYYMMDD}T00:00:00`;
+  // fromZonedTime интерпретирует строку как локальное время в tzid и конвертирует в UTC
+  const startUtc = fromZonedTime(dateString, tzid);
   const endUtc = addDays(startUtc, 1);
   return { startUtc, endUtc };
 }
