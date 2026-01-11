@@ -318,7 +318,6 @@ export async function GET(req: Request) {
     const minLeadMin = parsed.data.minLeadMin
       ? Math.max(0, parseInt(parsed.data.minLeadMin, 10))
       : 60; // например, минимум за 60 мин до визита
-    const tzid = parsed.data.tzid || "UTC";
 
     // горизонт планирования
     const now = new Date();
@@ -357,10 +356,12 @@ export async function GET(req: Request) {
       select: {
         slotDurationMin: true, // не обязателен для расчёта, берем из услуги
         bufferMin: true,
+        tzid: true,
       },
     });
     if (!doctor) return NextResponse.json({ error: "DOCTOR_NOT_FOUND" }, { status: 404 });
     const bufferMin = Math.max(0, doctor.bufferMin ?? 0);
+    const tzid = parsed.data.tzid || doctor.tzid || "UTC";
 
     // границы дня (локальный день в tz → UTC)
     const { startUtc: dayStart, endUtc: dayEnd } = dayBoundsUtc(day, tzid);
