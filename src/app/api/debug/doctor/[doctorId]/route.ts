@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "../../../../../../lib/prizma";
+import { prisma } from "../../../../../lib/prizma";
 
 /**
  * GET /api/debug/doctor/[doctorId]
