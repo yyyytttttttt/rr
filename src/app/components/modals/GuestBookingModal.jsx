@@ -307,7 +307,7 @@ export default function GuestBookingModal({ isOpen, onClose }) {
   };
 
   const handleTabChange = (newTab) => {
-    const tabOrder = ['service', 'doctor', 'time', 'contact'];
+    const tabOrder = ['service', 'doctor', 'time', 'contact', 'summary'];
     const currentIndex = tabOrder.indexOf(activeTab);
     const newIndex = tabOrder.indexOf(newTab);
     setTabDirection(newIndex > currentIndex ? 'forward' : 'backward');
@@ -446,6 +446,24 @@ export default function GuestBookingModal({ isOpen, onClose }) {
   const canGoToDoctor = formData.serviceIds.length > 0;
   const canGoToTime = formData.doctorId;
   const canGoToContact = formData.start;
+  const canGoToSummary = formData.clientName && formData.clientEmail;
+
+  // Рассчитать общую стоимость выбранных услуг
+  const getTotalPrice = () => {
+    return services
+      .filter(service => formData.serviceIds.includes(service.id))
+      .reduce((sum, service) => sum + service.priceCents, 0) / 100;
+  };
+
+  // Получить выбранные услуги
+  const getSelectedServices = () => {
+    return services.filter(service => formData.serviceIds.includes(service.id));
+  };
+
+  // Получить выбранного врача
+  const getSelectedDoctor = () => {
+    return doctors.find(doctor => doctor.id === formData.doctorId);
+  };
 
   // Функция для переключения категории
   const toggleCategory = (categoryId) => {
@@ -567,6 +585,23 @@ export default function GuestBookingModal({ isOpen, onClose }) {
           >
             Контакты
             {activeTab === 'contact' && (
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#5C6744] transition-all duration-300"></div>
+            )}
+          </button>
+          <button
+            type="button"
+            onClick={() => canGoToSummary && handleTabChange('summary')}
+            disabled={!canGoToSummary}
+            className={`px-3 sm:px-4 py-3 sm:py-4 text-sm sm:text-base font-ManropeMedium transition-all duration-300 relative ${
+              activeTab === 'summary'
+                ? 'text-[#4F5338]'
+                : canGoToSummary
+                ? 'text-[#636846] hover:text-[#4F5338]'
+                : 'text-[#636846]/40 cursor-not-allowed'
+            }`}
+          >
+            Итого
+            {activeTab === 'summary' && (
               <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#5C6744] transition-all duration-300"></div>
             )}
           </button>
@@ -952,8 +987,151 @@ export default function GuestBookingModal({ isOpen, onClose }) {
                   Назад
                 </button>
                 <button
+                  type="button"
+                  onClick={() => handleTabChange('summary')}
+                  disabled={!formData.clientName || !formData.clientEmail}
+                  className="flex-1 rounded-[8px] sm:rounded-[10px] bg-[#5C6744] text-white px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base font-ManropeMedium hover:bg-[#4F5338] disabled:opacity-50 disabled:cursor-not-allowed transition"
+                >
+                  Далее
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Вкладка: Итого */}
+          {activeTab === 'summary' && (
+            <div className={`space-y-3 sm:space-y-4 ${tabDirection === 'forward' ? 'animate-slideInRight' : 'animate-slideInLeft'}`}>
+              <h3 className="text-base sm:text-lg font-Manrope-SemiBold text-[#4F5338]">Итого</h3>
+
+              {/* Выбранные услуги */}
+              <div className="bg-[#EEE7DC]/20 rounded-[8px] sm:rounded-[10px] p-3 sm:p-4">
+                <h4 className="text-sm sm:text-base font-ManropeMedium text-[#4F5338] mb-2 sm:mb-3">
+                  Выбранные услуги:
+                </h4>
+                <div className="space-y-2">
+                  {getSelectedServices().map((service) => (
+                    <div key={service.id} className="flex justify-between items-center">
+                      <span className="text-sm sm:text-base font-ManropeRegular text-[#636846]">
+                        {service.name}
+                      </span>
+                      <span className="text-sm sm:text-base font-ManropeMedium text-[#5C6744]">
+                        {(service.priceCents / 100).toFixed(0)} ₽
+                      </span>
+                    </div>
+                  ))}
+                  <div className="border-t border-[#EEE7DC] pt-2 mt-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-base sm:text-lg font-Manrope-SemiBold text-[#4F5338]">
+                        Итого:
+                      </span>
+                      <span className="text-lg sm:text-xl font-Manrope-SemiBold text-[#5C6744]">
+                        {getTotalPrice().toFixed(0)} ₽
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Информация о записи */}
+              <div className="bg-[#EEE7DC]/20 rounded-[8px] sm:rounded-[10px] p-3 sm:p-4 space-y-2">
+                <h4 className="text-sm sm:text-base font-ManropeMedium text-[#4F5338] mb-2">
+                  Детали записи:
+                </h4>
+                <div className="space-y-1.5">
+                  <div className="flex items-start gap-2">
+                    <span className="text-sm sm:text-base font-ManropeRegular text-[#636846]/70 min-w-[80px]">
+                      Врач:
+                    </span>
+                    <span className="text-sm sm:text-base font-ManropeMedium text-[#636846]">
+                      {getSelectedDoctor()?.name || '—'}
+                    </span>
+                  </div>
+                  {formData.start && (
+                    <>
+                      <div className="flex items-start gap-2">
+                        <span className="text-sm sm:text-base font-ManropeRegular text-[#636846]/70 min-w-[80px]">
+                          Дата:
+                        </span>
+                        <span className="text-sm sm:text-base font-ManropeMedium text-[#636846]">
+                          {new Date(formData.start).toLocaleDateString('ru-RU', {
+                            day: 'numeric',
+                            month: 'long',
+                            year: 'numeric'
+                          })}
+                        </span>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <span className="text-sm sm:text-base font-ManropeRegular text-[#636846]/70 min-w-[80px]">
+                          Время:
+                        </span>
+                        <span className="text-sm sm:text-base font-ManropeMedium text-[#636846]">
+                          {new Date(formData.start).toLocaleTimeString('ru-RU', {
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </span>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              {/* Контактные данные */}
+              <div className="bg-[#EEE7DC]/20 rounded-[8px] sm:rounded-[10px] p-3 sm:p-4 space-y-2">
+                <h4 className="text-sm sm:text-base font-ManropeMedium text-[#4F5338] mb-2">
+                  Ваши контакты:
+                </h4>
+                <div className="space-y-1.5">
+                  <div className="flex items-start gap-2">
+                    <span className="text-sm sm:text-base font-ManropeRegular text-[#636846]/70 min-w-[80px]">
+                      Имя:
+                    </span>
+                    <span className="text-sm sm:text-base font-ManropeMedium text-[#636846]">
+                      {formData.clientName}
+                    </span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="text-sm sm:text-base font-ManropeRegular text-[#636846]/70 min-w-[80px]">
+                      Email:
+                    </span>
+                    <span className="text-sm sm:text-base font-ManropeMedium text-[#636846]">
+                      {formData.clientEmail}
+                    </span>
+                  </div>
+                  {formData.clientPhone && (
+                    <div className="flex items-start gap-2">
+                      <span className="text-sm sm:text-base font-ManropeRegular text-[#636846]/70 min-w-[80px]">
+                        Телефон:
+                      </span>
+                      <span className="text-sm sm:text-base font-ManropeMedium text-[#636846]">
+                        {formData.clientPhone}
+                      </span>
+                    </div>
+                  )}
+                  {formData.note && (
+                    <div className="flex items-start gap-2">
+                      <span className="text-sm sm:text-base font-ManropeRegular text-[#636846]/70 min-w-[80px]">
+                        Примечание:
+                      </span>
+                      <span className="text-sm sm:text-base font-ManropeRegular text-[#636846]">
+                        {formData.note}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex gap-2 sm:gap-3 mt-4">
+                <button
+                  type="button"
+                  onClick={() => handleTabChange('contact')}
+                  className="flex-1 rounded-[8px] sm:rounded-[10px] border border-[#5C6744] text-[#5C6744] px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base font-ManropeMedium hover:bg-[#5C6744]/5 transition"
+                >
+                  Назад
+                </button>
+                <button
                   type="submit"
-                  disabled={loading || !formData.clientName || !formData.clientEmail}
+                  disabled={loading}
                   className="flex-1 rounded-[8px] sm:rounded-[10px] bg-[#5C6744] text-white px-4 sm:px-6 py-2.5 sm:py-3 text-sm sm:text-base font-ManropeMedium hover:bg-[#4F5338] disabled:opacity-50 disabled:cursor-not-allowed transition"
                 >
                   {loading ? 'Отправка...' : 'Записаться'}

@@ -15,8 +15,11 @@ const Body = z.object({
   note: z.string().max(500, 'Примечание не должно превышать 500 символов').optional(),
 });
 
+// Тип статуса бронирования
+type BookingStatus = "PENDING" | "CONFIRMED" | "CANCELED" | "COMPLETED" | "NO_SHOW";
+
 // Допустимые переходы статусов
-const ALLOWED_TRANSITIONS = {
+const ALLOWED_TRANSITIONS: Record<BookingStatus, Set<BookingStatus>> = {
   PENDING: new Set(["CONFIRMED", "CANCELED"]),
   CONFIRMED: new Set(["COMPLETED", "CANCELED", "NO_SHOW"]),
   COMPLETED: new Set([]), // Завершенную запись нельзя изменить
