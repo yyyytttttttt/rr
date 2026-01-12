@@ -5,22 +5,29 @@ import GuestBookingModal from '../modals/GuestBookingModal'
 
 function BottomNav() {
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false)
+  const [activeTooltip, setActiveTooltip] = useState(null)
+
+  const handleTooltipToggle = (index) => {
+    setActiveTooltip(activeTooltip === index ? null : index)
+  }
 
   return (
     <>
       <div className="fixed max-w-[810px] mx-auto bottom-0 sm:bottom-12 left-1/2 transform -translate-x-1/2 w-full xl:w-3/4 flex items-center justify-center bg-[#e5dccb] px-2 py-1 pb-4 sm:pb-0 rounded-0 sm:rounded-full z-50">
-        
+
         <div className="w-[85%]  flex justify-between">
-          
+
+          {/* Главная */}
           <button
+            onClick={() => handleTooltipToggle(0)}
             className="
-              relative w-[10%] sm:w-[7.4%] cursor-pointer
+              relative w-[10%] sm:w-[7.4%] cursor-pointer group
               transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)]
               hover:scale-110 hover:opacity-95 active:scale-95
-              before:content-[''] before:absolute before:inset-0 
-              before:rounded-xl before:bg-gradient-to-r 
+              before:content-[''] before:absolute before:inset-0
+              before:rounded-xl before:bg-gradient-to-r
               before:from-[#A77C66]/40 before:to-[#A77C66]/10
-              before:blur-lg before:opacity-0 hover:before:opacity-100 
+              before:blur-lg before:opacity-0 hover:before:opacity-100
               before:transition-all before:duration-700
             "
           >
@@ -39,17 +46,25 @@ function BottomNav() {
                 strokeLinejoin="round"
               />
             </svg>
+            <div className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-3 ${activeTooltip === 0 ? 'opacity-100 -translate-y-1' : 'opacity-0'} group-hover:opacity-100 group-hover:-translate-y-1 transition-all duration-300 pointer-events-none`}>
+              <div className="bg-gradient-to-br from-[#A77C66] to-[#8B6654] text-white px-3 py-1.5 rounded-lg shadow-[0_4px_16px_rgba(167,124,102,0.4)] whitespace-nowrap text-xs sm:text-sm font-medium">
+                <span className="drop-shadow-sm">Главная</span>
+                <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-0.5 w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-t-[5px] border-t-[#8B6654]"></div>
+              </div>
+            </div>
           </button>
 
+          {/* Услуги */}
           <button
+            onClick={() => handleTooltipToggle(1)}
             className="
-              relative w-[10%] sm:w-[7.4%] cursor-pointer
+              relative w-[10%] sm:w-[7.4%] cursor-pointer group
               transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)]
               hover:scale-110 hover:opacity-95 active:scale-95
-              before:content-[''] before:absolute before:inset-0 
-              before:rounded-xl before:bg-gradient-to-r 
+              before:content-[''] before:absolute before:inset-0
+              before:rounded-xl before:bg-gradient-to-r
               before:from-[#A77C66]/40 before:to-[#A77C66]/10
-              before:blur-lg before:opacity-0 hover:before:opacity-100 
+              before:blur-lg before:opacity-0 hover:before:opacity-100
               before:transition-all before:duration-700
             "
           >
@@ -68,12 +83,22 @@ function BottomNav() {
                 strokeLinejoin="round"
               />
             </svg>
+            <div className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-3 ${activeTooltip === 1 ? 'opacity-100 -translate-y-1' : 'opacity-0'} group-hover:opacity-100 group-hover:-translate-y-1 transition-all duration-300 pointer-events-none`}>
+              <div className="bg-gradient-to-br from-[#A77C66] to-[#8B6654] text-white px-3 py-1.5 rounded-lg shadow-[0_4px_16px_rgba(167,124,102,0.4)] whitespace-nowrap text-xs sm:text-sm font-medium">
+                <span className="drop-shadow-sm">Услуги</span>
+                <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-0.5 w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-t-[5px] border-t-[#8B6654]"></div>
+              </div>
+            </div>
           </button>
 
+          {/* Записаться */}
           <button
             onClick={() => setIsBookingModalOpen(true)}
+            onMouseEnter={() => setActiveTooltip(2)}
+            onMouseLeave={() => setActiveTooltip(null)}
+            onTouchStart={() => handleTooltipToggle(2)}
             className="
-              relative w-[10%] sm:w-[7.4%] flex-shrink-0 scale-[1.5] cursor-pointer
+              relative w-[10%] sm:w-[7.4%] flex-shrink-0 scale-[1.5] cursor-pointer group
               transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)]
               hover:scale-[1.65] hover:opacity-95 active:scale-[1.4]
               before:content-[''] before:absolute before:inset-0
@@ -90,17 +115,25 @@ function BottomNav() {
               height={60}
               className="relative z-10 drop-shadow-[0_0_6px_#A77C6680] hover:drop-shadow-[0_0_12px_#A77C66]"
             />
+            <div className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-4 ${activeTooltip === 2 ? 'opacity-100 -translate-y-1' : 'opacity-0'} transition-all duration-300 pointer-events-none`}>
+              <div className="bg-gradient-to-br from-[#A77C66] to-[#8B6654] text-white px-3 py-1.5 rounded-lg shadow-[0_4px_16px_rgba(167,124,102,0.4)] whitespace-nowrap text-xs sm:text-sm font-medium">
+                <span className="drop-shadow-sm">Записаться</span>
+                <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-0.5 w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-t-[5px] border-t-[#8B6654]"></div>
+              </div>
+            </div>
           </button>
 
+          {/* Профиль */}
           <button
+            onClick={() => handleTooltipToggle(3)}
             className="
-              relative w-[10%] sm:w-[7.4%] cursor-pointer
+              relative w-[10%] sm:w-[7.4%] cursor-pointer group
               transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)]
               hover:scale-110 hover:opacity-95 active:scale-95
-              before:content-[''] before:absolute before:inset-0 
-              before:rounded-xl before:bg-gradient-to-r 
+              before:content-[''] before:absolute before:inset-0
+              before:rounded-xl before:bg-gradient-to-r
               before:from-[#A77C66]/40 before:to-[#A77C66]/10
-              before:blur-lg before:opacity-0 hover:before:opacity-100 
+              before:blur-lg before:opacity-0 hover:before:opacity-100
               before:transition-all before:duration-700
             "
           >
@@ -124,17 +157,25 @@ function BottomNav() {
                 strokeLinecap="round"
               />
             </svg>
+            <div className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-3 ${activeTooltip === 3 ? 'opacity-100 -translate-y-1' : 'opacity-0'} group-hover:opacity-100 group-hover:-translate-y-1 transition-all duration-300 pointer-events-none`}>
+              <div className="bg-gradient-to-br from-[#A77C66] to-[#8B6654] text-white px-3 py-1.5 rounded-lg shadow-[0_4px_16px_rgba(167,124,102,0.4)] whitespace-nowrap text-xs sm:text-sm font-medium">
+                <span className="drop-shadow-sm">Профиль</span>
+                <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-0.5 w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-t-[5px] border-t-[#8B6654]"></div>
+              </div>
+            </div>
           </button>
 
+          {/* Контакты */}
           <button
+            onClick={() => handleTooltipToggle(4)}
             className="
-              relative w-[10%] sm:w-[7.4%] cursor-pointer
+              relative w-[10%] sm:w-[7.4%] cursor-pointer group
               transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)]
               hover:scale-110 hover:opacity-95 active:scale-95
-              before:content-[''] before:absolute before:inset-0 
-              before:rounded-xl before:bg-gradient-to-r 
+              before:content-[''] before:absolute before:inset-0
+              before:rounded-xl before:bg-gradient-to-r
               before:from-[#A77C66]/40 before:to-[#A77C66]/10
-              before:blur-lg before:opacity-0 hover:before:opacity-100 
+              before:blur-lg before:opacity-0 hover:before:opacity-100
               before:transition-all before:duration-700
             "
           >
@@ -153,6 +194,12 @@ function BottomNav() {
                 strokeLinejoin="round"
               />
             </svg>
+            <div className={`absolute bottom-full left-1/2 -translate-x-1/2 mb-3 ${activeTooltip === 4 ? 'opacity-100 -translate-y-1' : 'opacity-0'} group-hover:opacity-100 group-hover:-translate-y-1 transition-all duration-300 pointer-events-none`}>
+              <div className="bg-gradient-to-br from-[#A77C66] to-[#8B6654] text-white px-3 py-1.5 rounded-lg shadow-[0_4px_16px_rgba(167,124,102,0.4)] whitespace-nowrap text-xs sm:text-sm font-medium">
+                <span className="drop-shadow-sm">Контакты</span>
+                <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-0.5 w-0 h-0 border-l-[5px] border-l-transparent border-r-[5px] border-r-transparent border-t-[5px] border-t-[#8B6654]"></div>
+              </div>
+            </div>
           </button>
 
         </div>
