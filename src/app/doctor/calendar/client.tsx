@@ -47,18 +47,19 @@ const DEFAULT_BUFFER_MIN = 15; // По умолчанию 15 минут
    Утилиты времени c учётом tzid
    =============================== */
 // NOTE: Конвертация Date в строку для datetime-local инпута
-// FullCalendar с timeZone="Europe/Moscow" передаёт Date объекты, где UTC время = московское время
-// Поэтому извлекаем компоненты из UTC напрямую
+// Date объект всегда в UTC, конвертируем в локальное время врача
 function dateToLocalInputValueTZ(d: Date | null | undefined, tzid: string): string {
   if (!d) return "";
 
+  // Конвертируем UTC date в локальное время врача
+  const localDate = toZonedTime(d, tzid);
+
   const pad = (x: number) => String(x).padStart(2, "0");
-  // NOTE: Используем UTC методы, т.к. FullCalendar хранит московское время как UTC
-  const y = d.getUTCFullYear();
-  const m = pad(d.getUTCMonth() + 1);
-  const day = pad(d.getUTCDate());
-  const h = pad(d.getUTCHours());
-  const min = pad(d.getUTCMinutes());
+  const y = localDate.getFullYear();
+  const m = pad(localDate.getMonth() + 1);
+  const day = pad(localDate.getDate());
+  const h = pad(localDate.getHours());
+  const min = pad(localDate.getMinutes());
   return `${y}-${m}-${day}T${h}:${min}`;
 }
 
@@ -856,7 +857,7 @@ export default function ClientCalendar({
             plugins={plugins}
             locales={locales}
             locale="ru"
-            timeZone="Europe/Moscow"
+            timeZone={tzid}
             initialView="dayGridMonth"
             headerToolbar={headerToolbar}
             slotMinTime="07:00:00"
