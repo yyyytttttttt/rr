@@ -149,14 +149,16 @@ async function openingsFromClassicScheduleForDay(
     where: { doctorId },
     select: { byWeekday: true, startTime: true, endTime: true },
   });
-  if (!schedules.length) return [];
-
-  // определим локальный день недели (0..6) в tz врача/клиники
-  const localDayStart = toZonedTime(dayStart, tzid);
-  const weekdayLocal = localDayStart.getDay(); // 0 - Sun, 1 - Mon ...
 
   const openings: Opening[] = [];
-  for (const s of schedules) {
+
+  // Если есть расписания - генерируем окна по ним
+  if (schedules.length > 0) {
+    // определим локальный день недели (0..6) в tz врача/клиники
+    const localDayStart = toZonedTime(dayStart, tzid);
+    const weekdayLocal = localDayStart.getDay(); // 0 - Sun, 1 - Mon ...
+
+    for (const s of schedules) {
     if (!s.byWeekday?.includes(weekdayLocal)) continue;
     const [sh, sm] = s.startTime.split(":").map(Number);
     const [eh, em] = s.endTime.split(":").map(Number);
@@ -173,6 +175,7 @@ async function openingsFromClassicScheduleForDay(
     const sUtc = maxDate([start, dayStart]);
     const eUtc = minDate([end, dayEnd]);
     if (isBefore(sUtc, eUtc)) openings.push({ startUtc: sUtc, endUtc: eUtc });
+    }
   }
 
   // учтём ручные окна Opening (если они перекрывают день)
