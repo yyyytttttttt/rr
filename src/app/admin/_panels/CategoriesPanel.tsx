@@ -33,12 +33,23 @@ const categorySchema = z.object({
 
 type CategoryFormData = z.infer<typeof categorySchema>;
 
+// Доступные иконки для выбора
+const AVAILABLE_ICONS = [
+  "💊", "🩺", "💉", "🏥", "🔬", "🦷", "👁️", "👂", "🧬", "⚕️",
+  "💆", "💇", "💅", "🧴", "🧼", "🧽", "🪒", "💄", "💋", "👄",
+  "🌸", "🌺", "🌼", "🌻", "🌷", "🌹", "💐", "🍀", "🌿", "🍃",
+  "⭐", "✨", "💫", "🌟", "🔥", "💧", "❄️", "☀️", "🌙", "⚡",
+  "🎯", "🎨", "🎭", "🎪", "🎬", "📸", "📷", "📹", "📺", "📻",
+  "📁", "📂", "📋", "📝", "📄", "📃", "📑", "📊", "📈", "📉",
+];
+
 export default function CategoriesPanel({ userId, filters }: Props) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const [search, setSearch] = useState("");
+  const [selectedIcon, setSelectedIcon] = useState<string>("");
 
   const form = useForm<CategoryFormData>({
     resolver: zodResolver(categorySchema),
@@ -83,6 +94,7 @@ export default function CategoriesPanel({ userId, filters }: Props) {
 
   const handleCreate = () => {
     setEditingCategory(null);
+    setSelectedIcon("");
     form.reset({
       name: "",
       description: "",
@@ -95,6 +107,7 @@ export default function CategoriesPanel({ userId, filters }: Props) {
 
   const handleEdit = (category: Category) => {
     setEditingCategory(category);
+    setSelectedIcon(category.icon || "");
     form.reset({
       name: category.name,
       description: category.description || "",
@@ -432,40 +445,69 @@ export default function CategoriesPanel({ userId, filters }: Props) {
                   />
                 </div>
 
-                {/* Иконка и порядок */}
-                <div className="grid md:grid-cols-2 gap-[clamp(0.75rem,0.6346rem+0.5128vw,1.25rem)]">
-                  <div>
-                    <label className="block text-[clamp(0.875rem,0.8077rem+0.2885vw,1.125rem)] font-ManropeMedium text-[#4F5338] mb-[clamp(0.5rem,0.4423rem+0.2564vw,0.75rem)]">
-                      Иконка (emoji или текст)
-                    </label>
-                    <input
-                      type="text"
-                      {...form.register("icon")}
-                      placeholder="📁"
-                      className="w-full px-[clamp(1rem,0.8846rem+0.5128vw,1.5rem)] py-[clamp(0.75rem,0.6346rem+0.5128vw,1.25rem)] bg-[#F5F0E4] border-none rounded-[clamp(0.5rem,0.4423rem+0.2564vw,0.75rem)] text-[clamp(0.875rem,0.8077rem+0.2885vw,1.125rem)] font-ManropeRegular text-[#4F5338] placeholder:text-[#636846] focus:outline-none focus:ring-2 focus:ring-[#967450]"
-                    />
-                    <p className="text-[clamp(0.75rem,0.6923rem+0.2564vw,1rem)] font-ManropeRegular text-[#636846] mt-1">
-                      Например: 💊 🩺 💉 🏥
-                    </p>
+                {/* Иконка */}
+                <div>
+                  <label className="block text-[clamp(0.875rem,0.8077rem+0.2885vw,1.125rem)] font-ManropeMedium text-[#4F5338] mb-[clamp(0.5rem,0.4423rem+0.2564vw,0.75rem)]">
+                    Иконка (необязательно)
+                  </label>
+
+                  {/* Сетка иконок */}
+                  <div className="grid grid-cols-8 sm:grid-cols-10 gap-2 mb-3 max-h-[200px] overflow-y-auto p-3 bg-[#F5F0E4] rounded-[clamp(0.5rem,0.4423rem+0.2564vw,0.75rem)]">
+                    {AVAILABLE_ICONS.map((icon) => (
+                      <button
+                        key={icon}
+                        type="button"
+                        onClick={() => {
+                          setSelectedIcon(icon);
+                          form.setValue("icon", icon);
+                        }}
+                        className={`aspect-square flex items-center justify-center text-2xl rounded-lg transition-all ${
+                          selectedIcon === icon
+                            ? "bg-[#5C6744] scale-110 shadow-md"
+                            : "bg-white hover:bg-[#E8E2D5] hover:scale-105"
+                        }`}
+                      >
+                        {icon}
+                      </button>
+                    ))}
                   </div>
 
-                  <div>
-                    <label className="block text-[clamp(0.875rem,0.8077rem+0.2885vw,1.125rem)] font-ManropeMedium text-[#4F5338] mb-[clamp(0.5rem,0.4423rem+0.2564vw,0.75rem)]">
-                      Порядок сортировки <span className="text-[#C74545]">*</span>
-                    </label>
-                    <input
-                      type="number"
-                      {...form.register("sortOrder", { valueAsNumber: true })}
-                      className={`w-full px-[clamp(1rem,0.8846rem+0.5128vw,1.5rem)] py-[clamp(0.75rem,0.6346rem+0.5128vw,1.25rem)] bg-[#F5F0E4] border-none rounded-[clamp(0.5rem,0.4423rem+0.2564vw,0.75rem)] text-[clamp(0.875rem,0.8077rem+0.2885vw,1.125rem)] font-ManropeRegular text-[#4F5338] placeholder:text-[#636846] focus:outline-none focus:ring-2 ${
-                        form.formState.errors.sortOrder ? "ring-2 ring-[#C74545]" : "focus:ring-[#967450]"
-                      }`}
-                    />
-                    {form.formState.errors.sortOrder && (
-                      <p className="mt-1 text-[clamp(0.75rem,0.6923rem+0.2564vw,1rem)] font-ManropeRegular text-[#C74545]">
-                        {form.formState.errors.sortOrder.message}
-                      </p>
-                    )}
-                  </div>
+                  {/* Выбранная иконка */}
+                  {selectedIcon && (
+                    <div className="flex items-center gap-3 p-3 bg-white rounded-lg border border-[#E8E2D5]">
+                      <span className="text-3xl">{selectedIcon}</span>
+                      <span className="text-sm font-ManropeMedium text-[#4F5338]">Выбранная иконка</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedIcon("");
+                          form.setValue("icon", "");
+                        }}
+                        className="ml-auto text-sm font-ManropeRegular text-[#967450] hover:text-[#C74545] transition-colors"
+                      >
+                        Очистить
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Порядок сортировки */}
+                <div>
+                  <label className="block text-[clamp(0.875rem,0.8077rem+0.2885vw,1.125rem)] font-ManropeMedium text-[#4F5338] mb-[clamp(0.5rem,0.4423rem+0.2564vw,0.75rem)]">
+                    Порядок сортировки <span className="text-[#C74545]">*</span>
+                  </label>
+                  <input
+                    type="number"
+                    {...form.register("sortOrder", { valueAsNumber: true })}
+                    className={`w-full px-[clamp(1rem,0.8846rem+0.5128vw,1.5rem)] py-[clamp(0.75rem,0.6346rem+0.5128vw,1.25rem)] bg-[#F5F0E4] border-none rounded-[clamp(0.5rem,0.4423rem+0.2564vw,0.75rem)] text-[clamp(0.875rem,0.8077rem+0.2885vw,1.125rem)] font-ManropeRegular text-[#4F5338] placeholder:text-[#636846] focus:outline-none focus:ring-2 ${
+                      form.formState.errors.sortOrder ? "ring-2 ring-[#C74545]" : "focus:ring-[#967450]"
+                    }`}
+                  />
+                  {form.formState.errors.sortOrder && (
+                    <p className="mt-1 text-[clamp(0.75rem,0.6923rem+0.2564vw,1rem)] font-ManropeRegular text-[#C74545]">
+                      {form.formState.errors.sortOrder.message}
+                    </p>
+                  )}
                 </div>
 
                 {/* Активна */}

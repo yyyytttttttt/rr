@@ -20,10 +20,6 @@ const doctorSchema = z
       .refine((v) => !v || /.+@.+\..+/.test(v), { message: "Некорректный email" }),
     title: z.string().transform((v) => (v?.trim() ? v.trim() : undefined)).optional(),
     tzid: z.string().min(1, "Выберите таймзону"),
-    minLeadMin: z.coerce.number().int().min(0),
-    gridStepMin: z.coerce.number().int().min(1),
-    slotDurationMin: z.coerce.number().int().min(1),
-    bufferMin: z.coerce.number().int().min(0),
   })
   .refine((d) => !!d.userId || !!d.email, {
     message: "Укажите userId или email",
@@ -35,10 +31,6 @@ type DoctorFormData = {
   email?: string;
   title?: string;
   tzid: string;
-  minLeadMin: number;
-  gridStepMin: number;
-  slotDurationMin: number;
-  bufferMin: number;
 };
 
 export default function AddDoctorModal({ open, onClose, onSuccess }: Props) {
@@ -71,10 +63,6 @@ export default function AddDoctorModal({ open, onClose, onSuccess }: Props) {
       email: "",
       title: "",
       tzid: defaultTz,
-      minLeadMin: 60,
-      gridStepMin: 10,
-      slotDurationMin: 30,
-      bufferMin: 0,
     },
     mode: "onBlur",
   });
@@ -206,53 +194,6 @@ export default function AddDoctorModal({ open, onClose, onSuccess }: Props) {
                   {form.formState.errors.tzid.message}
                 </p>
               )}
-            </div>
-
-            {/* Settings Grid */}
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-ManropeMedium text-[#4F5338] mb-2">
-                  Минимальный срок записи (мин)
-                </label>
-                <input
-                  type="number"
-                  {...form.register("minLeadMin")}
-                  className="w-full px-4 py-3 border border-[#E8E2D5] rounded-lg text-sm font-ManropeRegular text-[#636846] outline-none focus:border-[#5C6744] transition"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-ManropeMedium text-[#4F5338] mb-2">
-                  Шаг сетки (мин)
-                </label>
-                <input
-                  type="number"
-                  {...form.register("gridStepMin")}
-                  className="w-full px-4 py-3 border border-[#E8E2D5] rounded-lg text-sm font-ManropeRegular text-[#636846] outline-none focus:border-[#5C6744] transition"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-ManropeMedium text-[#4F5338] mb-2">
-                  Длительность слота (мин)
-                </label>
-                <input
-                  type="number"
-                  {...form.register("slotDurationMin")}
-                  className="w-full px-4 py-3 border border-[#E8E2D5] rounded-lg text-sm font-ManropeRegular text-[#636846] outline-none focus:border-[#5C6744] transition"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-ManropeMedium text-[#4F5338] mb-2">
-                  Буфер между приёмами (мин)
-                </label>
-                <input
-                  type="number"
-                  {...form.register("bufferMin")}
-                  className="w-full px-4 py-3 border border-[#E8E2D5] rounded-lg text-sm font-ManropeRegular text-[#636846] outline-none focus:border-[#5C6744] transition"
-                />
-              </div>
             </div>
 
             {/* Buttons */}

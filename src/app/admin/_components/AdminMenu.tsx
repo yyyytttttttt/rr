@@ -86,10 +86,10 @@ export default function AdminMenu({ setOpen, currentView }: Props) {
         className="absolute left-0 top-0 h-full w-full max-w-[clamp(400px,90vw,500px)] bg-[#FFFCF6] shadow-[var(--shadow-2xl)] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="p-[1.5rem]">
+        <div className="p-5 sm:p-6">
           {/* Header */}
-          <div className="flex items-center justify-between mb-[1.5rem]">
-            <h2 className="text-2xl font-ManropeBold text-[#4F5338] whitespace-nowrap">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl sm:text-2xl font-ManropeBold text-[#4F5338] whitespace-nowrap">
               Админ панель
             </h2>
             <button
@@ -104,7 +104,7 @@ export default function AdminMenu({ setOpen, currentView }: Props) {
           </div>
 
           {/* Navigation */}
-          <nav className="space-y-[1.5rem]" role="navigation" aria-label="Навигация администратора">
+          <nav className="space-y-6" role="navigation" aria-label="Навигация администратора">
             {Object.entries(groupedMenu).map(([groupName, items]) => (
               <section key={groupName}>
                 {/* Group title */}
@@ -112,28 +112,28 @@ export default function AdminMenu({ setOpen, currentView }: Props) {
                   <h3 className="text-xs font-ManropeBold text-[#967450] uppercase tracking-wider whitespace-nowrap">
                     {groupName}
                   </h3>
-                  <div className="flex-1 h-[1px] bg-[var(--admin-border)]" />
+                  <div className="flex-1 h-[1px] bg-[#E8E2D5]" />
                 </div>
 
                 {/* Group items */}
-                <ul className="space-y-1.5">
+                <ul className="space-y-2">
                   {items.map((item) => {
                     const isActive = currentView === item.view;
                     return (
                       <li key={item.view}>
                         <button
                           onClick={() => handleNavigate(item.view)}
-                          className={`w-full flex items-center gap-3 px-4 py-3 rounded-3xl transition-colors ${
+                          className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all ${
                             isActive
-                              ? "bg-[#5C6744] text-white"
-                              : "text-[var(--admin-primary-light)] hover:bg-[#F5F0E4]"
+                              ? "bg-[#5C6744] text-white shadow-md"
+                              : "text-[#636846] hover:bg-[#F5F0E4]"
                           }`}
                           aria-current={isActive ? "page" : undefined}
                         >
-                          <span className="text-2xl flex-shrink-0" aria-hidden="true">
+                          <span className="text-xl flex-shrink-0" aria-hidden="true">
                             {item.icon}
                           </span>
-                          <span className="text-base font-ManropeMedium text-left flex-1 leading-[var(--leading-tight)]">
+                          <span className="text-sm sm:text-base font-ManropeMedium text-left flex-1">
                             {item.label}
                           </span>
                           {isActive && (
@@ -151,16 +151,16 @@ export default function AdminMenu({ setOpen, currentView }: Props) {
           </nav>
 
           {/* Footer actions */}
-          <div className="mt-[2rem] pt-[1.5rem] border-t border-[#E8E2D5] space-y-2">
+          <div className="mt-8 pt-6 border-t border-[#E8E2D5] space-y-2">
             {/* На главную */}
             <a
               href="/"
-              className="flex items-center gap-3 px-4 py-3 rounded-3xl text-[#967450] hover:bg-[#F5F0E4] transition-colors"
+              className="flex items-center gap-3 px-4 py-3 rounded-2xl text-[#967450] hover:bg-[#F5F0E4] transition-colors"
             >
               <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2} aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
               </svg>
-              <span className="text-base font-ManropeMedium">
+              <span className="text-sm sm:text-base font-ManropeMedium">
                 На главную
               </span>
             </a>
@@ -168,12 +168,12 @@ export default function AdminMenu({ setOpen, currentView }: Props) {
             {/* Выйти */}
             <button
               onClick={handleSignOut}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-3xl text-[#C74545] hover:bg-[#C74545]-bg transition-colors"
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-[#C74545] hover:bg-red-50 transition-colors"
             >
               <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2} aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
               </svg>
-              <span className="text-base font-ManropeMedium">
+              <span className="text-sm sm:text-base font-ManropeMedium">
                 Выйти
               </span>
             </button>

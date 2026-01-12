@@ -20,7 +20,6 @@ type Props = {
 const VIEW_ACTIONS: Partial<Record<View, { label: string; icon: string }>> = {
   "specialists.manage": { label: "Добавить запись", icon: "+" },
   "specialists.base": { label: "Добавить специалиста", icon: "+" },
-  "clients.base": { label: "Добавить клиента", icon: "+" },
   "clients.bookings": { label: "Добавить запись", icon: "+" },
   "services.manage": { label: "Создать услугу", icon: "+" },
   "services.categories": { label: "Создать категорию", icon: "+" },
