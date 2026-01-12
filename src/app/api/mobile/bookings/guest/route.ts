@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
     const durationMs = service.durationMin * 60 * 1000;
     const endUtc = new Date(startUtc.getTime() + durationMs);
 
-    // Проверить что слот свободен
+    // Проверить что слот свободен wwww
     const existingBooking = await prisma.booking.findFirst({
       where: {
         doctorId,
