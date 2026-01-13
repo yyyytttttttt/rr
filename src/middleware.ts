@@ -16,6 +16,10 @@ type AppJWT = JWT & {
 const ALLOWED_ORIGINS = [
   'https://nikropolis.ru',
   'https://novay-y.com',
+  'http://mobileapp-app-iskjka:3000',  // Docker контейнер backend
+  'http://app-app-0yooux:3000',        // Docker контейнер Capacitor app
+  'mobileapp-app-iskjka',
+  'app-app-0yooux',
   'http://localhost:3000',
   'http://192.168.0.156:3000', // для локальной разработки
 ];
