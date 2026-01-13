@@ -15,13 +15,37 @@ export async function GET(request: NextRequest) {
     return auth.error;
   }
 
-  const { userId } = auth.payload;
+  const { userId, role } = auth.payload;
 
   try {
-    // Найти доктора по userId
-    const doctor = await prisma.doctor.findUnique({
-      where: { userId },
-    });
+    // Получить параметры из URL
+    const { searchParams } = new URL(request.url);
+    const doctorIdParam = searchParams.get('doctorId');
+    const status = searchParams.get('status'); // PENDING, CONFIRMED, CANCELED, COMPLETED
+    const from = searchParams.get('from'); // ISO date
+    const to = searchParams.get('to'); // ISO date
+
+    // Определяем ID врача в зависимости от роли
+    let doctor;
+
+    if (role === 'ADMIN') {
+      // Админ может смотреть бронирования любого врача
+      if (!doctorIdParam) {
+        return NextResponse.json(
+          { error: 'Для админа необходимо указать doctorId в query параметрах' },
+          { status: 400 }
+        );
+      }
+
+      doctor = await prisma.doctor.findUnique({
+        where: { id: doctorIdParam },
+      });
+    } else {
+      // Врач смотрит свои бронирования
+      doctor = await prisma.doctor.findUnique({
+        where: { userId },
+      });
+    }
 
     if (!doctor) {
       return NextResponse.json(
@@ -29,12 +53,6 @@ export async function GET(request: NextRequest) {
         { status: 404 }
       );
     }
-
-    // Получить параметры фильтрации из URL
-    const { searchParams } = new URL(request.url);
-    const status = searchParams.get('status'); // PENDING, CONFIRMED, CANCELED, COMPLETED
-    const from = searchParams.get('from'); // ISO date
-    const to = searchParams.get('to'); // ISO date
 
     const where: any = { doctorId: doctor.id };
 
@@ -91,11 +109,11 @@ export async function PATCH(request: NextRequest) {
     return auth.error;
   }
 
-  const { userId } = auth.payload;
+  const { userId, role } = auth.payload;
 
   try {
     const body = await request.json();
-    const { bookingId, status } = body;
+    const { bookingId, status, doctorId: doctorIdFromBody } = body;
 
     if (!bookingId || !status) {
       return NextResponse.json(
@@ -113,29 +131,56 @@ export async function PATCH(request: NextRequest) {
       );
     }
 
-    // Найти доктора
-    const doctor = await prisma.doctor.findUnique({
-      where: { userId },
-    });
+    // Определяем ID врача в зависимости от роли
+    let doctorId: string;
 
-    if (!doctor) {
-      return NextResponse.json(
-        { error: 'Doctor profile not found' },
-        { status: 404 }
-      );
+    if (role === 'ADMIN') {
+      // Админ должен указать doctorId в body или можно получить из booking
+      if (doctorIdFromBody) {
+        doctorId = doctorIdFromBody;
+      } else {
+        // Если не указан, получаем из самого бронирования
+        const bookingData = await prisma.booking.findUnique({
+          where: { id: bookingId },
+          select: { doctorId: true },
+        });
+
+        if (!bookingData) {
+          return NextResponse.json(
+            { error: 'Booking not found' },
+            { status: 404 }
+          );
+        }
+
+        doctorId = bookingData.doctorId;
+      }
+    } else {
+      // Врач работает со своими бронированиями
+      const doctor = await prisma.doctor.findUnique({
+        where: { userId },
+      });
+
+      if (!doctor) {
+        return NextResponse.json(
+          { error: 'Doctor profile not found' },
+          { status: 404 }
+        );
+      }
+
+      doctorId = doctor.id;
     }
 
     // Проверить что бронирование принадлежит этому доктору
     const booking = await prisma.booking.findFirst({
       where: {
         id: bookingId,
-        doctorId: doctor.id,
+        doctorId: doctorId,
       },
     });
 
     if (!booking) {
       return NextResponse.json(
-        { error: 'Booking not found' },
+        { error: 'Booking not found or does not belong to this doctor' },
         { status: 404 }
       );
     }
@@ -162,7 +207,7 @@ export async function PATCH(request: NextRequest) {
       },
     });
 
-    console.info(`[MOBILE_DOCTOR_BOOKINGS] Updated booking ${bookingId} to ${status} by doctor ${doctor.id}`);
+    console.info(`[MOBILE_DOCTOR_BOOKINGS] Updated booking ${bookingId} to ${status} by doctor ${doctorId} (role: ${role})`);
 
     return NextResponse.json({ success: true, booking: updatedBooking });
   } catch (error) {

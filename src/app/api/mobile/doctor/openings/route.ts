@@ -62,11 +62,32 @@ export async function GET(req: NextRequest) {
     const fromDate = new Date(from);
     const toDate = new Date(to);
 
-    // Получаем ID врача
-    const doctor = await prisma.doctor.findFirst({
-      where: { userId },
-      select: { id: true },
-    });
+    // Получаем doctorId из query параметров
+    const doctorIdParam = url.searchParams.get('doctorId');
+
+    // Определяем ID врача в зависимости от роли
+    let doctor;
+
+    if (role === 'ADMIN') {
+      // Админ может смотреть openings любого врача
+      if (!doctorIdParam) {
+        return NextResponse.json(
+          { error: 'Для админа необходимо указать doctorId в query параметрах' },
+          { status: 400 }
+        );
+      }
+
+      doctor = await prisma.doctor.findUnique({
+        where: { id: doctorIdParam },
+        select: { id: true },
+      });
+    } else {
+      // Врач смотрит свои openings
+      doctor = await prisma.doctor.findFirst({
+        where: { userId },
+        select: { id: true },
+      });
+    }
 
     if (!doctor) {
       return NextResponse.json(
@@ -153,11 +174,32 @@ export async function POST(req: NextRequest) {
       }, { status: 400 });
     }
 
-    // Получаем ID врача
-    const doctor = await prisma.doctor.findFirst({
-      where: { userId },
-      select: { id: true },
-    });
+    // Получаем doctorId из body (для админа)
+    const doctorIdFromBody = (body as any)?.doctorId;
+
+    // Определяем ID врача в зависимости от роли
+    let doctor;
+
+    if (role === 'ADMIN') {
+      // Админ может создавать openings для любого врача
+      if (!doctorIdFromBody) {
+        return NextResponse.json(
+          { error: 'Для админа необходимо указать doctorId в body' },
+          { status: 400 }
+        );
+      }
+
+      doctor = await prisma.doctor.findUnique({
+        where: { id: doctorIdFromBody },
+        select: { id: true },
+      });
+    } else {
+      // Врач создает свои openings
+      doctor = await prisma.doctor.findFirst({
+        where: { userId },
+        select: { id: true },
+      });
+    }
 
     if (!doctor) {
       return NextResponse.json(

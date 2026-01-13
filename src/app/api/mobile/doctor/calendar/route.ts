@@ -12,12 +12,18 @@ export async function OPTIONS(request: NextRequest) {
 const querySchema = z.object({
   from: z.string().datetime('Неверный формат даты from'),
   to: z.string().datetime('Неверный формат даты to'),
+  doctorId: z.string().optional(), // Для админа - указать какого врача смотреть
 });
 
 /**
  * GET /api/mobile/doctor/calendar
  * Получение календаря врача (расписание, записи, исключения, блокировки)
- * Требует JWT авторизацию и роль DOCTOR
+ * Требует JWT авторизацию и роль DOCTOR или ADMIN
+ *
+ * Параметры:
+ * - from: дата начала диапазона (ISO 8601)
+ * - to: дата окончания диапазона (ISO 8601)
+ * - doctorId: ID врача (обязательно для ADMIN, игнорируется для DOCTOR)
  */
 export async function GET(req: NextRequest) {
   const auth = requireAuth(req);
@@ -50,15 +56,33 @@ export async function GET(req: NextRequest) {
       }, { status: 400 });
     }
 
-    const { from, to } = parsed.data;
+    const { from, to, doctorId } = parsed.data;
     const fromDate = new Date(from);
     const toDate = new Date(to);
 
-    // Получаем ID врача текущего пользователя
-    const doctor = await prisma.doctor.findFirst({
-      where: { userId },
-      select: { id: true, tzid: true },
-    });
+    // Определяем ID врача в зависимости от роли
+    let doctor;
+
+    if (role === 'ADMIN') {
+      // Админ может смотреть календарь любого врача
+      if (!doctorId) {
+        return NextResponse.json(
+          { error: 'Для админа необходимо указать doctorId в query параметрах' },
+          { status: 400 }
+        );
+      }
+
+      doctor = await prisma.doctor.findUnique({
+        where: { id: doctorId },
+        select: { id: true, tzid: true },
+      });
+    } else {
+      // Врач смотрит свой собственный календарь
+      doctor = await prisma.doctor.findFirst({
+        where: { userId },
+        select: { id: true, tzid: true },
+      });
+    }
 
     if (!doctor) {
       return NextResponse.json(

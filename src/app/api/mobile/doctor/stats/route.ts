@@ -15,13 +15,34 @@ export async function GET(request: NextRequest) {
     return auth.error;
   }
 
-  const { userId } = auth.payload;
+  const { userId, role } = auth.payload;
 
   try {
-    // Найти доктора
-    const doctor = await prisma.doctor.findUnique({
-      where: { userId },
-    });
+    const { searchParams } = new URL(request.url);
+    const doctorIdParam = searchParams.get('doctorId');
+    const period = searchParams.get('period') || 'month'; // day, week, month, year
+
+    // Определяем ID врача в зависимости от роли
+    let doctor;
+
+    if (role === 'ADMIN') {
+      // Админ может смотреть статистику любого врача
+      if (!doctorIdParam) {
+        return NextResponse.json(
+          { error: 'Для админа необходимо указать doctorId в query параметрах' },
+          { status: 400 }
+        );
+      }
+
+      doctor = await prisma.doctor.findUnique({
+        where: { id: doctorIdParam },
+      });
+    } else {
+      // Врач смотрит свою статистику
+      doctor = await prisma.doctor.findUnique({
+        where: { userId },
+      });
+    }
 
     if (!doctor) {
       return NextResponse.json(
@@ -29,9 +50,6 @@ export async function GET(request: NextRequest) {
         { status: 404 }
       );
     }
-
-    const { searchParams } = new URL(request.url);
-    const period = searchParams.get('period') || 'month'; // day, week, month, year
 
     // Вычислить даты для фильтрации
     const now = new Date();
