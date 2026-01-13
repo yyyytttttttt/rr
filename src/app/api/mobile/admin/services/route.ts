@@ -20,6 +20,85 @@ export async function OPTIONS(request: NextRequest) {
   return createCorsResponse(request);
 }
 
+export async function GET(req: NextRequest) {
+  const auth = requireAuth(req, ['ADMIN']);
+
+  if ('error' in auth) {
+    return auth.error;
+  }
+
+  if (auth.payload.role !== 'ADMIN') {
+    return NextResponse.json({ error: "Доступ запрещен" }, { status: 403 });
+  }
+
+  const url = new URL(req.url);
+  const q = (url.searchParams.get("query") ?? "").trim();
+  const categoryId = url.searchParams.get("categoryId") || undefined;
+  const page = Math.max(1, Number(url.searchParams.get("page") ?? 1));
+  const pageSize = Math.min(100, Math.max(1, Number(url.searchParams.get("pageSize") ?? 20)));
+
+  console.log("[MOBILE_ADMIN_SERVICES] GET - query:", q, "categoryId:", categoryId, "page:", page);
+
+  try {
+    const where: any = {};
+
+    if (q) {
+      where.OR = [
+        { name: { contains: q, mode: "insensitive" as const } },
+        { description: { contains: q, mode: "insensitive" as const } },
+      ];
+    }
+
+    if (categoryId) {
+      where.categoryId = categoryId;
+    }
+
+    const total = await prisma.service.count({ where });
+
+    const services = await prisma.service.findMany({
+      where,
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        priceCents: true,
+        currency: true,
+        durationMin: true,
+        isActive: true,
+        bufferMinOverride: true,
+        categoryId: true,
+        category: {
+          select: {
+            id: true,
+            name: true,
+            icon: true,
+          },
+        },
+        createdAt: true,
+        _count: {
+          select: {
+            doctorServices: {
+              where: {
+                isActive: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+    });
+
+    console.log(`[MOBILE_ADMIN_SERVICES] Found ${services.length} services (total: ${total})`);
+
+    return NextResponse.json({ items: services, total, page, pageSize });
+  } catch (error) {
+    console.error("[MOBILE_ADMIN_SERVICES] Error:", error);
+    return NextResponse.json({ error: "Ошибка сервера" }, { status: 500 });
+  }
+}
+
 // NOTE: Create service without initial doctor link (admin creates, then links doctors)
 export async function POST(req: NextRequest) {
   const auth = requireAuth(req, ['ADMIN']);

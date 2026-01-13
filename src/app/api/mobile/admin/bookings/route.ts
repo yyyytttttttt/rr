@@ -20,6 +20,95 @@ export async function OPTIONS(request: NextRequest) {
   return createCorsResponse(request);
 }
 
+export async function GET(req: NextRequest) {
+  const auth = requireAuth(req, ['ADMIN']);
+
+  if ('error' in auth) {
+    return auth.error;
+  }
+
+  if (auth.payload.role !== 'ADMIN') {
+    return NextResponse.json({ error: "Доступ запрещен" }, { status: 403 });
+  }
+
+  const url = new URL(req.url);
+  const doctorId = url.searchParams.get("doctorId") || undefined;
+  const status = url.searchParams.get("status") || undefined;
+  const page = Math.max(1, Number(url.searchParams.get("page") ?? 1));
+  const pageSize = Math.min(100, Math.max(1, Number(url.searchParams.get("pageSize") ?? 20)));
+
+  console.log("[MOBILE_ADMIN_BOOKINGS] GET - doctorId:", doctorId, "status:", status, "page:", page);
+
+  try {
+    const where: any = {};
+
+    if (doctorId) {
+      where.doctorId = doctorId;
+    }
+
+    if (status) {
+      where.status = status;
+    }
+
+    const total = await prisma.booking.count({ where });
+
+    const bookings = await prisma.booking.findMany({
+      where,
+      select: {
+        id: true,
+        startUtc: true,
+        endUtc: true,
+        status: true,
+        note: true,
+        clientName: true,
+        clientEmail: true,
+        clientPhone: true,
+        createdAt: true,
+        doctor: {
+          select: {
+            id: true,
+            title: true,
+            user: {
+              select: {
+                name: true,
+                image: true,
+              },
+            },
+          },
+        },
+        service: {
+          select: {
+            id: true,
+            name: true,
+            priceCents: true,
+            currency: true,
+            durationMin: true,
+          },
+        },
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+            image: true,
+          },
+        },
+      },
+      orderBy: { startUtc: "desc" },
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+    });
+
+    console.log(`[MOBILE_ADMIN_BOOKINGS] Found ${bookings.length} bookings (total: ${total})`);
+
+    return NextResponse.json({ items: bookings, total, page, pageSize });
+  } catch (error) {
+    console.error("[MOBILE_ADMIN_BOOKINGS] Error:", error);
+    return NextResponse.json({ error: "Ошибка сервера" }, { status: 500 });
+  }
+}
+
 export async function POST(req: NextRequest) {
   const auth = requireAuth(req, ['ADMIN']);
 

@@ -12,6 +12,83 @@ export async function OPTIONS(request: NextRequest) {
   return createCorsResponse(request);
 }
 
+// GET - Admin gets booking details
+export async function GET(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const auth = requireAuth(req, ['ADMIN']);
+
+  if ('error' in auth) {
+    return auth.error;
+  }
+
+  if (auth.payload.role !== "ADMIN") {
+    return NextResponse.json({ error: "Доступ запрещен" }, { status: 403 });
+  }
+
+  const { id } = await params;
+
+  console.log("[MOBILE_ADMIN_BOOKING_GET] GET request for booking:", id);
+
+  try {
+    const booking = await prisma.booking.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        startUtc: true,
+        endUtc: true,
+        status: true,
+        note: true,
+        clientName: true,
+        clientEmail: true,
+        clientPhone: true,
+        createdAt: true,
+        doctor: {
+          select: {
+            id: true,
+            title: true,
+            user: {
+              select: {
+                name: true,
+                image: true,
+              },
+            },
+          },
+        },
+        service: {
+          select: {
+            id: true,
+            name: true,
+            priceCents: true,
+            currency: true,
+            durationMin: true,
+          },
+        },
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+            image: true,
+          },
+        },
+      },
+    });
+
+    if (!booking) {
+      return NextResponse.json({ error: "Бронирование не найдено" }, { status: 404 });
+    }
+
+    console.log("[MOBILE_ADMIN_BOOKING_GET] Found booking:", booking.id);
+    return NextResponse.json({ booking });
+  } catch (error) {
+    console.error("[MOBILE_ADMIN_BOOKING_GET] Error:", error);
+    return NextResponse.json({ error: "Ошибка сервера" }, { status: 500 });
+  }
+}
+
 // PATCH - Admin updates booking status
 export async function PATCH(
   req: NextRequest,

@@ -20,6 +20,69 @@ export async function OPTIONS(request: NextRequest) {
   return createCorsResponse(request);
 }
 
+// GET - Admin gets service details
+export async function GET(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const auth = requireAuth(req, ['ADMIN']);
+
+  if ('error' in auth) {
+    return auth.error;
+  }
+
+  if (auth.payload.role !== 'ADMIN') {
+    return NextResponse.json({ error: "Доступ запрещен" }, { status: 403 });
+  }
+
+  const { id } = await params;
+  console.log("[MOBILE_ADMIN_SERVICE_GET] GET request for service:", id);
+
+  try {
+    const service = await prisma.service.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        priceCents: true,
+        currency: true,
+        durationMin: true,
+        isActive: true,
+        bufferMinOverride: true,
+        categoryId: true,
+        category: {
+          select: {
+            id: true,
+            name: true,
+            icon: true,
+          },
+        },
+        createdAt: true,
+        _count: {
+          select: {
+            doctorServices: {
+              where: {
+                isActive: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!service) {
+      return NextResponse.json({ error: "Услуга не найдена" }, { status: 404 });
+    }
+
+    console.log("[MOBILE_ADMIN_SERVICE_GET] Found service:", service.id);
+    return NextResponse.json({ service });
+  } catch (error) {
+    console.error("[MOBILE_ADMIN_SERVICE_GET] Error:", error);
+    return NextResponse.json({ error: "Ошибка сервера" }, { status: 500 });
+  }
+}
+
 export async function PUT(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
