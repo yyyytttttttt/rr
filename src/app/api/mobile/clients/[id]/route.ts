@@ -14,6 +14,96 @@ export async function OPTIONS(request: NextRequest) {
   return createCorsResponse(request);
 }
 
+// GET - Get single client
+export async function GET(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const auth = requireAuth(req, ['ADMIN', 'DOCTOR']);
+
+  if ('error' in auth) {
+    return auth.error;
+  }
+
+  const { id } = await params;
+
+  console.log("[MOBILE_CLIENT_GET] GET request for client:", id);
+
+  try {
+    const client = await prisma.user.findUnique({
+      where: { id, role: "USER" },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+        image: true,
+        createdAt: true,
+        _count: {
+          select: {
+            bookings: {
+              where: {
+                status: { in: ["CONFIRMED", "COMPLETED"] },
+              },
+            },
+          },
+        },
+        bookings: {
+          take: 10,
+          orderBy: { createdAt: "desc" },
+          select: {
+            id: true,
+            startUtc: true,
+            endUtc: true,
+            status: true,
+            createdAt: true,
+            service: {
+              select: {
+                name: true,
+                priceCents: true,
+                currency: true,
+              },
+            },
+            doctor: {
+              select: {
+                id: true,
+                title: true,
+                user: {
+                  select: {
+                    name: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!client) {
+      return NextResponse.json({ error: "Клиент не найден" }, { status: 404 });
+    }
+
+    const response = {
+      id: client.id,
+      name: client.name || "Без имени",
+      email: client.email || "",
+      phone: client.phone || "",
+      image: client.image,
+      createdAt: client.createdAt,
+      visits: client._count.bookings,
+      recentBookings: client.bookings,
+      discount: 0,
+    };
+
+    console.log("[MOBILE_CLIENT_GET] Found client:", client.id);
+    return NextResponse.json(response);
+  } catch (error) {
+    console.error("[MOBILE_CLIENT_GET] Failed to fetch client:", error);
+    return NextResponse.json({ error: "Ошибка сервера" }, { status: 500 });
+  }
+}
+
 // PATCH - Update client data
 export async function PATCH(
   req: NextRequest,

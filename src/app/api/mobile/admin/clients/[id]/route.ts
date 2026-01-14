@@ -43,7 +43,42 @@ export async function GET(
         image: true,
         createdAt: true,
         _count: {
-          select: { bookings: true },
+          select: {
+            bookings: {
+              where: {
+                status: { in: ["CONFIRMED", "COMPLETED"] },
+              },
+            },
+          },
+        },
+        bookings: {
+          take: 10,
+          orderBy: { createdAt: "desc" },
+          select: {
+            id: true,
+            startUtc: true,
+            endUtc: true,
+            status: true,
+            createdAt: true,
+            service: {
+              select: {
+                name: true,
+                priceCents: true,
+                currency: true,
+              },
+            },
+            doctor: {
+              select: {
+                id: true,
+                title: true,
+                user: {
+                  select: {
+                    name: true,
+                  },
+                },
+              },
+            },
+          },
         },
       },
     });
@@ -54,12 +89,14 @@ export async function GET(
 
     return NextResponse.json({
       id: client.id,
-      name: client.name || "",
+      name: client.name || "Без имени",
       email: client.email || "",
       phone: client.phone || "",
       image: client.image,
       visits: client._count.bookings,
+      recentBookings: client.bookings,
       createdAt: client.createdAt,
+      discount: 0,
     });
   } catch (error) {
     console.error("[MOBILE_ADMIN_CLIENT_GET] Failed to fetch client:", error);
