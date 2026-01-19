@@ -16,7 +16,7 @@ type BookingData = {
 
 type ConfirmResult = {
   success: boolean;
-  message: string;
+  message?: string;
   alreadyConfirmed?: boolean;
   booking?: BookingData;
   error?: string;
