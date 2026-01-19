@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useRef } from 'react'
+import { useMemo } from 'react'
 import Image from 'next/image'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { Pagination, Navigation } from 'swiper/modules'
@@ -10,9 +10,6 @@ import 'swiper/css/pagination'
 import 'swiper/css/navigation'
 
 export default function ProjectsSlider() {
-  const prevRef = useRef(null)
-  const nextRef = useRef(null)
-
   const projects = useMemo(
     () => [
       { title: 'Инъекционная косметология', image: '/images/us1.png' },
@@ -28,27 +25,6 @@ export default function ProjectsSlider() {
     <section className="relative z-10 w-full h-app flex items-center justify-center px-4">
       {/* Заголовок */}
      
-
-      {/* Стрелки */}
-      <button
-        ref={prevRef}
-        aria-label="Предыдущий слайд"
-        className="absolute z-50 top-1/2 left-4 md:left-8 -translate-y-1/2 bg-[#967450] hover:bg-[#7d5f42] transition p-2 md:p-3 rounded-full shadow-xl"
-      >
-        <svg width="20" height="20" fill="white" viewBox="0 0 24 24">
-          <path d="M15 18l-6-6 6-6" />
-        </svg>
-      </button>
-
-      <button
-        ref={nextRef}
-        aria-label="Следующий слайд"
-        className="absolute z-50 top-1/2 right-4 md:right-8 -translate-y-1/2 bg-[#967450] hover:bg-[#7d5f42] transition p-2 md:p-3 rounded-full shadow-xl"
-      >
-        <svg width="20" height="20" fill="white" viewBox="0 0 24 24">
-          <path d="M9 6l6 6-6 6" />
-        </svg>
-      </button>
 
       {/* Слайдер */}
       <Swiper
@@ -72,12 +48,13 @@ export default function ProjectsSlider() {
           renderBullet: (index, className) =>
             `<span class="${className} projects-bullet"></span>`,
         }}
+        navigation={{
+          prevEl: '.nav-slide-3-prev',
+          nextEl: '.nav-slide-3-next',
+        }}
         onBeforeInit={(sw) => {
-          sw.params.navigation = {
-            prevEl: prevRef.current,
-            nextEl: nextRef.current,
-            disabledClass: 'opacity-40 pointer-events-none',
-          }
+          sw.params.navigation.prevEl = '.nav-slide-3-prev'
+          sw.params.navigation.nextEl = '.nav-slide-3-next'
         }}
         onInit={(sw) => {
           sw.navigation.init()

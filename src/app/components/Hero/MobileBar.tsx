@@ -1,6 +1,7 @@
 'use client'
 
 import { memo } from "react"
+import Link from "next/link"
 import { mobileBarType } from "../../types/GlavProps"
 
 const AppleIcon = () => (
@@ -48,18 +49,37 @@ function MobileBar({ title, text, buttons, buttonsVertical }:mobileBarType) {
             {text.map((t,i)=><span key={i}>{t}</span>)}
           </p>
           <div className={`flex  gap-4 ${buttonsVertical ? 'flex-col' : ''}`}>
-            {buttons?.map((b,i)=>(
-              <button key={i}
-                className={`rounded-[5px] w-full px-[6%] py-[3%] xs:py-[1%] w-[60%] xl:w-full  font-[Manrope-Regular]
+            {buttons?.map((b,i)=>{
+              const className = `rounded-[5px] w-full px-[6%] py-[3%] xs:py-[1%] w-[60%] xl:w-full  font-[Manrope-Regular]
                            text-[clamp(0.75rem,0.65rem+0.5vw,1.25rem)] flex items-center justify-center gap-2
                            ${b.variant==='primary'
                               ? 'bg-[#636846] text-[#F7EFE5]'
-                              : 'bg-[#F7EFE5] text-[#967450]'}`}>
-                {b.icon === 'apple' && <AppleIcon />}
-                {b.icon === 'android' && <AndroidIcon />}
-                {b.label}
-              </button>
-            ))}
+                              : 'bg-[#F7EFE5] text-[#967450]'}`
+              const content = (
+                <>
+                  {b.icon === 'apple' && <AppleIcon />}
+                  {b.icon === 'android' && <AndroidIcon />}
+                  {b.label}
+                </>
+              )
+              if (b.href) {
+                const isExternal = b.href.startsWith('http')
+                return isExternal ? (
+                  <a key={i} href={b.href} target="_blank" rel="noopener noreferrer" className={className}>
+                    {content}
+                  </a>
+                ) : (
+                  <Link key={i} href={b.href} className={className}>
+                    {content}
+                  </Link>
+                )
+              }
+              return (
+                <button key={i} className={className}>
+                  {content}
+                </button>
+              )
+            })}
           </div>
           <div className="bg-[#F4E4E6] h-[8dvh]" />
         </div>

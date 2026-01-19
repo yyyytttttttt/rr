@@ -23,8 +23,8 @@ export const slides = [
         'выбирать и чувствовать себя',
         'частью чего-то настоящего.',
       ],
-      buttons: [{ label: 'Перейти в раздел', variant: 'ghost' }],
-      
+      buttons: [{ label: 'Перейти в раздел', variant: 'ghost', href: '/News' }],
+
     },
     mobile: {
       title: 'Новости клиники',
@@ -34,7 +34,7 @@ export const slides = [
         'выбирать и чувствовать себя частью чего-то ',
         'настоящего.',
       ],
-      buttons: [{ label: 'Перейти в раздел', variant: 'ghost' }],
+      buttons: [{ label: 'Перейти в раздел', variant: 'ghost', href: '/News' }],
     },
   },
 
@@ -52,7 +52,7 @@ export const slides = [
 
       ],
       buttons: [
-        { label: 'Перейти в раздел', variant: 'ghost' },
+        { label: 'Перейти в раздел', variant: 'ghost', href: '/Propuski' },
 
       ],
     },
@@ -65,7 +65,7 @@ export const slides = [
 
       buttons: [
 
-        { label: 'Перейти в раздел', variant: 'ghost' },
+        { label: 'Перейти в раздел', variant: 'ghost', href: '/Propuski' },
       ],
     },
   },
@@ -81,7 +81,7 @@ export const slides = [
         'для вашей красоты и здоровья',
       ],
       buttons: [
-        { label: 'Смотреть все услуги', variant: 'ghost' },
+        { label: 'Смотреть все услуги', variant: 'ghost', href: '/Servic' },
       ],
     },
     mobile: {
@@ -91,7 +91,7 @@ export const slides = [
         'для вашей красоты и здоровья',
       ],
       buttons: [
-        { label: 'Смотреть все', variant: 'ghost' },
+        { label: 'Смотреть все', variant: 'ghost', href: '/Servic' },
       ],
     },
   },
@@ -106,7 +106,7 @@ export const slides = [
         'для вашей красоты и здоровья',
       ],
       buttons: [
-        { label: 'Смотреть все услуги', variant: 'ghost' },
+        { label: 'Смотреть все услуги', variant: 'ghost', href: '/Servic' },
       ],
     },
     mobile: {
@@ -116,7 +116,7 @@ export const slides = [
         'для вашей красоты и здоровья',
       ],
       buttons: [
-        { label: 'Смотреть все', variant: 'ghost' },
+        { label: 'Смотреть все', variant: 'ghost', href: '/Servic' },
       ],
     },
   },
@@ -133,7 +133,7 @@ export const slides = [
         'и с радостью делимся их преображениями.'
       ],
       buttons: [
-        { label: 'Перейти в раздел', variant: 'ghost' },
+        { label: 'Перейти в раздел', variant: 'ghost', href: '/galery' },
       ],
     },
     mobile: {
@@ -143,7 +143,7 @@ export const slides = [
         'с многолетним опытом работы',
       ],
       buttons: [
-        { label: 'Смотреть всех', variant: 'ghost' },
+        { label: 'Смотреть всех', variant: 'ghost', href: '/galery' },
       ],
     },
   },
@@ -156,7 +156,7 @@ export const slides = [
       oneK: '/images/sl1000.png',
       fourXL: '/images/sl1000.png',
     },
-   
+
     desktop: {
       pos: 'left',
       title: 'Личный кабинет',
@@ -165,10 +165,10 @@ export const slides = [
         'рекомендации, напоминания и дневник —     ',
         'всё в одном месте. На сайте и в приложении.',
         'Всегда под рукой.',
-        
+
       ],
-      buttons: [{ label: 'Перейти в раздел', variant: 'ghost' }],
-      
+      buttons: [{ label: 'Перейти в раздел', variant: 'ghost', href: '/profile' }],
+
     },
     mobile: {
       title: 'Личный кабинет',
@@ -179,7 +179,7 @@ export const slides = [
         'месте. На сайте и в приложении. Всегда ',
         'под рукой. '
       ],
-      buttons: [{ label: 'Перейти в раздел', variant: 'ghost' }],
+      buttons: [{ label: 'Перейти в раздел', variant: 'ghost', href: '/profile' }],
     },
   },
   {
@@ -200,7 +200,7 @@ export const slides = [
         'которую удобно сохранить',
         'и легко отправить.',
       ],
-      buttons: [{ label: 'Скачать', variant: 'ghost' },{label:'Перейти в раздел',variant:'primary'}],
+      buttons: [{ label: 'Скачать', variant: 'ghost', href: '/how-to-find' },{label:'Перейти в раздел',variant:'primary', href: '/how-to-find'}],
 
     },
     mobile: {
@@ -211,7 +211,7 @@ export const slides = [
         'отправить.  ',
 
       ],
-      buttons: [{ label: 'Перейти в раздел', variant: 'ghost' },],
+      buttons: [{ label: 'Перейти в раздел', variant: 'ghost', href: '/how-to-find' },],
     },
 
   },
@@ -233,7 +233,7 @@ export const slides = [
         'прием и онлайн-оплаты. Доступно в App store',
         'и Google play',
       ],
-      buttons: [{ label: 'Скачать на IOS', variant: 'primary', icon: 'apple' },{label:'Скачать на Android',variant:'ghost', icon: 'android'}],
+      buttons: [{ label: 'Скачать на IOS', variant: 'primary', icon: 'apple', href: 'https://apps.apple.com' },{label:'Скачать на Android',variant:'ghost', icon: 'android', href: 'https://play.google.com'}],
       buttonsVertical: true,
     },
     mobile: {
@@ -243,9 +243,9 @@ export const slides = [
         'прием и онлайн-оплаты. Доступно в App store',
         'и Google play',
       ],
-      buttons: [{ label: 'Скачать на IOS', variant: 'primary', icon: 'apple' },{ label: 'Скачать на Android', variant: 'ghost', icon: 'android' }],
+      buttons: [{ label: 'Скачать на IOS', variant: 'primary', icon: 'apple', href: 'https://apps.apple.com' },{ label: 'Скачать на Android', variant: 'ghost', icon: 'android', href: 'https://play.google.com' }],
       buttonsVertical: true,
     },
-    
+
   },
 ] as const satisfies readonly Slide[];

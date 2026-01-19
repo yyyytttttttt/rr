@@ -18,7 +18,17 @@ function HeroSlider() {
   const overlays = useMemo(() => {
     return slides.map(s => (
       <React.Fragment key={s.id}>
-        <div></div>
+        <DesktopCard
+          pos="right"
+          title={s.title}
+          lines={s.lines}
+          buttons={s.buttons}
+        />
+        <MobileBar
+          title={s.title}
+          text={s.lines}
+          buttons={s.buttons}
+        />
       </React.Fragment>
     ))
   }, [])

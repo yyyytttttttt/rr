@@ -1,5 +1,5 @@
 'use client'
-import React, { memo, useRef, useState } from 'react'
+import React, { memo, useState } from 'react'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { Navigation, A11y } from 'swiper/modules'
 import 'swiper/css'
@@ -84,8 +84,6 @@ const SlideCard = memo(function SlideCard({ card, active }) {
 
 function SliderSection2({ children }) {
   const [active, setActive] = useState(0)
-  const prevRef = useRef(null)
-  const nextRef = useRef(null)
 
   return (
     <div className="relative h-app min-h-0 flex-none w-screen bg-[#FFFCF3]">
@@ -99,11 +97,14 @@ function SliderSection2({ children }) {
         <MotionConfig reducedMotion="user">
           <Swiper
             modules={[Navigation, A11y]}
-            onBeforeInit={(s) => {
-              s.params.navigation.prevEl = prevRef.current
-              s.params.navigation.nextEl = nextRef.current
+            navigation={{
+              prevEl: '.nav-slide-2-prev',
+              nextEl: '.nav-slide-2-next',
             }}
-            navigation={{ prevEl: prevRef.current, nextEl: nextRef.current }}
+            onBeforeInit={(s) => {
+              s.params.navigation.prevEl = '.nav-slide-2-prev'
+              s.params.navigation.nextEl = '.nav-slide-2-next'
+            }}
             onInit={(s) => s.navigation.update()}
             loop={true}
             resistanceRatio={0.5}
@@ -129,22 +130,6 @@ function SliderSection2({ children }) {
             ))}
           </Swiper>
 
-          {/* стрелки */}
-          <div className="absolute left-4 sm:left-6 bottom-[-25%] 4xl:bottom-[-12%] z-10 flex gap-2 md:gap-6">
-            <button ref={prevRef} className="transition hover:scale-105" aria-label="Предыдущий">
-              <svg className="w-[30px] h-[30px] xs:h-auto xs:w-auto" viewBox="0 0 51 50" fill="none">
-                <rect x="50.668" y="50" width="50" height="50" rx="25" transform="rotate(-180 50.668 50)" fill="#F7EFE5"/>
-                <path d="M19.306 25L28.793 34.4871L27.4466 35.8657L16.5815 25L27.4466 14.1345L28.793 15.5131L19.306 25Z" fill="#967450"/>
-              </svg>
-            </button>
-
-            <button ref={nextRef} className="transition hover:scale-105" aria-label="Следующий">
-              <svg className="w-[30px] h-[30px] xs:h-auto xs:w-auto" viewBox="0 0 51 50" fill="none">
-                <rect width="50" height="50" rx="25" fill="#F7EFE5"/>
-                <path d="M32.03 25L22.543 15.5129L23.8893 14.1343L34.7544 25L23.8893 35.8655L22.543 34.4869L32.03 25Z" fill="#967450"/>
-              </svg>
-            </button>
-          </div>
         </MotionConfig>
 
         {/* выравнивание высоты карточек */}

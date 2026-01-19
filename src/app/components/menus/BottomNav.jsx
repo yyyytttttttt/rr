@@ -1,25 +1,71 @@
 'use client'
 import Image from "next/image"
 import { memo, useState } from "react"
+import { useRouter, usePathname } from "next/navigation"
 import GuestBookingModal from '../modals/GuestBookingModal'
 
-function BottomNav() {
+const ArrowLeft = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50" fill="none">
+    <rect x="50" y="50" width="50" height="50" rx="25" transform="rotate(-180 50 50)" fill="#F4EDD7"/>
+    <path d="M18.349 25.0001L27.8359 34.4871L26.4896 35.8657L15.6245 25.0001L26.4896 14.1345L27.8359 15.5131L18.349 25.0001Z" fill="#967450"/>
+  </svg>
+)
+
+const ArrowRight = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50" fill="none">
+    <rect width="50" height="50" rx="25" fill="#F4EDD7"/>
+    <path d="M31.651 25.0001L22.1641 34.4871L23.5104 35.8657L34.3755 25.0001L23.5104 14.1345L22.1641 15.5131L31.651 25.0001Z" fill="#967450"/>
+  </svg>
+)
+
+// Слайды со слайдерами и их классы навигации
+const SLIDER_SLIDES = {
+  0: { prev: 'nav-slide-0-prev', next: 'nav-slide-0-next' },
+  2: { prev: 'nav-slide-2-prev', next: 'nav-slide-2-next' },
+  3: { prev: 'nav-slide-3-prev', next: 'nav-slide-3-next' },
+  4: { prev: 'nav-slide-4-prev', next: 'nav-slide-4-next' },
+}
+
+function BottomNav({ activeSlide = 0 }) {
+  const router = useRouter()
+  const pathname = usePathname()
   const [isBookingModalOpen, setIsBookingModalOpen] = useState(false)
   const [activeTooltip, setActiveTooltip] = useState(null)
+
+  const isHomePage = pathname === '/' || pathname === ''
+  const hasSlider = isHomePage && SLIDER_SLIDES[activeSlide]
+  const navClasses = SLIDER_SLIDES[activeSlide] || { prev: '', next: '' }
 
   const handleTooltipToggle = (index) => {
     setActiveTooltip(activeTooltip === index ? null : index)
   }
 
+  const handleNavigation = (path) => {
+    router.push(path)
+  }
+
   return (
     <>
-      <div className="fixed max-w-[810px] mx-auto bottom-0 sm:bottom-12 left-1/2 transform -translate-x-1/2 w-full xl:w-3/4 flex items-center justify-center bg-[#e5dccb] px-2 py-1 pb-4 sm:pb-0 rounded-0 sm:rounded-full z-50">
+      <div className={`fixed mx-auto bottom-0 sm:bottom-12 left-1/2 transform -translate-x-1/2 w-full flex items-center justify-center px-2 py-1 pb-4 sm:pb-0 z-50 transition-all duration-300 ${hasSlider ? 'max-w-[1440px]' : 'max-w-[810px]'}`}>
 
-        <div className="w-[85%]  flex justify-between">
+        {/* Стрелки влево - все в DOM, показываем только активную */}
+        <div className={`${hasSlider ? 'sm:flex' : 'hidden'} hidden items-center justify-center mr-4`}>
+          {Object.entries(SLIDER_SLIDES).map(([slideIdx, classes]) => (
+            <button
+              key={`prev-${slideIdx}`}
+              className={`${classes.prev} items-center justify-center cursor-pointer transition-all duration-300 hover:scale-110 active:scale-95 ${Number(slideIdx) === activeSlide ? 'flex' : 'hidden'}`}
+            >
+              <ArrowLeft />
+            </button>
+          ))}
+        </div>
+
+        <div className={`bg-[#e5dccb] rounded-0 sm:rounded-full flex items-center justify-center py-2 sm:py-1 transition-all duration-300 ${isHomePage ? 'w-full max-w-[810px]' : 'w-full max-w-[810px]'}`}>
+          <div className="w-[85%] flex justify-between">
 
           {/* Главная */}
           <button
-            onClick={() => handleTooltipToggle(0)}
+            onClick={() => handleNavigation('/')}
             className="
               relative w-[10%] sm:w-[7.4%] cursor-pointer group
               transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)]
@@ -56,7 +102,7 @@ function BottomNav() {
 
           {/* Услуги */}
           <button
-            onClick={() => handleTooltipToggle(1)}
+            onClick={() => handleNavigation('/Servic/')}
             className="
               relative w-[10%] sm:w-[7.4%] cursor-pointer group
               transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)]
@@ -125,7 +171,7 @@ function BottomNav() {
 
           {/* Профиль */}
           <button
-            onClick={() => handleTooltipToggle(3)}
+            onClick={() => handleNavigation('/profile/')}
             className="
               relative w-[10%] sm:w-[7.4%] cursor-pointer group
               transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)]
@@ -167,7 +213,7 @@ function BottomNav() {
 
           {/* Контакты */}
           <button
-            onClick={() => handleTooltipToggle(4)}
+            onClick={() => handleNavigation('/how-to-find/')}
             className="
               relative w-[10%] sm:w-[7.4%] cursor-pointer group
               transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)]
@@ -202,7 +248,21 @@ function BottomNav() {
             </div>
           </button>
 
+          </div>
         </div>
+
+        {/* Стрелки вправо - все в DOM, показываем только активную */}
+        <div className={`${hasSlider ? 'sm:flex' : 'hidden'} hidden items-center justify-center ml-4`}>
+          {Object.entries(SLIDER_SLIDES).map(([slideIdx, classes]) => (
+            <button
+              key={`next-${slideIdx}`}
+              className={`${classes.next} items-center justify-center cursor-pointer transition-all duration-300 hover:scale-110 active:scale-95 ${Number(slideIdx) === activeSlide ? 'flex' : 'hidden'}`}
+            >
+              <ArrowRight />
+            </button>
+          ))}
+        </div>
+
       </div>
 
       <GuestBookingModal

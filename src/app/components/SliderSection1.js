@@ -40,12 +40,12 @@ function SliderSection({ images = [], overlays = [] }) {
       <Swiper
         modules={[Navigation]}
         navigation={{
-          nextEl: '.swiper-button-custom-next-2',
-          prevEl: '.swiper-button-custom-prev-2',
+          nextEl: '.nav-slide-0-next',
+          prevEl: '.nav-slide-0-prev',
         }}
         onBeforeInit={(s) => {
-          s.params.navigation.prevEl = '.swiper-button-custom-prev-2'
-          s.params.navigation.nextEl = '.swiper-button-custom-next-2'
+          s.params.navigation.prevEl = '.nav-slide-0-prev'
+          s.params.navigation.nextEl = '.nav-slide-0-next'
         }}
         onInit={(s) => { pauseAllVideos(s.el); playActiveVideos(s) }}
         onSlideChange={(s) => { pauseAllVideos(s.el); playActiveVideos(s) }}

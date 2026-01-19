@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '../../../../lib/prizma';
 import { createCorsResponse } from '../../../../lib/jwt';
+import { sendMail } from '../../../../lib/mailer';
 import { z } from 'zod';
+import crypto from 'crypto';
 
 // Обработка OPTIONS для CORS preflight
 export async function OPTIONS(request: NextRequest) {
@@ -139,12 +141,117 @@ export async function POST(request: NextRequest) {
 
     console.info(`[GUEST_BOOKING] Created guest booking ${booking.id} for ${clientName} (${clientEmail})`);
 
-    // TODO: Отправить email подтверждения гостю (если SMTP работает)
-    // await sendBookingConfirmationEmail(clientEmail, booking);
+    // Создать токен для подтверждения записи
+    const rawToken = crypto.randomBytes(32).toString('hex');
+    const tokenHash = crypto.createHash('sha256').update(rawToken).digest('hex');
+    const expires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 часа
+
+    await prisma.verificationToken.create({
+      data: {
+        identifier: `booking:${booking.id}`,
+        token: tokenHash,
+        expires,
+      },
+    });
+
+    // Сформировать ссылку для подтверждения
+    const confirmLink = `${process.env.NEXTAUTH_URL}/confirm-booking?token=${rawToken}&bookingId=${booking.id}`;
+
+    // Форматирование даты и времени
+    const dateStr = new Date(booking.startUtc).toLocaleDateString('ru-RU', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    });
+    const timeStr = new Date(booking.startUtc).toLocaleTimeString('ru-RU', {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+
+    // Отправить email подтверждения
+    console.info(`[GUEST_BOOKING] Attempting to send email to ${clientEmail}`);
+    console.info(`[GUEST_BOOKING] SMTP config: host=${process.env.SMTP_HOST}, port=${process.env.SMTP_PORT}, user=${process.env.SMTP_USER}`);
+
+    try {
+      await sendMail({
+        to: clientEmail,
+        subject: 'Подтвердите запись на приём — Новая Я',
+        html: `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <style>
+              body { font-family: 'Manrope', Arial, sans-serif; line-height: 1.6; color: #2F2D28; }
+              .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+              .header { background: #5C6744; color: white; padding: 30px; text-align: center; border-radius: 12px 12px 0 0; }
+              .content { background: #FFFCF3; padding: 30px; border-radius: 0 0 12px 12px; }
+              .booking-details { background: #F5F0E4; padding: 20px; border-radius: 10px; margin: 20px 0; }
+              .booking-details p { margin: 8px 0; }
+              .label { color: #636846; font-size: 14px; }
+              .value { font-weight: 600; color: #4F5338; }
+              .confirm-btn { display: inline-block; background: #5C6744; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; margin: 20px 0; font-weight: 600; }
+              .confirm-btn:hover { background: #4F5338; }
+              .footer { text-align: center; color: #636846; font-size: 12px; margin-top: 20px; }
+              .warning { background: #FFF3CD; border: 1px solid #FFECB5; padding: 15px; border-radius: 8px; margin: 15px 0; color: #856404; }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="header">
+                <h1 style="margin: 0; font-size: 24px;">Новая Я</h1>
+                <p style="margin: 10px 0 0; opacity: 0.9;">Подтверждение записи</p>
+              </div>
+              <div class="content">
+                <h2 style="color: #4F5338; margin-top: 0;">Здравствуйте, ${clientName}!</h2>
+                <p>Вы записались на приём в клинику «Новая Я». Пожалуйста, подтвердите запись, нажав на кнопку ниже.</p>
+
+                <div class="booking-details">
+                  <p><span class="label">Услуга:</span> <span class="value">${booking.service.name}</span></p>
+                  <p><span class="label">Специалист:</span> <span class="value">${booking.doctor.user?.name || booking.doctor.title}</span></p>
+                  <p><span class="label">Дата:</span> <span class="value">${dateStr}</span></p>
+                  <p><span class="label">Время:</span> <span class="value">${timeStr}</span></p>
+                  <p><span class="label">Стоимость:</span> <span class="value">${(booking.service.priceCents / 100).toFixed(0)} ₽</span></p>
+                </div>
+
+                <div class="warning">
+                  ⚠️ Для подтверждения записи нажмите на кнопку ниже. Ссылка действительна 24 часа.
+                </div>
+
+                <div style="text-align: center;">
+                  <a href="${confirmLink}" class="confirm-btn">Подтвердить запись</a>
+                </div>
+
+                <p style="font-size: 13px; color: #636846;">
+                  Если кнопка не работает, скопируйте ссылку:<br>
+                  <a href="${confirmLink}" style="color: #5C6744; word-break: break-all;">${confirmLink}</a>
+                </p>
+
+                <div class="footer">
+                  <p>Если вы не записывались на приём — просто проигнорируйте это письмо.</p>
+                  <p>С уважением, команда «Новая Я»</p>
+                </div>
+              </div>
+            </div>
+          </body>
+          </html>
+        `,
+      });
+      console.info(`[GUEST_BOOKING] Confirmation email sent to ${clientEmail}`);
+    } catch (emailError: any) {
+      console.error('[GUEST_BOOKING] Failed to send confirmation email:', emailError);
+      console.error('[GUEST_BOOKING] Email error details:', {
+        message: emailError?.message,
+        code: emailError?.code,
+        command: emailError?.command,
+        responseCode: emailError?.responseCode,
+      });
+      // Не прерываем процесс - бронирование создано, но email не отправлен
+    }
 
     return NextResponse.json({
       success: true,
-      message: 'Вы успешно записались! Подтверждение отправлено на email.',
+      message: 'Запись создана! Проверьте email для подтверждения.',
       booking: {
         id: booking.id,
         doctorName: booking.doctor.user?.name || booking.doctor.title,

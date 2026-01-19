@@ -1,6 +1,7 @@
 'use client'
 import React, { memo } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 
 function LeftMenu() {
   return (
@@ -8,12 +9,12 @@ function LeftMenu() {
                     hidden xs:flex justify-between items-center gap-16 z-30 w-[20%] text-[#414141]">
       <div className="flex flex-col gap-4 w-[58%] xs:w-[32%] lg:w-[18%]">
         {[
-          { src: '/images/loc1.svg', alt: 'Лок' },
-          { src: '/images/doc1.svg', alt: 'Док' },
-          { src: '/images/lk1.svg',  alt: 'ЛК'  },
-          { src: '/images/zv1.svg',  alt: 'Зв'  },
-        ].map(({ src, alt }, i) => (
-          <div key={i}>
+          { src: '/images/loc1.svg', alt: 'Лок' ,href:'/how-to-find' },
+          { src: '/images/doc1.svg', alt: 'Док' ,href:'/'},
+          { src: '/images/lk1.svg',  alt: 'ЛК'  ,href:'/Team'},
+          { src: '/images/zv1.svg',  alt: 'Зв'  ,href:'/'},
+        ].map(({ src, alt ,href }, i) => (
+          <Link href={href} key={i}>
             <Image
               src={src}
               alt={alt}
@@ -24,7 +25,7 @@ function LeftMenu() {
                          hover:-translate-y-1 hover:scale-110
                          hover:drop-shadow-[0_0_15px_rgba(167,124,102,0.5)]"
             />
-          </div>
+          </Link>
         ))}
       </div>
     </div>

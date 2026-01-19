@@ -9,8 +9,6 @@ import TopTitle from './components/glav/TopTitle'
 import LayoutOverlay from './components/LayoutOverlay'
 import { slides } from './components/glav/slides.dataGlav'
 import SlideRenderer from './components/glav/SlideRenderer'
-import { useSession } from 'next-auth/react'
-import Navigation from './components/Navigation'
 
 export default function FullPageSwiper() {
   const texts = useMemo(

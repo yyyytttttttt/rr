@@ -1,6 +1,6 @@
 
 
-export type button ={label:string,variant:string, icon?:'apple' | 'android'}
+export type button ={label:string,variant:string, icon?:'apple' | 'android', href?:string}
 export type DescProps ={
   title:string | string[]
   lines:string[]

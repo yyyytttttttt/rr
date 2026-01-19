@@ -28,7 +28,7 @@
     ".next/types/**/*.ts",
     "**/*.ts",
     "**/*.tsx"
-, "src/lib/auth.js", "src/app/api/upload-avatar/route.js", "src/app/components/profile/UploadClient.jsx", "src/app/api/resend/route.ts", "src/app/profile/admin/page.jsx"  ],
+, "src/lib/auth.js", "src/app/api/upload-avatar/route.js", "src/app/components/profile/UploadClient.jsx", "src/app/api/resend/route.ts", "src/app/profile/admin/page.jsx", "src/app/Servic/page.jsx"  ],
   "exclude": [
     "node_modules"
   ]

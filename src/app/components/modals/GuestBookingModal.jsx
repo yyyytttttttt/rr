@@ -279,9 +279,15 @@ export default function GuestBookingModal({ isOpen, onClose }) {
       const data = await response.json();
 
       if (response.ok && data.success) {
-        toast.success(data.message || 'Вы успешно записались!', {
-          duration: 5000,
-        });
+        toast.success(
+          <div>
+            <strong>Запись создана!</strong>
+            <p className="text-sm mt-1">Проверьте email {formData.clientEmail} для подтверждения записи.</p>
+          </div>,
+          {
+            duration: 8000,
+          }
+        );
         handleClose();
       } else {
         // Обработка ошибок валидации

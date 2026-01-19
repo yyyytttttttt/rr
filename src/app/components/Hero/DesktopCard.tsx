@@ -2,6 +2,7 @@
 'use client'
 
 import { JSX, memo } from "react"
+import Link from "next/link"
 import { DescProps } from "../../types/GlavProps"
 
 const AppleIcon = () => (
@@ -52,18 +53,35 @@ function DesktopCard({title,buttons, lines ,pos, buttonsVertical }:DescProps):JS
 
       {!!buttons.length && (
         <div className={`flex gap-4 ${buttonsVertical ? 'flex-col' : ''}`}>
-          {buttons.map((b,i)=>(
-            <button
-              key={i}
-              className={`rounded-[5px] w-full px-4 py-3 font-[Manrope-Regular] text-[clamp(0.75rem,0.65rem+0.5vw,1.25rem)] whitespace-nowrap flex items-center justify-center gap-2
+          {buttons.map((b,i)=>{
+            const className = `rounded-[5px] w-full px-4 py-3 font-[Manrope-Regular] text-[clamp(0.75rem,0.65rem+0.5vw,1.25rem)] whitespace-nowrap flex items-center justify-center gap-2
                 ${b.variant==='primary' ? 'bg-[#636846] text-[#F7EFE5]' : 'bg-[#F7EFE5] text-[#967450]'}
-              `}
-            >
-              {b.icon === 'apple' && <AppleIcon />}
-              {b.icon === 'android' && <AndroidIcon />}
-              {b.label}
-            </button>
-          ))}
+              `
+            const content = (
+              <>
+                {b.icon === 'apple' && <AppleIcon />}
+                {b.icon === 'android' && <AndroidIcon />}
+                {b.label}
+              </>
+            )
+            if (b.href) {
+              const isExternal = b.href.startsWith('http')
+              return isExternal ? (
+                <a key={i} href={b.href} target="_blank" rel="noopener noreferrer" className={className}>
+                  {content}
+                </a>
+              ) : (
+                <Link key={i} href={b.href} className={className}>
+                  {content}
+                </Link>
+              )
+            }
+            return (
+              <button key={i} className={className}>
+                {content}
+              </button>
+            )
+          })}
         </div>
       )}
     </div>

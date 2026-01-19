@@ -50,7 +50,14 @@ const SliderSection5 = () => {
           renderBullet: (index, className) =>
             `<span class="${className} projects-bullet"></span>`,
         }}
-        
+        navigation={{
+          prevEl: '.nav-slide-4-prev',
+          nextEl: '.nav-slide-4-next',
+        }}
+        onBeforeInit={(sw) => {
+          sw.params.navigation.prevEl = '.nav-slide-4-prev'
+          sw.params.navigation.nextEl = '.nav-slide-4-next'
+        }}
         onInit={(sw) => {
           sw.navigation.init()
           sw.navigation.update()
