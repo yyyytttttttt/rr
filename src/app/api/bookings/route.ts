@@ -237,7 +237,8 @@ export async function GET(req: Request) {
     }
   }
 
-  const total = returnAdminFormat ? await prisma.booking.count({ where }) : undefined;
+  // Всегда считаем total для пагинации
+  const total = await prisma.booking.count({ where });
 
   const bookings = await prisma.booking.findMany({
     where,
@@ -285,7 +286,8 @@ export async function GET(req: Request) {
       },
     },
     orderBy: { startUtc: "desc" },
-    ...(returnAdminFormat && { skip: (page - 1) * pageSize, take: pageSize }),
+    skip: (page - 1) * pageSize,
+    take: pageSize,
   });
 
   // NOTE: Transform to flat structure
@@ -323,5 +325,6 @@ export async function GET(req: Request) {
     return NextResponse.json({ items: transformed, total, page, pageSize });
   }
 
-  return NextResponse.json({ bookings: transformed });
+  // Для обычных пользователей тоже возвращаем пагинацию
+  return NextResponse.json({ bookings: transformed, total, page, pageSize });
 }

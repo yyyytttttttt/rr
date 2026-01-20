@@ -19,8 +19,9 @@ const loginAttempts = new Map<string, RateLimitEntry>();
 const MAX_ATTEMPTS = 5;
 const BLOCK_DURATION = 15 * 60 * 1000; // 15 минут
 const ATTEMPT_WINDOW = 60 * 1000; // 1 минута
+const MAX_MAP_SIZE = 10000; // Максимальный размер Map для предотвращения утечки памяти
 
-// Очистка старых записей каждые 30 минут
+// Очистка старых записей каждые 5 минут (было 30)
 setInterval(() => {
   const now = Date.now();
   for (const [key, value] of loginAttempts.entries()) {
@@ -30,7 +31,22 @@ setInterval(() => {
       loginAttempts.delete(key);
     }
   }
-}, 30 * 60 * 1000);
+}, 5 * 60 * 1000);
+
+// Функция для безопасного добавления в Map с лимитом размера
+function setLoginAttempt(key: string, value: RateLimitEntry) {
+  // Если Map переполнен, удаляем самые старые записи
+  if (loginAttempts.size >= MAX_MAP_SIZE) {
+    const entries = Array.from(loginAttempts.entries());
+    entries.sort((a, b) => a[1].lastAttempt - b[1].lastAttempt);
+    // Удаляем 20% самых старых записей
+    const toDelete = Math.floor(MAX_MAP_SIZE * 0.2);
+    for (let i = 0; i < toDelete; i++) {
+      loginAttempts.delete(entries[i][0]);
+    }
+  }
+  loginAttempts.set(key, value);
+}
 
 // Обработка OPTIONS для CORS preflight
 export async function OPTIONS(request: NextRequest) {
@@ -121,7 +137,7 @@ export async function POST(request: NextRequest) {
       if (newCount >= MAX_ATTEMPTS) {
         // Блокируем IP на 15 минут
         const blockedUntil = now + BLOCK_DURATION;
-        loginAttempts.set(ip, { count: newCount, lastAttempt: now, blockedUntil });
+        setLoginAttempt(ip, { count: newCount, lastAttempt: now, blockedUntil });
 
         console.warn(`[MOBILE_AUTH] IP ${ip} blocked after ${newCount} failed attempts`);
 
@@ -136,7 +152,7 @@ export async function POST(request: NextRequest) {
       }
 
       // Обновляем счетчик
-      loginAttempts.set(ip, { count: newCount, lastAttempt: now });
+      setLoginAttempt(ip, { count: newCount, lastAttempt: now });
 
       console.warn(`[MOBILE_AUTH] Failed login attempt ${newCount}/${MAX_ATTEMPTS} from IP: ${ip} for email: ${email}`);
 

@@ -5,7 +5,7 @@ import { z } from "zod";
 import bcrypt from "bcrypt";
 
 import { getServerSession } from "next-auth";
-import { authOptions } from "../../../lib/auth";
+import { authOptions, invalidateTokenVersionCache } from "../../../lib/auth";
 
 const schema = z.object({
     oldPassword:z.string().min(8),
@@ -35,10 +35,7 @@ export  async function POST(req:Request) {
 
     const user = await prisma.user.findUnique({
         where:{email},
-        select:{id:true,password:true}
-        
-     
-
+        select:{id:true,password:true,tokenVersion:true}
     })
 
     if (!user?.password){
@@ -55,10 +52,21 @@ export  async function POST(req:Request) {
 
     const hash = await bcrypt.hash(newPassword,12)
 
+    // Инкрементируем tokenVersion для инвалидации всех старых сессий
+    const newTokenVersion = (user.tokenVersion ?? 0) + 1;
+
     await prisma.user.update({
         where:{email},
-        data:{password:hash,passwordUpdatedAt:new Date()}
+        data:{
+            password:hash,
+            passwordUpdatedAt:new Date(),
+            tokenVersion: newTokenVersion
+        }
     })
+
+    // Инвалидируем кэш tokenVersion
+    invalidateTokenVersionCache(user.id);
+
     return NextResponse.json({ok:true})
 
   

@@ -5,6 +5,51 @@ import Credentials from "next-auth/providers/credentials";
 import { prisma } from "../lib/prizma";
 import bcrypt from "bcrypt";
 
+// Кэш tokenVersion для уменьшения нагрузки на БД
+// TTL: 60 секунд - баланс между безопасностью и производительностью
+interface TokenVersionCache {
+    version: number;
+    timestamp: number;
+}
+const tokenVersionCache = new Map<string, TokenVersionCache>();
+const TOKEN_VERSION_CACHE_TTL = 60 * 1000; // 60 секунд
+const MAX_CACHE_SIZE = 10000;
+
+function getCachedTokenVersion(userId: string): number | null {
+    const cached = tokenVersionCache.get(userId);
+    if (!cached) return null;
+    if (Date.now() - cached.timestamp > TOKEN_VERSION_CACHE_TTL) {
+        tokenVersionCache.delete(userId);
+        return null;
+    }
+    return cached.version;
+}
+
+function setCachedTokenVersion(userId: string, version: number): void {
+    // Ограничиваем размер кэша
+    if (tokenVersionCache.size >= MAX_CACHE_SIZE) {
+        // Удаляем самую старую запись
+        const oldestKey = tokenVersionCache.keys().next().value;
+        if (oldestKey) tokenVersionCache.delete(oldestKey);
+    }
+    tokenVersionCache.set(userId, { version, timestamp: Date.now() });
+}
+
+// Экспортируем для инвалидации при смене пароля
+export function invalidateTokenVersionCache(userId: string): void {
+    tokenVersionCache.delete(userId);
+}
+
+// Очистка устаревших записей каждые 5 минут
+setInterval(() => {
+    const now = Date.now();
+    for (const [key, value] of tokenVersionCache.entries()) {
+        if (now - value.timestamp > TOKEN_VERSION_CACHE_TTL) {
+            tokenVersionCache.delete(key);
+        }
+    }
+}, 5 * 60 * 1000);
+
 
 
 declare module "next-auth" {
@@ -110,13 +155,27 @@ export const authOptions:NextAuthOptions ={
 
                 // Проверяем tokenVersion только если это не первый вход
                 if (token.sub && token.tokenVersion !== undefined){
-                    const s = await prisma.user.findUnique({
-                        where :{id: token.sub},
-                        select :{tokenVersion: true}
-                    })
+                    // Сначала проверяем кэш
+                    let dbTokenVersion = getCachedTokenVersion(token.sub);
 
-                    // Если пользователь не найден или версия не совпадает - сбрасываем сессию
-                    if (!s || s.tokenVersion !== token.tokenVersion){
+                    if (dbTokenVersion === null) {
+                        // Кэш пуст или устарел - запрашиваем из БД
+                        const s = await prisma.user.findUnique({
+                            where :{id: token.sub},
+                            select :{tokenVersion: true}
+                        });
+
+                        if (!s) {
+                            console.log('User not found, clearing session');
+                            return {} as any;
+                        }
+
+                        dbTokenVersion = s.tokenVersion;
+                        setCachedTokenVersion(token.sub, dbTokenVersion);
+                    }
+
+                    // Если версия не совпадает - сбрасываем сессию
+                    if (dbTokenVersion !== token.tokenVersion){
                         console.log('Token version mismatch, clearing session');
                         return {} as any;
                     }

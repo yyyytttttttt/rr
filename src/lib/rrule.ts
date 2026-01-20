@@ -4,7 +4,12 @@
  */
 
 import { toZonedTime, fromZonedTime } from "date-fns-tz";
-import { addDays, addMonths, isBefore, isAfter, startOfDay } from "date-fns";
+import { addDays, addWeeks, addMonths, isBefore, isAfter, startOfDay } from "date-fns";
+
+// Максимальное количество итераций для защиты от бесконечного цикла
+const MAX_ITERATIONS = 500;
+// Максимальное количество генерируемых вхождений
+const MAX_OCCURRENCES = 100;
 
 // ================= Типы =================
 
@@ -146,14 +151,33 @@ export function generateOccurrences(
   const occurrences: RRuleOccurrence[] = [];
   let currentDate = new Date(baseStart);
   let count = 0;
+  let iterations = 0;
 
   // Длительность базового события
   const duration = baseEnd.getTime() - baseStart.getTime();
 
+  // Оптимизация: пропускаем даты до начала диапазона поиска
+  // Прыгаем целыми неделями/месяцами если возможно
+  if (options.freq === "WEEKLY" && isBefore(currentDate, rangeStart)) {
+    const weeksToSkip = Math.floor((rangeStart.getTime() - currentDate.getTime()) / (7 * 24 * 60 * 60 * 1000));
+    if (weeksToSkip > 1) {
+      currentDate = addWeeks(currentDate, weeksToSkip - 1);
+    }
+  } else if (options.freq === "MONTHLY" && isBefore(currentDate, rangeStart)) {
+    const monthsToSkip = Math.floor((rangeStart.getTime() - currentDate.getTime()) / (30 * 24 * 60 * 60 * 1000));
+    if (monthsToSkip > 1) {
+      currentDate = addMonths(currentDate, monthsToSkip - 1);
+    }
+  }
+
   while (
     isBefore(currentDate, effectiveUntil) &&
-    (!options.count || count < options.count)
+    (!options.count || count < options.count) &&
+    iterations < MAX_ITERATIONS &&
+    occurrences.length < MAX_OCCURRENCES
   ) {
+    iterations++;
+
     // Генерируем вхождение
     if (shouldInclude(currentDate, options, tzid)) {
       const occStart = new Date(currentDate);
@@ -172,17 +196,21 @@ export function generateOccurrences(
       }
     }
 
-    // Переходим к следующему кандидату
+    // Переходим к следующему кандидату - оптимизированный инкремент
     if (options.freq === "WEEKLY") {
+      // Для WEEKLY с BYDAY - переходим к следующему дню
+      // Но если мы проверили все 7 дней недели, прыгаем на неделю вперед
       currentDate = addDays(currentDate, 1);
     } else if (options.freq === "MONTHLY") {
-      currentDate = addDays(currentDate, 1);
-      // Для MONTHLY проверяем все дни месяца
-    }
-
-    // Защита от бесконечного цикла
-    if (isAfter(currentDate, new Date(effectiveUntil.getTime() + 365 * 24 * 60 * 60 * 1000))) {
-      break;
+      // Для MONTHLY - переходим к следующему дню в пределах месяца
+      // Если достигли конца месяца, переходим к началу следующего
+      const nextDay = addDays(currentDate, 1);
+      if (nextDay.getMonth() !== currentDate.getMonth()) {
+        // Перешли в новый месяц - сразу переходим к первому дню следующего месяца
+        currentDate = nextDay;
+      } else {
+        currentDate = nextDay;
+      }
     }
   }
 

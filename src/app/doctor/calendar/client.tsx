@@ -404,6 +404,14 @@ export default function ClientCalendar({
   }, []);
 
   // Синхронизация горизонтального скролла заголовков и тела календаря
+  // Храним ссылки на обработчики для корректной очистки
+  const scrollListenersRef = useRef<{
+    bodyScroller: Element | null;
+    headerScroller: Element | null;
+    syncFromBody: (() => void) | null;
+    syncFromHeader: (() => void) | null;
+  }>({ bodyScroller: null, headerScroller: null, syncFromBody: null, syncFromHeader: null });
+
   useEffect(() => {
     if (!isMobile) return;
 
@@ -436,16 +444,30 @@ export default function ClientCalendar({
         requestAnimationFrame(() => { syncing = false; });
       };
 
+      // Сохраняем ссылки для очистки при unmount
+      scrollListenersRef.current = {
+        bodyScroller,
+        headerScroller,
+        syncFromBody,
+        syncFromHeader,
+      };
+
       bodyScroller.addEventListener('scroll', syncFromBody, { passive: true });
       headerScroller.addEventListener('scroll', syncFromHeader, { passive: true });
-
-      return () => {
-        bodyScroller.removeEventListener('scroll', syncFromBody);
-        headerScroller.removeEventListener('scroll', syncFromHeader);
-      };
     }, 800);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      // Очищаем обработчики если они были установлены
+      const { bodyScroller, headerScroller, syncFromBody, syncFromHeader } = scrollListenersRef.current;
+      if (bodyScroller && syncFromBody) {
+        bodyScroller.removeEventListener('scroll', syncFromBody);
+      }
+      if (headerScroller && syncFromHeader) {
+        headerScroller.removeEventListener('scroll', syncFromHeader);
+      }
+      scrollListenersRef.current = { bodyScroller: null, headerScroller: null, syncFromBody: null, syncFromHeader: null };
+    };
   }, [isMobile]);
 
   const headerToolbar = useMemo(
@@ -464,11 +486,38 @@ export default function ClientCalendar({
   const inflightRef = useRef<AbortController | null>(null);
   const refetchTimerRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Максимальный размер кэша диапазонов для предотвращения утечки памяти
+  const MAX_CACHE_SIZE = 20;
+
   const makeKey = useCallback(
     (info: { startStr: string; endStr: string }) =>
       `${info.startStr}|${info.endStr}|${tzid}`,
     [tzid]
   );
+
+  // Функция для безопасного добавления в кэш с лимитом размера
+  const setCacheEntry = useCallback((key: string, value: CalendarEvent[]) => {
+    // Если кэш переполнен, удаляем самую старую запись (FIFO)
+    if (rangeCacheRef.current.size >= MAX_CACHE_SIZE) {
+      const firstKey = rangeCacheRef.current.keys().next().value;
+      if (firstKey) {
+        rangeCacheRef.current.delete(firstKey);
+      }
+    }
+    rangeCacheRef.current.set(key, value);
+  }, []);
+
+  // Очистка ресурсов при размонтировании компонента
+  useEffect(() => {
+    return () => {
+      rangeCacheRef.current.clear();
+      eventsCache.current = [];
+      inflightRef.current?.abort?.();
+      if (refetchTimerRef.current) {
+        clearTimeout(refetchTimerRef.current);
+      }
+    };
+  }, []);
 
   const loadEvents = useCallback(
     async (
@@ -510,7 +559,7 @@ export default function ClientCalendar({
 
         const merged = [...openings, ...exceptions, ...bookings, ...unavailabilities];
         eventsCache.current = merged;
-        rangeCacheRef.current.set(key, merged);
+        setCacheEntry(key, merged);
         success(merged);
       } catch (e) {
         const error = e as Error;
@@ -523,7 +572,7 @@ export default function ClientCalendar({
         setLoading(false);
       }
     },
-    [doctorId, tzid, makeKey]
+    [doctorId, tzid, makeKey, setCacheEntry]
   );
 
   const eventSources = useMemo(

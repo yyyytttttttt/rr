@@ -46,6 +46,11 @@ export async function POST(req) {
 
   try {
     const upload = await new Promise((resolve, reject) => {
+      // Таймаут для предотвращения зависания
+      const timeout = setTimeout(() => {
+        reject(new Error("Upload timeout"));
+      }, 30000); // 30 секунд максимум
+
       const stream = cloudinary.uploader.upload_stream(
         {
           folder: "avatars",
@@ -56,6 +61,7 @@ export async function POST(req) {
           ],
         },
         (err, result) => {
+          clearTimeout(timeout);
           if (err || !result) return reject(err);
           resolve({ url: result.secure_url, public_id: result.public_id });
         }
