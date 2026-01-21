@@ -226,7 +226,7 @@ export default function WorksGalleryShowcase({
   const thumbAlt = current.thumb?.alt || current.after?.alt || 'Миниатюра'
 
   return (
-    <section className="rounded-[28px] p-6 md:p-10">
+    <section className="rounded-[28px] p-2 md:p-10">
       <div className="grid grid-cols-1 gap-8 md:grid-cols-[1fr_1.15fr] md:items-center">
         {/* LEFT */}
         <div className="pt-2 md:pt-6">

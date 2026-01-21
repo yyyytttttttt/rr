@@ -4,15 +4,15 @@ import { memo, useState } from "react"
 import { useRouter, usePathname } from "next/navigation"
 import GuestBookingModal from '../modals/GuestBookingModal'
 
-const ArrowLeft = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50" fill="none">
+const ArrowLeft = ({ className = "" }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50" fill="none" className={className}>
     <rect x="50" y="50" width="50" height="50" rx="25" transform="rotate(-180 50 50)" fill="#F4EDD7"/>
     <path d="M18.349 25.0001L27.8359 34.4871L26.4896 35.8657L15.6245 25.0001L26.4896 14.1345L27.8359 15.5131L18.349 25.0001Z" fill="#967450"/>
   </svg>
 )
 
-const ArrowRight = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50" fill="none">
+const ArrowRight = ({ className = "" }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50" fill="none" className={className}>
     <rect width="50" height="50" rx="25" fill="#F4EDD7"/>
     <path d="M31.651 25.0001L22.1641 34.4871L23.5104 35.8657L34.3755 25.0001L23.5104 14.1345L22.1641 15.5131L31.651 25.0001Z" fill="#967450"/>
   </svg>
@@ -46,21 +46,21 @@ function BottomNav({ activeSlide = 0 }) {
 
   return (
     <>
-      <div className={`fixed mx-auto bottom-0 sm:bottom-12 left-1/2 transform -translate-x-1/2 w-full flex items-center justify-center px-2 py-1 pb-4 sm:pb-0 z-50 transition-all duration-300 ${hasSlider ? 'max-w-[1440px]' : 'max-w-[810px]'}`}>
+      <div className={`fixed mx-auto bottom-2 sm:bottom-12 left-1/2 transform -translate-x-1/2 w-full flex items-center justify-center px-1 sm:px-2 py-1 pb-4 sm:pb-0 z-50 transition-all duration-300 ${hasSlider ? 'max-w-[100%] sm:max-w-[1440px]' : 'max-w-[810px]'}`}>
 
-        {/* Стрелки влево - все в DOM, показываем только активную */}
-        <div className={`${hasSlider ? 'sm:flex' : 'hidden'} hidden items-center justify-center mr-4`}>
+        {/* Стрелки влево - видны и на мобильных */}
+        <div className={`${hasSlider ? 'flex' : 'hidden'} items-center justify-center mr-1 sm:mr-4`}>
           {Object.entries(SLIDER_SLIDES).map(([slideIdx, classes]) => (
             <button
               key={`prev-${slideIdx}`}
               className={`${classes.prev} items-center justify-center cursor-pointer transition-all duration-300 hover:scale-110 active:scale-95 ${Number(slideIdx) === activeSlide ? 'flex' : 'hidden'}`}
             >
-              <ArrowLeft />
+              <ArrowLeft className="w-9 h-9 sm:w-[50px] sm:h-[50px]" />
             </button>
           ))}
         </div>
 
-        <div className={`bg-[#e5dccb] rounded-0 sm:rounded-full flex items-center justify-center py-2 sm:py-1 transition-all duration-300 ${isHomePage ? 'w-full max-w-[810px]' : 'w-full max-w-[810px]'}`}>
+        <div className={`bg-[#e5dccb] rounded-full flex items-center justify-center py-2 sm:py-1 transition-all duration-300 ${hasSlider ? 'flex-1 max-w-[calc(100%-5rem)] sm:max-w-[810px]' : 'w-full max-w-[810px]'}`}>
           <div className="w-[85%] flex justify-between">
 
           {/* Главная */}
@@ -251,14 +251,14 @@ function BottomNav({ activeSlide = 0 }) {
           </div>
         </div>
 
-        {/* Стрелки вправо - все в DOM, показываем только активную */}
-        <div className={`${hasSlider ? 'sm:flex' : 'hidden'} hidden items-center justify-center ml-4`}>
+        {/* Стрелки вправо - видны и на мобильных */}
+        <div className={`${hasSlider ? 'flex' : 'hidden'} items-center justify-center ml-1 sm:ml-4`}>
           {Object.entries(SLIDER_SLIDES).map(([slideIdx, classes]) => (
             <button
               key={`next-${slideIdx}`}
               className={`${classes.next} items-center justify-center cursor-pointer transition-all duration-300 hover:scale-110 active:scale-95 ${Number(slideIdx) === activeSlide ? 'flex' : 'hidden'}`}
             >
-              <ArrowRight />
+              <ArrowRight className="w-9 h-9 sm:w-[50px] sm:h-[50px]" />
             </button>
           ))}
         </div>

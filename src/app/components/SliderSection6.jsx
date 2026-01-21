@@ -45,7 +45,7 @@ const SliderSection6 = () => {
       <div className="absolute inset-0" />
 
       {/* Центрированный контейнер */}
-      <div className="absolute inset-0 flex items-center justify-center px-3 py-6 sm:px-4 sm:py-8 md:px-6 md:py-10 lg:px-8 lg:py-12">
+      <div className="absolute inset-0 flex items-center justify-center px-0 py-6 sm:px-4 sm:py-8 md:px-6 md:py-10 lg:px-8 lg:py-4%">
         <div className="w-full h-full flex items-center justify-center max-w-[95%] sm:max-w-[90%] md:max-w-[85%] lg:max-w-[80%] xl:max-w-[75%] 2xl:max-w-[84%]">
           <div className="w-full scale-[0.85] sm:scale-90 md:scale-95 lg:scale-100 origin-center">
             <BeforeAfter
