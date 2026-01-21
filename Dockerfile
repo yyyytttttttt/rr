@@ -1,69 +1,69 @@
-# Multi-stage build для Next.js 15 приложения
+# =============================================================================
+# Multi-stage build для Next.js 15 + Prisma
+# Оптимизировано для минимального размера образа
+# =============================================================================
 
 # Stage 1: Dependencies
 FROM node:20-alpine AS deps
 WORKDIR /app
 
-# Установка зависимостей для native модулей
+# Установка зависимостей для native модулей (bcrypt, prisma)
 RUN apk add --no-cache libc6-compat openssl
 
-# Копируем package files
-COPY package*.json ./
-COPY prisma ./prisma/
+# Копируем ТОЛЬКО файлы для установки зависимостей (лучший кэш)
+COPY package.json package-lock.json* ./
 
-# Устанавливаем зависимости
-RUN npm ci --omit=dev && \
-    npx prisma generate
+# Устанавливаем ВСЕ зависимости (включая devDependencies для билда)
+RUN npm ci
 
+# =============================================================================
 # Stage 2: Builder
 FROM node:20-alpine AS builder
 WORKDIR /app
 
-# Копируем зависимости из предыдущего stage
+RUN apk add --no-cache libc6-compat openssl
+
+# Копируем зависимости из deps
 COPY --from=deps /app/node_modules ./node_modules
+
+# Копируем исходный код
 COPY . .
 
-# Генерируем Prisma Client
+# Генерируем Prisma Client (ОДИН РАЗ!)
 RUN npx prisma generate
 
-# Отключаем телеметрию Next.js
+# Отключаем телеметрию и собираем
 ENV NEXT_TELEMETRY_DISABLED=1
-
-# Собираем приложение
 RUN npm run build
 
-# Stage 3: Runner
+# =============================================================================
+# Stage 3: Production Runner (минимальный образ)
 FROM node:20-alpine AS runner
 WORKDIR /app
 
-# Добавляем безопасность
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV PORT=3000
+
+# Безопасность: non-root user
 RUN apk add --no-cache openssl && \
     addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs
 
-# Копируем необходимые файлы
-COPY --from=builder /app/next.config.mjs ./
+# Копируем только необходимое для production
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/prisma ./prisma
 
-# Копируем build результаты
+# Standalone output от Next.js (уже включает нужные node_modules)
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-
-# Копируем node_modules с Prisma
-COPY --from=deps --chown=nextjs:nodejs /app/node_modules ./node_modules
 
 USER nextjs
 
 EXPOSE 3000
 
-ENV PORT=3000
-ENV NODE_ENV=production
-ENV NEXT_TELEMETRY_DISABLED=1
-
 # Healthcheck
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3000/api/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:3000/api/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1))"
 
 CMD ["node", "server.js"]

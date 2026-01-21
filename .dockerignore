@@ -5,53 +5,81 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# Testing
-coverage
-.nyc_output
-
-# Next.js
+# Next.js build output (будет создан заново в Docker)
 .next/
 out/
-build
-dist
-
-# Production
-.vercel
-
-# Misc
-.DS_Store
-*.pem
-
-# Debug
-.vscode
-.idea
-
-# Local env files
-.env*.local
-.env
+build/
+dist/
 
 # Git
 .git
 .gitignore
 .gitattributes
 
-# CI/CD
-.github
-.gitlab-ci.yml
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# Environment files (секреты через Dokploy!)
+.env
+.env.*
+.env.local
+.env.development
+.env.production
+
+# Prisma dev database
+prisma/*.db
+prisma/*.db-journal
+
+# Testing
+coverage/
+.nyc_output/
+__tests__/
+*.test.js
+*.test.ts
+*.spec.js
+*.spec.ts
 
 # Docs
 *.md
-!README.md
+LICENSE
+
+# OS files
+.DS_Store
+Thumbs.db
 
 # Logs
-logs
+logs/
 *.log
 
-# Uploads (если не нужны в образе)
-uploads
-public/uploads
+# Archives
+*.zip
+*.tar
+*.tar.gz
+*.rar
 
-# Temp files
-.tmp
-tmp
-temp
+# Temp
+.tmp/
+tmp/
+temp/
+
+# CI/CD configs
+.github/
+.gitlab-ci.yml
+.travis.yml
+
+# Misc
+.vercel/
+.turbo/
+*.pem
+*.key
+
+# Uploads (если хранятся локально)
+uploads/
+public/uploads/
+
+# Dockerfile itself (не нужен внутри образа)
+Dockerfile*
+docker-compose*
