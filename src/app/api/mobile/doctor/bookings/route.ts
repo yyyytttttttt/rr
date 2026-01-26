@@ -24,6 +24,7 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get('status'); // PENDING, CONFIRMED, CANCELED, COMPLETED
     const from = searchParams.get('from'); // ISO date
     const to = searchParams.get('to'); // ISO date
+    const filter = searchParams.get('filter'); // today | upcoming | all
 
     // Определяем ID врача в зависимости от роли
     let doctor;
@@ -56,20 +57,49 @@ export async function GET(request: NextRequest) {
 
     const where: any = { doctorId: doctor.id };
 
-    if (status) {
-      where.status = status;
-    }
+    // Применяем filter (today | upcoming | all) если указан
+    if (filter) {
+      const now = new Date();
+      const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const endOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
 
-    if (from || to) {
-      where.startUtc = {};
-      if (from) where.startUtc.gte = new Date(from);
-      if (to) where.startUtc.lte = new Date(to);
+      if (filter === 'today') {
+        where.status = { in: ['PENDING', 'CONFIRMED'] };
+        where.startUtc = {
+          gte: startOfToday,
+          lt: endOfToday,
+        };
+      } else if (filter === 'upcoming') {
+        where.status = { in: ['PENDING', 'CONFIRMED'] };
+        where.startUtc = { gte: now };
+      }
+      // filter === 'all' - без дополнительных фильтров
+    } else {
+      // Обратная совместимость: используем старые параметры status, from, to
+      if (status) {
+        where.status = status;
+      }
+
+      if (from || to) {
+        where.startUtc = {};
+        if (from) where.startUtc.gte = new Date(from);
+        if (to) where.startUtc.lte = new Date(to);
+      }
     }
 
     // Получить бронирования
     const bookings = await prisma.booking.findMany({
       where,
-      include: {
+      select: {
+        id: true,
+        startUtc: true,
+        endUtc: true,
+        status: true,
+        note: true,
+        createdAt: true,
+        clientName: true,
+        clientEmail: true,
+        clientPhone: true,
         user: {
           select: {
             id: true,
@@ -81,6 +111,7 @@ export async function GET(request: NextRequest) {
         },
         service: {
           select: {
+            id: true,
             name: true,
             priceCents: true,
             currency: true,
@@ -91,7 +122,37 @@ export async function GET(request: NextRequest) {
       orderBy: { startUtc: 'asc' },
     });
 
-    return NextResponse.json({ bookings, doctorId: doctor.id });
+    // Формируем ответ с unified client объектом
+    const formattedBookings = bookings.map((b) => ({
+      id: b.id,
+      startUtc: b.startUtc,
+      endUtc: b.endUtc,
+      status: b.status,
+      note: b.note,
+      createdAt: b.createdAt,
+      service: b.service
+        ? {
+            id: b.service.id,
+            name: b.service.name,
+            durationMin: b.service.durationMin,
+            priceCents: b.service.priceCents,
+            currency: b.service.currency,
+          }
+        : null,
+      client: {
+        id: b.user?.id || null,
+        name: b.user?.name || b.clientName || null,
+        email: b.user?.email || b.clientEmail || null,
+        phone: b.user?.phone || b.clientPhone || null,
+        image: b.user?.image || null,
+      },
+    }));
+
+    return NextResponse.json({
+      ok: true,
+      bookings: formattedBookings,
+      doctorId: doctor.id
+    });
   } catch (error) {
     console.error('[MOBILE_DOCTOR_BOOKINGS] GET error:', error);
     return NextResponse.json(

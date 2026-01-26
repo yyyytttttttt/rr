@@ -25,7 +25,7 @@ const MENU_ITEMS: MenuItem[] = [
   { view: "services", label: "Услуги", icon: "", group: "Работа" },
 
   // Расписание
-  { view: "schedule", label: "График работы", icon: "", group: "Расписание" },
+  { view: "schedule", label: "Шаблоны расписания", icon: "", group: "Расписание" },
   { view: "blocks", label: "Блокировки", icon: "", group: "Расписание" },
 
   // Настройки

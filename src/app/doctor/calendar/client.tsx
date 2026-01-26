@@ -6,6 +6,7 @@ import type {
   EventClickArg,
   EventDropArg,
   EventContentArg,
+  DateClickArg,
 } from "@fullcalendar/core";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import dayGridPlugin from "@fullcalendar/daygrid";
@@ -657,6 +658,42 @@ export default function ClientCalendar({
     [bufferMin]
   );
 
+  /* ======== создание по клику на ячейку (для мобильных) ======== */
+  const handleDateClick = useCallback(
+    (info: { date: Date; dateStr: string; allDay: boolean; view: any }) => {
+      // Только для мобильных и в timeGrid видах
+      if (!isMobile) return;
+      if (!info.view.type.includes('timeGrid')) return;
+
+      const now = new Date();
+      if (info.date < now) {
+        toast.error("Нельзя создать событие в прошлом");
+        return;
+      }
+
+      // Создаём слот на 30 минут по умолчанию
+      const start = info.date;
+      const end = new Date(start.getTime() + 30 * 60 * 1000);
+
+      if (hasUnavailabilityConflict(start, end, eventsCache.current)) {
+        toast.error("Нельзя создать окно в период отпуска/выходного");
+        return;
+      }
+      if (hasBufferViolation(start, end, eventsCache.current, bufferMin)) {
+        const msg =
+          bufferMin > 0
+            ? `Нужен ${bufferMin}-минутный перерыв до/после соседнего приёма`
+            : "Событие пересекается с другим";
+        toast.error(msg);
+        return;
+      }
+
+      setSelection({ start, end });
+      setWhichCreate("chooser");
+    },
+    [bufferMin, isMobile]
+  );
+
   /* ======== клик по событию ======== */
   const eventClick = useCallback((info: EventClickArg) => {
     const { extendedProps } = info.event;
@@ -922,6 +959,8 @@ export default function ClientCalendar({
             selectAllow={selectAllow}
             eventAllow={eventAllow}
             selectMirror
+            selectLongPressDelay={isMobile ? 150 : 1000}
+            longPressDelay={isMobile ? 150 : 1000}
             editable
             eventSources={eventSources}
             loading={(isLoading) => setLoading(isLoading)}
@@ -929,6 +968,7 @@ export default function ClientCalendar({
             eventDrop={eventDrop}
             eventResize={eventResize}
             select={handleSelect}
+            dateClick={handleDateClick}
             height="auto"
             firstDay={1}
             dayHeaderContent={dayHeaderContent}
