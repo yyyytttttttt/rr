@@ -509,7 +509,7 @@ export default function GuestBookingModal({ isOpen, onClose }) {
       onClick={handleClose}
     >
       <div
-        className={`bg-white rounded-[12px] sm:rounded-[16px] w-full max-w-[90%] sm:max-w-[600px] md:max-w-[700px] max-h-[90vh] overflow-y-auto shadow-2xl transition-all duration-300 ${
+        className={`bg-white rounded-[12px] sm:rounded-[16px] w-full max-w-full sm:max-w-[90%] sm:max-w-[600px] md:max-w-[700px] max-h-[90vh] overflow-y-auto shadow-2xl transition-all duration-300 ${
           isAnimating ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
         }`}
         onClick={(e) => e.stopPropagation()}

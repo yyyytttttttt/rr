@@ -3,7 +3,6 @@ import { authOptions } from "../../lib/auth";
 import { prisma } from "../../lib/prizma";
 import { redirect } from "next/navigation";
 import DoctorContent from "./_components/DoctorContent";
-import BottomNav from "../components/menus/BottomNav";
 
 type View = "home" | "calendar" | "services" | "schedule" | "blocks" | "settings";
 
@@ -97,7 +96,6 @@ export default async function DoctorPage({ searchParams }: Props) {
   return (
     <div className="min-h-screen bg-[#FFFCF3] flex flex-col">
       <DoctorContent view={view} panelProps={panelProps} doctor={doctorInfo} />
-      <BottomNav />
     </div>
   );
 }

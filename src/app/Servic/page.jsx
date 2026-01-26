@@ -180,7 +180,7 @@ export default function ServicesPage() {
           )}
 
           {/* заголовок + слайдер */}
-          <h1 className="mt-10 text-[24px] xs:text-[32px] lg:text-[40px] font-[Manrope-SemiBold] tracking-[-0.02em] text-[#2F2D28]">
+          <h1 className="mt-4 sm:mt-10 text-[24px] xs:text-[32px] lg:text-[40px] font-[Manrope-SemiBold] tracking-[-0.02em] text-[#2F2D28]">
             Доступные направления
           </h1>
 
@@ -191,7 +191,7 @@ export default function ServicesPage() {
           />
 
           {/* секции */}
-          <div className="mt-16 space-y-16">
+          <div className="mt-4 sm:mt-12 space-y-16">
             <AnimatePresence mode="wait">
               <motion.div
                 key={searchQuery || activeId}
@@ -212,7 +212,7 @@ export default function ServicesPage() {
                       {sec.categoryName}
                     </h2>
 
-                    <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="mt-4 sm:mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                       {sec.items.map((it, idx) => (
                         <motion.div
                           key={idx}

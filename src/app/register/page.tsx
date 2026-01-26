@@ -232,7 +232,7 @@ export default function RegisterPage() {
             {/* Ссылка на вход */}
             <p className="text-center text-[clamp(0.875rem,0.7885rem+0.3846vw,1.25rem)] font-ManropeRegular text-[#7A7A7A]">
               У вас уже есть аккаунт?{' '}
-              <Link href="/login" className="text-[#8B6F3D] hover:opacity-80">
+              <Link href="/Login" className="text-[#8B6F3D] hover:opacity-80">
                 Войти
               </Link>
             </p>

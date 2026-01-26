@@ -28,20 +28,20 @@ type MenuItem = {
 
 const MENU_ITEMS: MenuItem[] = [
   // Специалисты
-  { view: "specialists.schedule", label: "Смотреть занятость", icon: "📅", group: "Специалисты" },
-  { view: "specialists.manage", label: "Управление записями", icon: "📋", group: "Специалисты" },
-  { view: "specialists.base", label: "База специалистов", icon: "👥", group: "Специалисты" },
+  { view: "specialists.schedule", label: "Смотреть занятость", icon: "", group: "Специалисты" },
+  { view: "specialists.manage", label: "Управление записями", icon: "", group: "Специалисты" },
+  { view: "specialists.base", label: "База специалистов", icon: "", group: "Специалисты" },
 
   // Клиенты
-  { view: "clients.base", label: "База клиентов", icon: "📇", group: "Клиенты" },
-  { view: "clients.bookings", label: "Записи клиентов", icon: "🗓️", group: "Клиенты" },
+  { view: "clients.base", label: "База клиентов", icon: "", group: "Клиенты" },
+  { view: "clients.bookings", label: "Записи клиентов", icon: "", group: "Клиенты" },
 
   // Услуги
-  { view: "services.manage", label: "Управление услугами", icon: "📝", group: "Услуги" },
-  { view: "services.categories", label: "Категории услуг", icon: "📁", group: "Услуги" },
+  { view: "services.manage", label: "Управление услугами", icon: "", group: "Услуги" },
+  { view: "services.categories", label: "Категории услуг", icon: "", group: "Услуги" },
 
   // Настройки
-  { view: "settings", label: "Настройки", icon: "⚙️", group: "Настройки" },
+  { view: "settings", label: "Настройки", icon: "", group: "Настройки" },
 ];
 
 // Группируем меню

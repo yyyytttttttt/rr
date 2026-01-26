@@ -3,7 +3,6 @@ import { authOptions } from "../../lib/auth";
 import { prisma } from "../../lib/prizma";
 import { redirect } from "next/navigation";
 import ProfileContent from "./_components/ProfileContent";
-import BottomNav from '../components/menus/BottomNav'
 
 type View = "home" | "booking" | "healthpasses" | "history" | "gifts" | "settings";
 
@@ -57,7 +56,6 @@ export default async function ProfilePage({ searchParams }: Props) {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <ProfileContent view={view} panelProps={panelProps} user={user} />
-      <BottomNav></BottomNav>
     </div>
   );
 }

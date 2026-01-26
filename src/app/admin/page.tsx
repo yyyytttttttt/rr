@@ -2,7 +2,6 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../../lib/auth";
 import { redirect } from "next/navigation";
 import AdminContent from "./_components/AdminContent";
-import BottomNav from "../components/menus/BottomNav";
 
 type View =
   | "specialists.schedule"
@@ -58,7 +57,6 @@ export default async function AdminPage({ searchParams }: Props) {
         userEmail={session.user.email || ""}
         userImage={session.user.image || ""}
       />
-      <BottomNav />
     </div>
   );
 }

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useMemo, useRef, useState } from 'react'
+import React, { useMemo, useRef, useState, useCallback, memo } from 'react'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { Mousewheel, Keyboard } from 'swiper/modules'
 import 'swiper/css'
@@ -9,6 +9,18 @@ import TopTitle from './components/glav/TopTitle'
 import LayoutOverlay from './components/LayoutOverlay'
 import { slides } from './components/glav/slides.dataGlav'
 import SlideRenderer from './components/glav/SlideRenderer'
+
+// Ленивый слайд — рендерит контент только если рядом с активным
+const LazySlide = memo(function LazySlide({ slide, index, activeIndex }) {
+  // Рендерим только текущий слайд и соседние
+  const isNear = Math.abs(index - activeIndex) <= 1
+
+  if (!isNear) {
+    return <div className="h-app w-screen bg-[#FFFCF3]" />
+  }
+
+  return <SlideRenderer slide={slide} />
+})
 
 export default function FullPageSwiper() {
   const texts = useMemo(
@@ -23,34 +35,43 @@ export default function FullPageSwiper() {
   const swiperRef = useRef(null)
   const [active, setActive] = useState(0)
 
+  const handleSlideChange = useCallback((s) => {
+    setActive(s.activeIndex)
+  }, [])
+
   return (
     <div className="relative">
       <TopTitle active={active} texts={texts} />
 
-      {/* ФИКС: высота экрана вместо h-full */}
       <div className="relative w-screen h-app overflow-hidden overscroll-none touch-pan-y">
         <Swiper
           direction="vertical"
           slidesPerView={1}
-          speed={1000}
-          resistanceRatio={0.5}
-          threshold={6}
-          longSwipesMs={220}
-          longSwipesRatio={0.1}
-          touchAngle={45}
-          followFinger
-          allowTouchMove
-          mousewheel={{ forceToAxis: true, releaseOnEdges: true }}
+          speed={800}
+          resistanceRatio={0.85}
+          threshold={5}
+          longSwipesMs={150}
+          longSwipesRatio={0.15}
+          touchAngle={50}
+          followFinger={true}
+          allowTouchMove={true}
+          touchReleaseOnEdges={true}
+          passiveListeners={true}
+          touchStartPreventDefault={false}
+          mousewheel={{
+            forceToAxis: true,
+            releaseOnEdges: true,
+          }}
           keyboard={{ enabled: true, onlyInViewport: true }}
           onSwiper={(s) => (swiperRef.current = s)}
-          onSlideChange={(s) => setActive(s.activeIndex)}
+          onSlideChange={handleSlideChange}
           modules={[Mousewheel, Keyboard]}
-          className="h-full will-change-transform"
+          className="h-full"
         >
-          {slides.map((slide) => (
-            <SwiperSlide key={slide.id} className="!h-auto p-0 m-0">
-              <div className="h-app w-screen flex-none relative will-change-transform translate-z-0">
-                <SlideRenderer slide={slide} />
+          {slides.map((slide, index) => (
+            <SwiperSlide key={`${slide.id}-${index}`} className="!h-auto p-0 m-0">
+              <div className="h-app w-screen flex-none relative">
+                <LazySlide slide={slide} index={index} activeIndex={active} />
               </div>
             </SwiperSlide>
           ))}
@@ -59,9 +80,13 @@ export default function FullPageSwiper() {
         <LayoutOverlay active={active} />
 
         <style jsx global>{`
-          .translate-z-0 { transform: translateZ(0); }
-          .swiper, .swiper-wrapper, .swiper-slide { backface-visibility: hidden; }
-          html, body { overscroll-behavior: none; }
+          .swiper, .swiper-wrapper, .swiper-slide {
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+          }
+          html, body {
+            overscroll-behavior: none;
+          }
         `}</style>
       </div>
     </div>

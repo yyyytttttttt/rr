@@ -20,16 +20,16 @@ type MenuItem = {
 
 const MENU_ITEMS: MenuItem[] = [
   // Работа
-  { view: "home", label: "Главная", icon: "🏠", group: "Работа" },
-  { view: "calendar", label: "Календарь", icon: "📅", group: "Работа" },
-  { view: "services", label: "Услуги", icon: "💼", group: "Работа" },
+  { view: "home", label: "Главная", icon: "", group: "Работа" },
+  { view: "calendar", label: "Календарь", icon: "", group: "Работа" },
+  { view: "services", label: "Услуги", icon: "", group: "Работа" },
 
   // Расписание
-  { view: "schedule", label: "График работы", icon: "📋", group: "Расписание" },
-  { view: "blocks", label: "Блокировки", icon: "🏖️", group: "Расписание" },
+  { view: "schedule", label: "График работы", icon: "", group: "Расписание" },
+  { view: "blocks", label: "Блокировки", icon: "", group: "Расписание" },
 
   // Настройки
-  { view: "settings", label: "Настройки", icon: "⚙️", group: "Настройки" },
+  { view: "settings", label: "Настройки", icon: "", group: "Настройки" },
 ];
 
 // Группируем меню

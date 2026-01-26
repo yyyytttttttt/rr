@@ -21,8 +21,14 @@ export default function StaticSection3({ src = '', images, alt = '', children })
   const useResponsiveImage = !!images
   const vh100 = useVh100()
 
+  // Выбираем лучшую картинку для мобилки (default) с учётом Retina
+  const mobileSrc = images?.default || src
+  const tabletSrc = images?.xs || mobileSrc
+  const desktopSrc = images?.oneK || tabletSrc
+  const largeSrc = images?.fourXL || desktopSrc
+
   return (
-    <div  
+    <div
      className="relative overflow-hidden h-app flex-none w-screen">
       {/* Бэкграунд: Видео или Картинка */}
       {isVideo(src) && !useResponsiveImage ? (
@@ -46,34 +52,67 @@ export default function StaticSection3({ src = '', images, alt = '', children })
           />
         </video>
       ) : useResponsiveImage ? (
-        // Адаптивные изображения с кастомными брейкпоинтами
-        <picture className="absolute inset-0 block">
-          {/* Порядок: от самых больших к меньшим */}
-          {images.fourXL && (
-            <source media="(min-width: 1930px)" srcSet={images.fourXL} />
-          )}
-          {images.oneK && (
-            <source media="(min-width: 1000px)" srcSet={images.oneK} />
-          )}
-          {images.xs && <source media="(min-width: 480px)" srcSet={images.xs} />}
-
-          {/* Fallback: default или src */}
-          {/* Использую next/image для оптимизаций, но внутри picture — обычный img:
-              next/image не должен быть дочерним <picture>/<source>. */}
-          <img
-            src={images.default || src}
-            alt={alt}
-            loading="lazy"
-            className="absolute inset-0 h-full w-full object-cover"
-          />
-        </picture>
+        // Адаптивные изображения с Next.js Image для Retina качества
+        <>
+          {/* Mobile < 480px */}
+          <div className="absolute inset-0 block xs:hidden">
+            <Image
+              src={mobileSrc}
+              alt={alt}
+              fill
+              priority={false}
+              quality={100}
+              sizes="100vw"
+              className="object-cover"
+            />
+          </div>
+          {/* Tablet 480px - 999px */}
+          <div className="absolute inset-0 hidden xs:block 1k:hidden">
+            <Image
+              src={tabletSrc}
+              alt={alt}
+              fill
+              priority={false}
+              quality={100}
+              sizes="100vw"
+              className="object-cover"
+            />
+          </div>
+          {/* Desktop 1000px - 1929px */}
+          <div className="absolute inset-0 hidden 1k:block 4xl:hidden">
+            <Image
+              src={desktopSrc}
+              alt={alt}
+              fill
+              priority={false}
+              quality={100}
+              sizes="100vw"
+              className="object-cover"
+            />
+          </div>
+          {/* Large 1930px+ */}
+          <div className="absolute inset-0 hidden 4xl:block">
+            <Image
+              src={largeSrc}
+              alt={alt}
+              fill
+              priority={false}
+              quality={100}
+              sizes="100vw"
+              className="object-cover"
+            />
+          </div>
+        </>
       ) : (
-        // Обычное одиночное изображение (если не видео и нет images)
-        <img
+        // Обычное одиночное изображение
+        <Image
           src={src}
           alt={alt}
-          loading="lazy"
-          className="absolute inset-0 h-full w-full object-cover"
+          fill
+          priority={false}
+          quality={100}
+          sizes="100vw"
+          className="object-cover"
         />
       )}
 
@@ -82,7 +121,7 @@ export default function StaticSection3({ src = '', images, alt = '', children })
         <div className=" absolute  inset-0">{children}</div>
       )}
 
-      
+
     </div>
   )
 }

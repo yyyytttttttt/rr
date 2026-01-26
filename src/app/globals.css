@@ -95,6 +95,56 @@
 .swiper-wrapper { align-items: stretch; }   /* тянем слайды по высоте ряда */
 .swiper-slide > * { height: 100%; }         /* контент внутри слайда на всю высоту */
 
+/* iOS Swiper оптимизация для плавности */
+@supports (-webkit-touch-callout: none) {
+  .swiper {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .swiper-slide {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+
+  .swiper-wrapper {
+    -webkit-transform-style: preserve-3d;
+    transform-style: preserve-3d;
+  }
+
+  /* Убираем will-change на iOS - вызывает проблемы с памятью */
+  .swiper,
+  .swiper-wrapper,
+  .swiper-slide {
+    will-change: auto;
+  }
+}
+
+/* GPU acceleration для всех устройств */
+.swiper-slide-active,
+.swiper-slide-next,
+.swiper-slide-prev {
+  -webkit-transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0);
+}
+
+/* Отключение автозума на iOS при фокусе на инпутах */
+@supports (-webkit-touch-callout: none) {
+  input,
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="tel"],
+  input[type="number"],
+  input[type="search"],
+  input[type="url"],
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
+
 /* Admin & Doctor container with responsive padding */
 .admin-container {
   width: 100%;

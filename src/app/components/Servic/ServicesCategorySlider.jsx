@@ -80,7 +80,7 @@ export default function ServicesCategorySlider({
               <button
                 type="button"
                 onClick={() => onSelect?.(cat.id)}
-                className="relative w-full aspect-[3/5] md:aspect-[4/5] overflow-hidden rounded-2xl text-left transition-transform duration-200 hover:scale-[1.02]"
+                className="relative w-full aspect-[4/5] md:aspect-[4/5] overflow-hidden rounded-2xl text-left transition-transform duration-200 hover:scale-[1.02]"
               >
                 {/* Галочка на активной карточке */}
                 {isActive && <CheckBadge />}

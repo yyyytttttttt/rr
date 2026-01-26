@@ -46,7 +46,7 @@ function BottomNav({ activeSlide = 0 }) {
 
   return (
     <>
-      <div className={`fixed mx-auto bottom-2 sm:bottom-12 left-1/2 transform -translate-x-1/2 w-full flex items-center justify-center px-1 sm:px-2 py-1 pb-4 sm:pb-0 z-50 transition-all duration-300 ${hasSlider ? 'max-w-[100%] sm:max-w-[1440px]' : 'max-w-[810px]'}`}>
+      <div className={`fixed mx-auto bottom-0 sm:bottom-12 left-1/2 transform -translate-x-1/2 w-full flex items-center justify-center px-1 sm:px-2 py-1 pb-0 sm:pb-0 z-50 transition-all duration-300 ${hasSlider ? 'max-w-[100%] sm:max-w-[1440px]' : 'max-w-[810px]'}`}>
 
         {/* Стрелки влево - видны и на мобильных */}
         <div className={`${hasSlider ? 'flex' : 'hidden'} items-center justify-center mr-1 sm:mr-4`}>

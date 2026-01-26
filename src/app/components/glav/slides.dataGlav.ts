@@ -186,7 +186,7 @@ export const slides = [
     id: 'news',
     type: 'static',
     images: {
-      default: '/images/sl901.png',
+      default: '/images/slslnew.png',
       xs: '/images/sl90.png',
       oneK: '/images/sl90.png',
       fourXL: '/images/sl90.png',
@@ -219,7 +219,7 @@ export const slides = [
     id: 'news',
     type: 'static',
     images: {
-      default: '/images/sl902.png',
+      default: '/images/sl920.png',
       xs: '/images/sl902.png',
       oneK: '/images/sl902.png',
       fourXL: '/images/sl902.png',
