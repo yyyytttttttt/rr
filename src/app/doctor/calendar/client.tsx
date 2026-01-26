@@ -6,8 +6,8 @@ import type {
   EventClickArg,
   EventDropArg,
   EventContentArg,
-  DateClickArg,
 } from "@fullcalendar/core";
+import type { DateClickArg } from "@fullcalendar/interaction";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
