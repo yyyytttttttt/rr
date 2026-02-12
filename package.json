@@ -6,7 +6,7 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
     "lint:logs": "npm run lint:logs:server && npm run lint:logs:client",
     "lint:logs:server": "grep -rn \"console\\.\" src/app/api/ src/lib/ scripts/ --include=\"*.ts\" --include=\"*.tsx\" --include=\"*.js\" --include=\"*.jsx\" | grep -v node_modules | grep -v client-logger | grep -v logger.ts",
     "lint:logs:client": "grep -rn \"console\\.\" src/app/ --include=\"*.ts\" --include=\"*.tsx\" --include=\"*.js\" --include=\"*.jsx\" | grep -v node_modules | grep -v \"src/app/api/\""

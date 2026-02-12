@@ -28,7 +28,7 @@ jobs:
         run: npm audit --audit-level=high
 
       - name: Lint
-        run: npm run lint
+        run: npx eslint .
 
       - name: IOC scan (crypto-miners, install hooks)
         run: node scripts/ioc-scan.js
