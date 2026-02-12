@@ -39,6 +39,10 @@ export default defineConfig([
       // эти 2 сейчас валили сборку — переводим в warn
       '@next/next/no-html-link-for-pages': 'warn',
       'react/no-unescaped-entities': 'warn',
+
+      // React 19 strict rules — warn until components are refactored
+      'react-hooks/set-state-in-effect': 'warn',
+      'react-hooks/refs': 'warn',
     },
   },
 
@@ -81,5 +85,5 @@ export default defineConfig([
     rules: { 'no-console': 'off' },
   },
 
-  globalIgnores(['.next/**', 'out/**', 'build/**', 'next-env.d.ts']),
+  globalIgnores(['.next/**', 'out/**', 'build/**', 'next-env.d.ts', 'src/generated/**']),
 ])

@@ -5,12 +5,16 @@ import { prisma } from '../../../../lib/prizma';
 import { createCorsResponse } from '../../../../lib/jwt';
 import { sanitizeIp } from '../../../../lib/rate-limit';
 import { logger } from '../../../../lib/logger';
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
-const JWT_SECRET = (() => {
+function getJwtSecret() {
   const s = process.env.NEXTAUTH_SECRET;
-  if (!s) throw new Error('[SEC] NEXTAUTH_SECRET is not set');
+  if (!s) {
+    throw new Error('[SEC] NEXTAUTH_SECRET is not set');
+  }
   return s;
-})();
+}
 
 // Rate limiting - в памяти (для production лучше использовать Redis)
 interface RateLimitEntry {
@@ -179,15 +183,15 @@ export async function POST(request: NextRequest) {
 
     // Создаем JWT токен для авторизации последующих запросов
     const token = jwt.sign(
-      {
-        userId: user.id,
-        email: user.email,
-        role: user.role,
-        tokenVersion: user.tokenVersion,
-      },
-      JWT_SECRET,
-      { expiresIn: '7d' } // Токен действителен 7 дней
-    );
+    {
+      userId: user.id,
+      email: user.email,
+      role: user.role,
+      tokenVersion: user.tokenVersion,
+    },
+    getJwtSecret(),
+    { expiresIn: '7d' }
+  );
 
     // Вернуть данные пользователя и JWT токен (без пароля!)
     return NextResponse.json({

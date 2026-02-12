@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "../../../lib/prizma";
 import crypto from "crypto";
 import { sendMail } from "../../../lib/mailer";
+import { logger } from "../../../lib/logger";
 
 export async function POST(req: Request) {
  
@@ -62,7 +63,7 @@ export async function POST(req: Request) {
              <p>Ссылка активна 24 часа.</p>`,
     });
   } catch (e) {
-    console.error("[RESEND_MAIL_ERROR]", e);
+    logger.error("[RESEND_MAIL_ERROR]", e);
     
   }
 

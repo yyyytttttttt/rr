@@ -19,6 +19,7 @@ import {
   parseISO,
 } from "date-fns";
 import { generateOccurrences } from "../../../../lib/rrule";
+import { logger } from "../../../../lib/logger";
 
 // Обработка OPTIONS для CORS preflight
 export async function OPTIONS(request: NextRequest) {
@@ -393,16 +394,11 @@ export async function GET(req: Request) {
       openings = await openingsFromClassicScheduleForDay(doctorId, day, tzid);
     }
 
-    // ВРЕМЕННЫЙ DEBUG
-    console.log('[SLOTS_DEBUG]', {
+    logger.debug('[SLOTS_DEBUG]', {
       day,
       tzid,
       doctorId,
       openingsCount: openings.length,
-      openings: openings.map(o => ({
-        start: o.startUtc.toISOString(),
-        end: o.endUtc.toISOString(),
-      })),
     });
 
     // защита: если вообще нет окон — вернуть пусто

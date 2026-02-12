@@ -13,6 +13,7 @@ WORKDIR /app
 RUN apk add --no-cache libc6-compat openssl
 
 COPY package.json package-lock.json ./
+RUN npm install -g npm@11.10.0
 
 # install all deps (for build)
 RUN npm ci

@@ -3,15 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-  "dev": "next dev --turbopack",
-  "build": "next build",
-  "start": "next start",
-
-  "lint": "eslint --cache --cache-location .cache/eslint \"src/**/*.{js,jsx,ts,tsx}\" \"scripts/**/*.{js,jsx,ts,tsx}\"",
-  "lint:ci": "npm run lint -- --max-warnings 0",
-  "lint:fix": "npm run lint -- --fix"
-},
-  
+    "dev": "next dev --turbopack",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint --cache --cache-location .cache/eslint --ignore-pattern \"src/generated/**\" \"src/**/*.{js,jsx,ts,tsx}\" \"scripts/**/*.{js,jsx,ts,tsx}\"",
+    "lint:ci": "npm run lint -- --max-warnings 0",
+    "lint:fix": "npm run lint -- --fix",
+    "typecheck": "tsc --noEmit"
+  },
   "dependencies": {
     "@fullcalendar/core": "^6.1.19",
     "@fullcalendar/daygrid": "^6.1.19",
@@ -54,6 +53,7 @@
     "eslint": "^9.39.2",
     "eslint-config-next": "^16.1.6",
     "framer-motion": "^12.23.12",
+    "picomatch": "^4.0.3",
     "prisma": "^6.16.3",
     "tailwindcss": "^4",
     "typescript": "^5.9.2"

@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "../../../../lib/prizma";
 import { createCorsResponse } from "../../../../lib/jwt";
 import { serverError } from "../../../../lib/api-error";
+import { logger } from "../../../../lib/logger";
 
 /**
  * OPTIONS - CORS preflight
@@ -24,7 +25,7 @@ export async function GET(req: Request) {
     const page = Math.max(1, Number(url.searchParams.get("page") ?? 1));
     const pageSize = Math.min(100, Math.max(1, Number(url.searchParams.get("pageSize") ?? 50)));
 
-    console.log("GET /api/services/catalog - categoryId:", categoryId, "page:", page);
+    logger.info("GET /api/services/catalog - categoryId:", categoryId, "page:", page);
 
     const where = {
       ...(categoryId && { categoryId }),
@@ -74,7 +75,7 @@ export async function GET(req: Request) {
       prisma.service.count({ where }),
     ]);
 
-    console.log(`Found ${services.length} services (total: ${total})`);
+    logger.info(`Found ${services.length} services (total: ${total})`);
     return NextResponse.json({ services, total, page, pageSize });
   } catch (error) {
     return serverError('[SERVICES_CATALOG] Error', error);

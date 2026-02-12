@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../../lib/auth";
 import { prisma } from "../../../lib/prizma";
+import { logger } from "../../../lib/logger";
 
 export async function GET(req: Request) {
   const session = await getServerSession(authOptions);
@@ -25,7 +26,7 @@ export async function GET(req: Request) {
   const page = Math.max(1, Number(url.searchParams.get("page") ?? 1));
   const pageSize = Math.min(100, Math.max(1, Number(url.searchParams.get("pageSize") ?? 20)));
 
-  console.log("GET /api/clients - query:", q, "page:", page, "pageSize:", pageSize);
+  logger.info("GET /api/clients - query:", q, "page:", page, "pageSize:", pageSize);
 
   try {
     // Build where clause for search
@@ -78,18 +79,11 @@ export async function GET(req: Request) {
       discount: 0, // TODO: Add discount field to User model if needed
     }));
 
-    console.log(`GET /api/clients - found ${items.length} clients (total: ${total})`);
-    if (items.length > 0) {
-      console.log("First client example:", {
-        name: items[0].name,
-        visits: items[0].visits,
-        discount: items[0].discount,
-      });
-    }
+    logger.info(`GET /api/clients - found ${items.length} clients (total: ${total})`);
 
     return NextResponse.json({ items, total, page, pageSize });
   } catch (error) {
-    console.error("Failed to fetch clients:", error);
+    logger.error("Failed to fetch clients:", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
