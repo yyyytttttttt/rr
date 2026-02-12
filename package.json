@@ -3,13 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
-    "build": "next build",
-    "start": "next start",
-     "lint": "eslint --cache --cache-location .cache/eslint --ext .js,.jsx,.ts,.tsx src scripts",
+  "dev": "next dev --turbopack",
+  "build": "next build",
+  "start": "next start",
+
+  "lint": "eslint --cache --cache-location .cache/eslint \"src/**/*.{js,jsx,ts,tsx}\" \"scripts/**/*.{js,jsx,ts,tsx}\"",
   "lint:ci": "npm run lint -- --max-warnings 0",
   "lint:fix": "npm run lint -- --fix"
-  },
+},
   
   "dependencies": {
     "@fullcalendar/core": "^6.1.19",
