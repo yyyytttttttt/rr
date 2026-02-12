@@ -7,29 +7,42 @@ export default defineConfig([
   ...nextVitals,
   ...nextTs,
 
-  // ── глобально: запрещаем console.*, разрешаем только console.error ──
+  // GLOBAL
   {
     rules: {
       'no-console': ['error', { allow: ['error'] }],
-    },
+      '@typescript-eslint/ban-ts-comment': [
+        'error',
+        { 'ts-ignore': 'allow-with-description' }
+      ],
+    }
   },
 
-  // ── сервер: запрещаем вообще любой console, только logger ──
+  // SERVER STRICT
   {
-    files: [
-      'src/app/api/**/*.{ts,tsx,js,jsx}',
-      'src/lib/**/*.{ts,tsx,js,jsx}',
-      'scripts/**/*.{js,mjs,ts}',
-    ],
+    files: ['src/app/api/**/*.{ts,tsx}'],
     rules: {
       'no-console': 'error',
-    },
+      '@typescript-eslint/no-explicit-any': 'error'
+    }
   },
 
-  // ── сами логгеры ──
+  // UI softer
   {
-    files: ['src/lib/logger.ts', 'src/lib/client-logger.ts'],
-    rules: { 'no-console': 'off' },
+    files: ['src/app/**/*.{ts,tsx}'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'warn'
+    }
+  },
+
+  // SCRIPTS relaxed
+  {
+    files: ['scripts/**/*.{js,ts}'],
+    rules: {
+      'no-console': 'off',
+      '@typescript-eslint/no-require-imports': 'off',
+      '@typescript-eslint/no-explicit-any': 'off'
+    }
   },
 
   globalIgnores([
