@@ -56,11 +56,22 @@ jobs:
             FILES=$(git ls-files)
           fi
 
+          # Write patterns to temp file to avoid shell quoting issues
+          cat > /tmp/secret-patterns.txt <<'PATTERNS'
+          AKIA[0-9A-Z]{16}
+          -----BEGIN (RSA|EC|PGP) PRIVATE
+          xox[baprs]-[0-9A-Za-z-]{10,}
+          ghp_[A-Za-z0-9]{36,}
+          AIza[0-9A-Za-z\-_]{35}
+          password\s*=\s*["'][^"']{8,}
+          smtp(_)?pass\s*[:=]\s*["'][^"']{8,}
+          nextauth(_)?secret\s*[:=]\s*["'][^"']{12,}
+          PATTERNS
+
           echo "$FILES" | \
             grep -E '\.(ts|tsx|js|mjs|cjs|json|yml|yaml)$' | \
             grep -vE '(\.env(\.|$)|node_modules/|\.next/|dist/|build/)' | \
-            xargs -r grep -nIE \
-              'AKIA[0-9A-Z]{16}|-----BEGIN (RSA|EC|PGP) PRIVATE|xox[baprs]-[0-9A-Za-z-]{10,}|ghp_[A-Za-z0-9]{36,}|AIza[0-9A-Za-z\-_]{35}|password\s*=\s*["'\'''][^"'\''']{8,}|smtp(_)?pass\s*[:=]\s*["'\'''][^"'\''']{8,}|nextauth(_)?secret\s*[:=]\s*["'\'''][^"'\''']{12,}' \
+            xargs -r grep -nIEf /tmp/secret-patterns.txt \
             && echo "SECRETS FOUND - fix before merge" && exit 1 || echo "No secrets found"
 
       - name: TypeScript check
