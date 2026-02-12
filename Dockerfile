@@ -7,13 +7,12 @@
 # ========================
 # 1️⃣ Dependencies Stage
 # ========================
-FROM node:20.10-alpine AS deps
+FROM node:20-alpine AS deps
 WORKDIR /app
 
 RUN apk add --no-cache libc6-compat openssl
 
 COPY package.json package-lock.json ./
-RUN npm install -g npm@11.10.0
 
 # install all deps (for build)
 RUN npm ci
@@ -22,7 +21,7 @@ RUN npm ci
 # ========================
 # 2️⃣ Build Stage
 # ========================
-FROM node:20.10-alpine AS builder
+FROM node:20-alpine AS builder
 WORKDIR /app
 
 RUN apk add --no-cache libc6-compat openssl
@@ -41,7 +40,7 @@ RUN npm run build
 # ========================
 # 3️⃣ Production Runner
 # ========================
-FROM node:20.10-alpine AS runner
+FROM node:20-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
