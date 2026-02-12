@@ -28,7 +28,7 @@ jobs:
         run: npm audit --audit-level=high
 
       - name: Lint
-        run: npx next lint
+        run: ./node_modules/.bin/next lint .
 
       - name: IOC scan (crypto-miners, install hooks)
         run: node scripts/ioc-scan.js
