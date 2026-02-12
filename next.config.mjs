@@ -53,7 +53,7 @@ const nextConfig = {
         key: 'Content-Security-Policy',
         value: [
           "default-src 'self'",
-          "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://api-maps.yandex.ru",
+          "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://api-maps.yandex.ru https://yastatic.net https://*.yastatic.net",
           "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
           "font-src 'self' data: https://fonts.googleapis.com https://fonts.gstatic.com",
           "img-src 'self' data: https://res.cloudinary.com https://lh3.googleusercontent.com https://images.unsplash.com https://i.pravatar.cc https://*.yandex.ru https://*.yandex.net",
