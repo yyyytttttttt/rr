@@ -52,9 +52,12 @@ RUN apk add --no-cache openssl \
     && addgroup -S nodejs -g 1001 \
     && adduser -S nextjs -u 1001
 
-# copy public + prisma schema
+# copy public + prisma schema + generated client
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder /app/node_modules/@prisma/client ./node_modules/@prisma/client
+COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
 
 # standalone build
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
@@ -67,4 +70,4 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=3s --start-period=15s --retries=3 \
   CMD node -e "require('http').get('http://localhost:3000/api/health', r => process.exit(r.statusCode===200?0:1))"
 
-CMD ["sh", "-c", "HOSTNAME=0.0.0.0 exec node server.js"]
+CMD ["sh", "-c", "npx prisma db push --skip-generate && HOSTNAME=0.0.0.0 exec node server.js"]
