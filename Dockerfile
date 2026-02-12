@@ -70,4 +70,4 @@ EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=3s --start-period=15s --retries=3 \
   CMD node -e "require('http').get('http://localhost:3000/api/health', r => process.exit(r.statusCode===200?0:1))"
 
-CMD ["sh", "-c", "npx prisma db push --skip-generate && HOSTNAME=0.0.0.0 exec node server.js"]
+CMD ["sh", "-c", "node ./node_modules/prisma/build/index.js db push --skip-generate && HOSTNAME=0.0.0.0 exec node server.js"]
