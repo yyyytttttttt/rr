@@ -1,13 +1,15 @@
 export const runtime = "nodejs";
 
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "../../../lib/prizma";
 import crypto from "crypto";
 import { sendMail } from "../../../lib/mailer";
-
-
+import { logger } from "../../../lib/logger";
+import { rateLimit, sanitizeIp } from "../../../lib/rate-limit";
 import z from "zod";
-import { PrismaClient } from "@prisma/client";
+// Removed unused PrismaClient import (use singleton from prizma.ts)
+
+const resetRateLimit = rateLimit({ windowMs: 60_000, max: 3, keyPrefix: 'pwd-reset' });
 
 const schema = z.object({
     email:z.email()
@@ -15,7 +17,12 @@ const schema = z.object({
 })
 const TTL_MIN = Number(process.env.TTL_MIN || 60)
 
-export async function POST(req:Request){
+export async function POST(req: NextRequest) {
+  const ip = sanitizeIp(req.headers.get('x-forwarded-for'));
+  const rl = await resetRateLimit(ip);
+  if (!rl.ok) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429, headers: { 'Retry-After': String(rl.retryAfterSec) } });
+  }
     const body = await req.json().catch(()=>null)
     const parsed = schema.safeParse(body)
 
@@ -64,7 +71,7 @@ export async function POST(req:Request){
             
         
     } catch (e) {
-        console.error('[RESET_MAIL_FAIL',e)
+        logger.error('[RESET] Failed to send password reset email', e);
     }
     return NextResponse.json({ok:true})
 

@@ -3,6 +3,10 @@ import { prisma } from '../../../../lib/prizma';
 import { requireAuth, createCorsResponse } from '../../../../lib/jwt';
 import bcrypt from 'bcrypt';
 import { z } from 'zod';
+import { logger } from '../../../../lib/logger';
+import { rateLimit, sanitizeIp } from '../../../../lib/rate-limit';
+
+const rl = rateLimit({ windowMs: 60_000, max: 5, keyPrefix: 'mobile-change-pwd' });
 
 // Обработка OPTIONS для CORS preflight
 export async function OPTIONS(request: NextRequest) {
@@ -16,6 +20,9 @@ const changePasswordSchema = z.object({
 
 // POST - Изменить пароль
 export async function POST(request: NextRequest) {
+  const check = await rl(sanitizeIp(request.headers.get('x-forwarded-for')));
+  if (!check.ok) return NextResponse.json({ error: 'Too many requests' }, { status: 429, headers: { 'Retry-After': String(check.retryAfterSec) } });
+
   const auth = requireAuth(request);
 
   if ('error' in auth) {
@@ -58,7 +65,7 @@ export async function POST(request: NextRequest) {
     const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password);
 
     if (!isCurrentPasswordValid) {
-      console.warn(`[MOBILE_CHANGE_PASSWORD] Invalid current password for user ${userId}`);
+      logger.warn('[MOBILE_CHANGE_PASSWORD] Invalid current password attempt');
       return NextResponse.json(
         { error: 'Current password is incorrect' },
         { status: 401 }
@@ -78,14 +85,14 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    console.info(`[MOBILE_CHANGE_PASSWORD] Password changed for user ${userId}`);
+    logger.info('[MOBILE_CHANGE_PASSWORD] Password changed successfully');
 
     return NextResponse.json({
       success: true,
       message: 'Пароль успешно изменен. Пожалуйста, войдите снова с новым паролем.',
     });
   } catch (error) {
-    console.error('[MOBILE_CHANGE_PASSWORD] Error:', error);
+    logger.error('[MOBILE_CHANGE_PASSWORD] Error:', error);
     return NextResponse.json(
       { error: 'Failed to change password' },
       { status: 500 }

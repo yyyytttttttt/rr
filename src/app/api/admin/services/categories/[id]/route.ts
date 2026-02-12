@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../../../../../../lib/auth";
 import { prisma } from "../../../../../../lib/prizma";
 import { z } from "zod";
+import { serverError } from "../../../../../../lib/api-error";
 
 const updateCategorySchema = z.object({
   name: z.string().min(1, "Название обязательно"),
@@ -71,12 +72,8 @@ export async function PUT(
     });
 
     return NextResponse.json({ ok: true, category });
-  } catch (error: any) {
-    console.error("UPDATE_CATEGORY_ERROR", error);
-    return NextResponse.json(
-      { error: "INTERNAL", message: error?.message ?? "Unknown error" },
-      { status: 500 }
-    );
+  } catch (error: unknown) {
+    return serverError('UPDATE_CATEGORY_ERROR', error);
   }
 }
 
@@ -129,11 +126,7 @@ export async function DELETE(
     });
 
     return NextResponse.json({ ok: true });
-  } catch (error: any) {
-    console.error("DELETE_CATEGORY_ERROR", error);
-    return NextResponse.json(
-      { error: "INTERNAL", message: error?.message ?? "Unknown error" },
-      { status: 500 }
-    );
+  } catch (error: unknown) {
+    return serverError('DELETE_CATEGORY_ERROR', error);
   }
 }

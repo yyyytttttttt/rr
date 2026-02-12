@@ -2,6 +2,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "../../../../lib/prizma";
 import { z } from "zod";
+import { serverError } from "../../../../lib/api-error";
 
 const bodySchema = z.object({
   code: z.string().min(1).max(50),
@@ -126,11 +127,7 @@ export async function POST(req: Request) {
       },
       message: `Скидка применена${promo.description ? `: ${promo.description}` : ""}`,
     });
-  } catch (e: any) {
-    console.error("VERIFY_PROMO_ERR", e);
-    return NextResponse.json(
-      { error: "INTERNAL", message: e?.message ?? "Unknown error" },
-      { status: 500 }
-    );
+  } catch (e: unknown) {
+    return serverError('VERIFY_PROMO_ERR', e);
   }
 }

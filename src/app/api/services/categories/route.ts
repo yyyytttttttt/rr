@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "../../../../lib/prizma";
 import { createCorsResponse } from "../../../../lib/jwt";
+import { serverError } from "../../../../lib/api-error";
 
 /**
  * OPTIONS - CORS preflight
@@ -48,10 +49,6 @@ export async function GET() {
 
     return NextResponse.json({ categories });
   } catch (error) {
-    console.error('[SERVICES_CATEGORIES] Error:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch categories', details: error instanceof Error ? error.message : 'Unknown error' },
-      { status: 500 }
-    );
+    return serverError('[SERVICES_CATEGORIES] Error', error);
   }
 }

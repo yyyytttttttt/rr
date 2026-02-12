@@ -1,20 +1,26 @@
 import jwt from 'jsonwebtoken';
 import { NextRequest, NextResponse } from 'next/server';
+import { logger } from './logger';
 
-const JWT_SECRET = process.env.NEXTAUTH_SECRET || 'your-secret-key';
+// [SEC] No fallback — fail fast if secret is missing
+function getJwtSecret(): string {
+  const s = process.env.NEXTAUTH_SECRET;
+  if (!s) throw new Error('[SEC] NEXTAUTH_SECRET is not set');
+  return s;
+}
 
-// Разрешенные origins для мобильного приложения
-const ALLOWED_ORIGINS = [
+// Публичные origins (не содержат имён контейнеров/внутренней сети).
+// Имена Docker-контейнеров и локальные адреса — через EXTRA_ALLOWED_ORIGINS в .env
+const BASE_ORIGINS = [
   'https://nikropolis.ru',
   'https://novay-y.com',
-  'http://mobileapp-app-iskjka:3000',  // Docker контейнер backend
-  'http://app-app-0yooux:3000',        // Docker контейнер Capacitor app
-  'mobileapp-app-iskjka',
-  'app-app-0yooux',
-  'http://localhost:3000',
-  'http://localhost:3001',
-  'http://192.168.0.156:3000',
 ];
+
+const extraOrigins = process.env.EXTRA_ALLOWED_ORIGINS
+  ? process.env.EXTRA_ALLOWED_ORIGINS.split(',').map((s) => s.trim()).filter(Boolean)
+  : [];
+
+const ALLOWED_ORIGINS = [...BASE_ORIGINS, ...extraOrigins];
 
 /**
  * Добавить CORS headers к ответу
@@ -60,11 +66,12 @@ export function verifyToken(request: NextRequest): JWTPayload | null {
 
     const token = authHeader.substring(7); // Убираем "Bearer "
 
-    const decoded = jwt.verify(token, JWT_SECRET) as JWTPayload;
+    const decoded = jwt.verify(token, getJwtSecret()) as JWTPayload;
 
     return decoded;
-  } catch (error) {
-    console.error('[JWT] Token verification failed:', error);
+  } catch {
+    // Intentionally silent in production — invalid tokens are expected
+    logger.debug('[JWT] Token verification failed');
     return null;
   }
 }

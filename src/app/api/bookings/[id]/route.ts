@@ -119,6 +119,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         id: true,
         userId: true,
         status: true,
+        doctor: { select: { userId: true } },
       },
     });
 
@@ -126,17 +127,18 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       return NextResponse.json({ error: "Booking not found" }, { status: 404 });
     }
 
-    // Check access: user can cancel own bookings, admin/doctor can update any
-    const isAdmin = session.user.role === "ADMIN" || session.user.role === "DOCTOR";
+    // Check access: user can cancel own bookings, admin can update any, doctor can update own bookings
+    const isAdmin = session.user.role === "ADMIN";
+    const isDoctor = session.user.role === "DOCTOR" && booking.doctor.userId === session.user.id;
     const isOwner = booking.userId === session.user.id;
 
     // Users can only cancel their own bookings
-    if (!isAdmin && !isOwner) {
+    if (!isAdmin && !isDoctor && !isOwner) {
       return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
     }
 
-    // Users can only cancel (not set other statuses)
-    if (!isAdmin && status !== "CANCELED") {
+    // Regular users can only cancel (not set other statuses); doctors and admins can set any status
+    if (!isAdmin && !isDoctor && status !== "CANCELED") {
       return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
     }
 

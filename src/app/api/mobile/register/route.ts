@@ -6,6 +6,10 @@ import bcrypt from "bcrypt";
 import { z } from "zod";
 import crypto from "crypto";
 import { sendMail } from '../../../../lib/mailer';
+import { logger } from '../../../../lib/logger';
+import { rateLimit, sanitizeIp } from '../../../../lib/rate-limit';
+
+const rl = rateLimit({ windowMs: 60_000, max: 5, keyPrefix: 'mobile-register' });
 
 // Обработка OPTIONS для CORS preflight
 export async function OPTIONS(request: NextRequest) {
@@ -25,6 +29,9 @@ const schema = z.object({
  * Регистрация нового пользователя для мобильного приложения
  */
 export async function POST(req: NextRequest) {
+  const check = await rl(sanitizeIp(req.headers.get('x-forwarded-for')));
+  if (!check.ok) return NextResponse.json({ error: 'Too many requests' }, { status: 429, headers: { 'Retry-After': String(check.retryAfterSec) } });
+
   try {
     const body = await req.json().catch(() => null);
 
@@ -106,9 +113,9 @@ export async function POST(req: NextRequest) {
         `,
       });
 
-      console.log(`[MOBILE_REGISTER] Verification email sent to ${email}`);
+      logger.debug('[MOBILE_REGISTER] Verification email sent');
     } catch (e) {
-      console.error("[MOBILE_REGISTER] Mail send error:", e);
+      logger.error('[MOBILE_REGISTER] Mail send error', e);
       // НЕ возвращаем ошибку, т.к. пользователь уже создан
       // Можно добавить возможность повторной отправки через /api/mobile/resend
     }
@@ -126,13 +133,7 @@ export async function POST(req: NextRequest) {
     }, { status: 201 });
 
   } catch (error) {
-    console.error('[MOBILE_REGISTER] Error:', error);
-    return NextResponse.json(
-      {
-        error: 'Ошибка при регистрации',
-        message: error instanceof Error ? error.message : 'Внутренняя ошибка сервера'
-      },
-      { status: 500 }
-    );
+    logger.error('[MOBILE_REGISTER] Error', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

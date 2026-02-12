@@ -35,15 +35,11 @@ export async function sendMail({ to, subject, html }) {
         throw new Error('SMTP not configured');
     }
 
-    console.log('[MAILER] Sending email to:', to);
-
     const result = await mailer.sendMail({
         from: process.env.MAIL_FROM,
         to,
         subject,
         html,
     });
-
-    console.log('[MAILER] Email sent, messageId:', result.messageId);
     return result;
 }

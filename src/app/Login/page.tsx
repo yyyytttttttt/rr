@@ -59,8 +59,6 @@ export default function LoginPage() {
         redirect: false,
       });
 
-      console.log('SignIn response:', res);
-
       if (!res) {
         setError('password', { message: 'Ошибка подключения к серверу' });
         return;

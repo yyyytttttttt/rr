@@ -4,6 +4,7 @@ import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import Credentials from "next-auth/providers/credentials";
 import { prisma } from "../lib/prizma";
 import bcrypt from "bcrypt";
+import { logger } from "../lib/logger";
 
 // Кэш tokenVersion для уменьшения нагрузки на БД
 // TTL: 60 секунд - баланс между безопасностью и производительностью
@@ -89,35 +90,34 @@ export const authOptions:NextAuthOptions ={
             credentials:{email:{},password:{}},
             async authorize(creds){
                 try {
-                    console.log('[AUTH] Starting authorization...');
+                    logger.debug('[AUTH] Starting authorization');
                     const email = (creds?.email || '').trim().toLowerCase()
                     const password=(creds?.password || '')
 
                     if (!email || !password) {
-                        console.log('[AUTH] Missing email or password');
+                        logger.debug('[AUTH] Missing email or password');
                         return null;
                     }
 
-                    console.log('[AUTH] Looking up user:', email);
                     const user = await prisma.user.findUnique({where:{email}})
 
                     if (!user?.password) {
-                        console.log('[AUTH] User not found or no password');
+                        logger.debug('[AUTH] User not found or no password');
                         return null;
                     }
 
                     if (!user.emailVerified) {
-                        console.log('[AUTH] Email not verified');
+                        logger.debug('[AUTH] Email not verified');
                         throw new Error("EMAIL_NOT_VERIFIED")
                     }
 
                     const ok = await bcrypt.compare(password,user.password)
                     if (!ok) {
-                        console.log('[AUTH] Password mismatch');
+                        logger.debug('[AUTH] Password mismatch');
                         return null;
                     }
 
-                    console.log('[AUTH] Authorization successful');
+                    logger.debug('[AUTH] Authorization successful');
                     return {
                         id:user.id,
                         email:user.email,
@@ -126,7 +126,7 @@ export const authOptions:NextAuthOptions ={
                         tokenVersion:user.tokenVersion?? 0
                     }
                 } catch (error: any) {
-                    console.error('[AUTH] Authorization error:', error);
+                    logger.error('[AUTH] Authorization error', error);
                     // Пробрасываем ошибку EMAIL_NOT_VERIFIED для обработки на фронтенде
                     if (error.message === "EMAIL_NOT_VERIFIED") {
                         throw error;
@@ -166,7 +166,7 @@ export const authOptions:NextAuthOptions ={
                         });
 
                         if (!s) {
-                            console.log('User not found, clearing session');
+                            logger.warn('[AUTH] User not found in DB, clearing session');
                             return {} as any;
                         }
 
@@ -176,14 +176,14 @@ export const authOptions:NextAuthOptions ={
 
                     // Если версия не совпадает - сбрасываем сессию
                     if (dbTokenVersion !== token.tokenVersion){
-                        console.log('Token version mismatch, clearing session');
+                        logger.warn('[AUTH] Token version mismatch, clearing session');
                         return {} as any;
                     }
                 }
 
                 return token;
             } catch (error) {
-                console.error('[JWT] Error in jwt callback:', error);
+                logger.error('[JWT] Error in jwt callback', error);
                 // Возвращаем токен как есть, чтобы не ломать сессию
                 return token;
             }

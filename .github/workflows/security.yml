@@ -1,0 +1,46 @@
+name: Security Scan
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Dependency audit (fail on high/critical)
+        run: npm audit --audit-level=high
+
+      - name: Lint (no-console enforcement)
+        run: ./node_modules/.bin/next lint --max-warnings 0
+        continue-on-error: false
+
+      - name: IOC scan (crypto-miners, install hooks)
+        run: node scripts/ioc-scan.js
+
+      - name: Secret grep (fail on hardcoded secrets)
+        run: |
+          # Fail if any non-.env file contains common secret patterns
+          git diff --name-only HEAD~1 HEAD 2>/dev/null | grep -E '\.(ts|js|json|mjs|yml|yaml)$' | \
+            xargs -I{} grep -lnE \
+              'AKIA[0-9A-Z]{16}|-----BEGIN (RSA|EC|PGP) PRIVATE|your-secret-key|password\s*=\s*["\x27][^"\x27]{8,}' \
+              {} 2>/dev/null && echo "SECRETS FOUND - fix before merge" && exit 1 || echo "No secrets found"
+
+      - name: TypeScript check
+        run: ./node_modules/.bin/tsc -p tsconfig.json --noEmit --pretty false

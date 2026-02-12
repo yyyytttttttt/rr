@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAuth, createCorsResponse } from "../../../../../lib/jwt";
 import { prisma } from "../../../../../lib/prizma";
 import { z } from "zod";
+import { logger } from "../../../../../lib/logger";
 
 const serviceSchema = z.object({
   name: z.string().min(1),
@@ -37,7 +38,7 @@ export async function GET(req: NextRequest) {
   const page = Math.max(1, Number(url.searchParams.get("page") ?? 1));
   const pageSize = Math.min(100, Math.max(1, Number(url.searchParams.get("pageSize") ?? 20)));
 
-  console.log("[MOBILE_ADMIN_SERVICES] GET - query:", q, "categoryId:", categoryId, "page:", page);
+  logger.debug('[MOBILE_ADMIN_SERVICES] GET', { query: q, categoryId, page });
 
   try {
     const where: any = {};
@@ -90,11 +91,11 @@ export async function GET(req: NextRequest) {
       take: pageSize,
     });
 
-    console.log(`[MOBILE_ADMIN_SERVICES] Found ${services.length} services (total: ${total})`);
+    logger.debug('[MOBILE_ADMIN_SERVICES] Found services', { count: services.length, total });
 
     return NextResponse.json({ items: services, total, page, pageSize });
   } catch (error) {
-    console.error("[MOBILE_ADMIN_SERVICES] Error:", error);
+    logger.error('[MOBILE_ADMIN_SERVICES] Error', error);
     return NextResponse.json({ error: "Ошибка сервера" }, { status: 500 });
   }
 }
@@ -111,15 +112,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Доступ запрещен" }, { status: 403 });
   }
 
-  console.log("[MOBILE_ADMIN_SERVICES] POST request by user:", auth.payload.userId);
+  logger.debug('[MOBILE_ADMIN_SERVICES] POST');
 
   try {
     const body = await req.json();
-    console.log("[MOBILE_ADMIN_SERVICES] Received body:", body);
     const parsed = serviceSchema.safeParse(body);
 
     if (!parsed.success) {
-      console.error("[MOBILE_ADMIN_SERVICES] Validation failed:", parsed.error.flatten());
+      logger.warn('[MOBILE_ADMIN_SERVICES] Validation failed');
       return NextResponse.json(
         { error: "Ошибка валидации", details: parsed.error.flatten() },
         { status: 400 }
@@ -152,13 +152,10 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    console.log("[MOBILE_ADMIN_SERVICES] Created service:", service.id);
+    logger.debug('[MOBILE_ADMIN_SERVICES] Created service', { id: service.id });
     return NextResponse.json({ ok: true, service }, { status: 201 });
-  } catch (e: any) {
-    console.error("[MOBILE_ADMIN_SERVICES] CREATE_SERVICE_ERR", e);
-    return NextResponse.json(
-      { error: "INTERNAL", message: e?.message ?? "Неизвестная ошибка" },
-      { status: 500 }
-    );
+  } catch (e: unknown) {
+    logger.error('[MOBILE_ADMIN_SERVICES] CREATE_SERVICE_ERR', e);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

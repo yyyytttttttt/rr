@@ -6,6 +6,10 @@ import { createCorsResponse } from "../../../../lib/jwt";
 import { z } from "zod";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
+import { logger } from "../../../../lib/logger";
+import { rateLimit, sanitizeIp } from "../../../../lib/rate-limit";
+
+const rl = rateLimit({ windowMs: 60_000, max: 5, keyPrefix: 'mobile-reset-pwd' });
 
 // Обработка OPTIONS для CORS preflight
 export async function OPTIONS(request: NextRequest) {
@@ -24,12 +28,15 @@ const schema = z.object({
  * NOTE: Не требует старый пароль, так как пользователь его забыл
  */
 export async function POST(req: NextRequest) {
+  const check = await rl(sanitizeIp(req.headers.get('x-forwarded-for')));
+  if (!check.ok) return NextResponse.json({ error: 'Too many requests' }, { status: 429, headers: { 'Retry-After': String(check.retryAfterSec) } });
+
   try {
     const body = await req.json().catch(() => null);
     const parsed = schema.safeParse(body);
 
     if (!parsed.success) {
-      console.error("[MOBILE_RESET_PASSWORD] Validation failed:", parsed.error.issues);
+      logger.warn('[MOBILE_RESET_PASSWORD] Validation failed');
       return NextResponse.json({
         error: "Ошибка валидации",
         details: parsed.error.flatten().fieldErrors
@@ -49,7 +56,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (!rec) {
-      console.log(`[MOBILE_RESET_PASSWORD] Invalid token for ${email}`);
+      logger.warn('[MOBILE_RESET_PASSWORD] Invalid reset token');
       return NextResponse.json({
         error: "Неверный токен сброса пароля"
       }, { status: 400 });
@@ -60,7 +67,7 @@ export async function POST(req: NextRequest) {
       await prisma.passwordResetToken.deleteMany({
         where: { identifier: email },
       });
-      console.log(`[MOBILE_RESET_PASSWORD] Expired token for ${email}`);
+      logger.warn('[MOBILE_RESET_PASSWORD] Expired reset token');
       return NextResponse.json({
         error: "Токен сброса пароля истек. Запросите новый."
       }, { status: 400 });
@@ -73,7 +80,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (!user) {
-      console.log(`[MOBILE_RESET_PASSWORD] User not found: ${email}`);
+      logger.warn('[MOBILE_RESET_PASSWORD] User not found');
       return NextResponse.json({
         error: "Пользователь не найден"
       }, { status: 404 });
@@ -104,7 +111,7 @@ export async function POST(req: NextRequest) {
       }),
     ]);
 
-    console.log(`[MOBILE_RESET_PASSWORD] Password reset successful for ${email}`);
+    logger.debug('[MOBILE_RESET_PASSWORD] Password reset successful');
 
     return NextResponse.json({
       success: true,
@@ -112,13 +119,7 @@ export async function POST(req: NextRequest) {
     });
 
   } catch (error) {
-    console.error('[MOBILE_RESET_PASSWORD] Error:', error);
-    return NextResponse.json(
-      {
-        error: 'Ошибка при сбросе пароля',
-        message: error instanceof Error ? error.message : 'Внутренняя ошибка сервера'
-      },
-      { status: 500 }
-    );
+    logger.error('[MOBILE_RESET_PASSWORD] Error', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

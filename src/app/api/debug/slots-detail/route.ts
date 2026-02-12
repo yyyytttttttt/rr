@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "../../../../lib/prizma";
+import { getServerSession } from "next-auth";
+import { authOptions } from "../../../../lib/auth";
 import { fromZonedTime, toZonedTime } from "date-fns-tz";
 import { addDays, isBefore, max as maxDate, min as minDate } from "date-fns";
 
@@ -126,6 +128,15 @@ async function openingsFromClassicScheduleForDay(
 }
 
 export async function GET(req: NextRequest) {
+  if (process.env.NODE_ENV === 'production') {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  }
+  // [SEC] debug endpoint — admin/doctor only
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id || (session.user.role !== "ADMIN" && session.user.role !== "DOCTOR")) {
+    return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
+  }
+
   const url = new URL(req.url);
   const doctorId = url.searchParams.get("doctorId") || "";
   const day = url.searchParams.get("day") || "2026-01-14";
@@ -212,8 +223,9 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (error: any) {
+    console.error("[DEBUG_SLOTS_DETAIL]", error);
     return NextResponse.json(
-      { error: error.message, stack: error.stack },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }

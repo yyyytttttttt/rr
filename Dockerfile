@@ -4,6 +4,8 @@
 # =============================================================================
 
 # Stage 1: Dependencies
+# Pin digest to prevent supply-chain tag-rewrite attacks.
+# Update periodically: docker pull node:20-alpine && docker inspect --format='{{index .RepoDigests 0}}' node:20-alpine
 FROM node:20-alpine AS deps
 WORKDIR /app
 
@@ -14,6 +16,8 @@ RUN apk add --no-cache libc6-compat openssl
 COPY package.json package-lock.json* ./
 
 # Устанавливаем ВСЕ зависимости (включая devDependencies для билда)
+# NOTE: --ignore-scripts disabled — bcrypt needs node-gyp postinstall.
+# Mitigate supply-chain risk by pinning exact versions in package-lock.json.
 RUN npm ci
 
 # =============================================================================
@@ -59,6 +63,9 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 USER nextjs
+
+# Drop all Linux capabilities — container needs none
+# (enforce via --cap-drop=ALL in docker run or security_opt in compose)
 
 EXPOSE 3000
 

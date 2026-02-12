@@ -31,7 +31,6 @@ export default function AvatarForm(){
         router.refresh();
         
     }
-    console.log(file)
     return (
         <form onSubmit={onSubmit}>
             <div>

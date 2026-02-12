@@ -6,6 +6,10 @@ import { createCorsResponse } from "../../../../lib/jwt";
 import crypto from "crypto";
 import { sendMail } from "../../../../lib/mailer";
 import { z } from "zod";
+import { logger } from "../../../../lib/logger";
+import { rateLimit, sanitizeIp } from "../../../../lib/rate-limit";
+
+const rl = rateLimit({ windowMs: 60_000, max: 3, keyPrefix: 'mobile-resend' });
 
 // Обработка OPTIONS для CORS preflight
 export async function OPTIONS(request: NextRequest) {
@@ -21,6 +25,9 @@ const schema = z.object({
  * Повторная отправка письма с подтверждением email
  */
 export async function POST(req: NextRequest) {
+  const check = await rl(sanitizeIp(req.headers.get('x-forwarded-for')));
+  if (!check.ok) return NextResponse.json({ error: 'Too many requests' }, { status: 429, headers: { 'Retry-After': String(check.retryAfterSec) } });
+
   try {
     const body = await req.json().catch(() => null);
     const parsed = schema.safeParse(body);
@@ -42,7 +49,7 @@ export async function POST(req: NextRequest) {
 
     // Для безопасности всегда возвращаем успех
     if (!user) {
-      console.log(`[MOBILE_RESEND] User not found: ${normalEmail}`);
+      logger.debug('[MOBILE_RESEND] User not found');
       return NextResponse.json({
         success: true,
         message: "Если email существует и не подтвержден, письмо отправлено"
@@ -88,9 +95,9 @@ export async function POST(req: NextRequest) {
         `,
       });
 
-      console.log(`[MOBILE_RESEND] Verification email resent to ${normalEmail}`);
+      logger.debug('[MOBILE_RESEND] Verification email resent');
     } catch (e) {
-      console.error("[MOBILE_RESEND] Mail send error:", e);
+      logger.error('[MOBILE_RESEND] Mail send error', e);
       return NextResponse.json({
         error: 'Ошибка отправки email',
         message: 'Не удалось отправить письмо. Попробуйте позже.'
@@ -103,13 +110,7 @@ export async function POST(req: NextRequest) {
     });
 
   } catch (error) {
-    console.error('[MOBILE_RESEND] Error:', error);
-    return NextResponse.json(
-      {
-        error: 'Ошибка при повторной отправке письма',
-        message: error instanceof Error ? error.message : 'Внутренняя ошибка сервера'
-      },
-      { status: 500 }
-    );
+    logger.error('[MOBILE_RESEND] Error', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

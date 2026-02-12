@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAuth, createCorsResponse } from "../../../../lib/jwt";
 import { prisma } from "../../../../lib/prizma";
 import { z } from "zod";
+import { serverError } from "../../../../lib/api-error";
 
 const bodySchema = z.object({
   doctorId: z.string().min(1),
@@ -47,11 +48,16 @@ export async function POST(req: NextRequest) {
     // Проверяем существование врача
     const doc = await prisma.doctor.findUnique({
       where: { id: doctorId },
-      select: { id: true }
+      select: { id: true, userId: true }
     });
 
     if (!doc) {
       return NextResponse.json({ error: "Врач не найден" }, { status: 404 });
+    }
+
+    // DOCTOR can only create services for themselves
+    if (auth.payload.role === "DOCTOR" && doc.userId !== auth.payload.userId) {
+      return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
     }
 
     // Создаем услугу и связываем с врачом
@@ -84,11 +90,7 @@ export async function POST(req: NextRequest) {
     console.log("[MOBILE_SERVICES] Created service:", service.id);
 
     return NextResponse.json({ ok: true, service }, { status: 201 });
-  } catch (e: any) {
-    console.error("[MOBILE_SERVICES] Error creating service:", e);
-    return NextResponse.json(
-      { error: "Ошибка сервера", message: e?.message ?? "Unknown error" },
-      { status: 500 }
-    );
+  } catch (e: unknown) {
+    return serverError('[MOBILE_SERVICES] Error creating service', e);
   }
 }

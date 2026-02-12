@@ -6,6 +6,10 @@ import { createCorsResponse } from "../../../../lib/jwt";
 import crypto from "crypto";
 import { sendMail } from "../../../../lib/mailer";
 import { z } from "zod";
+import { logger } from "../../../../lib/logger";
+import { rateLimit, sanitizeIp } from "../../../../lib/rate-limit";
+
+const rl = rateLimit({ windowMs: 60_000, max: 3, keyPrefix: 'mobile-pwd-reset' });
 
 // Обработка OPTIONS для CORS preflight
 export async function OPTIONS(request: NextRequest) {
@@ -23,6 +27,9 @@ const TTL_MIN = Number(process.env.TTL_MIN || 60); // По умолчанию 60
  * Запрос на сброс пароля для мобильного приложения
  */
 export async function POST(req: NextRequest) {
+  const check = await rl(sanitizeIp(req.headers.get('x-forwarded-for')));
+  if (!check.ok) return NextResponse.json({ error: 'Too many requests' }, { status: 429, headers: { 'Retry-After': String(check.retryAfterSec) } });
+
   try {
     const body = await req.json().catch(() => null);
     const parsed = schema.safeParse(body);
@@ -47,7 +54,7 @@ export async function POST(req: NextRequest) {
 
     // Для безопасности всегда возвращаем успех, даже если пользователь не найден
     if (!user) {
-      console.log(`[MOBILE_PASSWORD_RESET] User not found: ${email}`);
+      logger.debug('[MOBILE_PASSWORD_RESET] User not found');
       return NextResponse.json({
         success: true,
         message: "Если email существует, на него отправлена ссылка для сброса пароля"
@@ -56,7 +63,7 @@ export async function POST(req: NextRequest) {
 
     // Если у пользователя нет пароля (OAuth), не даем сброс
     if (!user.password) {
-      console.log(`[MOBILE_PASSWORD_RESET] No password for OAuth user: ${email}`);
+      logger.debug('[MOBILE_PASSWORD_RESET] No password set (OAuth user)');
       return NextResponse.json({
         success: true,
         message: "Если email существует, на него отправлена ссылка для сброса пароля"
@@ -93,9 +100,9 @@ export async function POST(req: NextRequest) {
         `
       });
 
-      console.log(`[MOBILE_PASSWORD_RESET] Reset email sent to ${email}`);
+      logger.debug('[MOBILE_PASSWORD_RESET] Reset email sent');
     } catch (e) {
-      console.error('[MOBILE_PASSWORD_RESET] Mail send error:', e);
+      logger.error('[MOBILE_PASSWORD_RESET] Mail send error', e);
       // Не выбрасываем ошибку для безопасности
     }
 
@@ -105,13 +112,7 @@ export async function POST(req: NextRequest) {
     });
 
   } catch (error) {
-    console.error('[MOBILE_PASSWORD_RESET] Error:', error);
-    return NextResponse.json(
-      {
-        error: 'Ошибка при запросе сброса пароля',
-        message: error instanceof Error ? error.message : 'Внутренняя ошибка сервера'
-      },
-      { status: 500 }
-    );
+    logger.error('[MOBILE_PASSWORD_RESET] Error', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

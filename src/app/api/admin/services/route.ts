@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../../../../lib/auth";
 import { prisma } from "../../../../lib/prizma";
 import { z } from "zod";
+import { serverError } from "../../../../lib/api-error";
 
 const serviceSchema = z.object({
   name: z.string().min(1),
@@ -35,7 +36,6 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    console.log("Received body:", body);
     const parsed = serviceSchema.safeParse(body);
 
     if (!parsed.success) {
@@ -73,11 +73,7 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json({ ok: true, service }, { status: 201 });
-  } catch (e: any) {
-    console.error("CREATE_SERVICE_ERR", e);
-    return NextResponse.json(
-      { error: "INTERNAL", message: e?.message ?? "Unknown error" },
-      { status: 500 }
-    );
+  } catch (e: unknown) {
+    return serverError('[ADMIN_SERVICES_CREATE]', e);
   }
 }

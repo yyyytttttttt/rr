@@ -5,6 +5,7 @@ import { z } from "zod";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../../lib/auth";
 import { generateOccurrences } from "../../../lib/rrule";
+import { logger } from "../../../lib/logger";
 
 const schema = z.object({
   doctorId: z.string().min(1),
@@ -183,7 +184,8 @@ export async function POST(req: Request) {
         { status: 409 }
       );
     }
-    throw error;
+    logger.error('[BOOKINGS] Error creating booking', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
 

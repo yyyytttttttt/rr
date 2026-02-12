@@ -304,6 +304,6 @@ export async function POST(req: NextRequest) {
       );
     }
     console.error("[MOBILE_ADMIN_BOOKINGS] Error creating booking:", error);
-    throw error;
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

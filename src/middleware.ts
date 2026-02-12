@@ -2,6 +2,33 @@
 import { withAuth, type NextRequestWithAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
 import type { JWT } from "next-auth/jwt";
+import { randomBytes } from "crypto";
+
+const CSP_STRICT = process.env.CSP_STRICT === '1';
+
+/** Build nonce-based CSP. Called only when CSP_STRICT=1. */
+function buildNonceCsp(nonce: string): string {
+  return [
+    "default-src 'self'",
+    `script-src 'self' 'nonce-${nonce}'`,
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "font-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com",
+    "img-src 'self' data: https://res.cloudinary.com https://lh3.googleusercontent.com https://images.unsplash.com https://i.pravatar.cc",
+    "connect-src 'self' https://api.yandex.com https://maps.yandex.ru",
+    "frame-src 'self' https://yandex.ru https://maps.yandex.ru",
+  ].join('; ');
+}
+
+/** NextResponse.next() with nonce injected into request headers + CSP on response. */
+function nextWithNonce(req: NextRequestWithAuth): NextResponse {
+  if (!CSP_STRICT) return NextResponse.next();
+  const nonce = randomBytes(16).toString('base64');
+  const reqHeaders = new Headers(req.headers);
+  reqHeaders.set('x-nonce', nonce);
+  const res = NextResponse.next({ request: { headers: reqHeaders } });
+  res.headers.set('Content-Security-Policy', buildNonceCsp(nonce));
+  return res;
+}
 
 // Роли
 type Role = "ADMIN" | "DOCTOR" | "USER";
@@ -12,16 +39,16 @@ type AppJWT = JWT & {
   role?: Role;
 };
 
-// Домены, которым разрешен доступ к API
+// Публичные origins (не содержат имён контейнеров/внутренней сети).
+// Имена Docker-контейнеров, локальные IP и адреса разработки — через EXTRA_ALLOWED_ORIGINS в .env
+const _extraOrigins = process.env.EXTRA_ALLOWED_ORIGINS
+  ? process.env.EXTRA_ALLOWED_ORIGINS.split(',').map((s) => s.trim()).filter(Boolean)
+  : [];
+
 const ALLOWED_ORIGINS = [
   'https://nikropolis.ru',
   'https://novay-y.com',
-  'http://mobileapp-app-iskjka:3000',  // Docker контейнер backend
-  'http://app-app-0yooux:3000',        // Docker контейнер Capacitor app
-  'mobileapp-app-iskjka',
-  'app-app-0yooux',
-  'http://localhost:3000',
-  'http://192.168.0.156:3000', // для локальной разработки
+  ..._extraOrigins,
 ];
 
 // Матрица доступа (обрати внимание: БЕЗ "as const" у массивов allow)
@@ -89,8 +116,8 @@ export default withAuth(
 
     // Для не-API роутов
     if (!rule) {
-      // путь не защищён — пропускаем
-      return NextResponse.next();
+      // путь не защищён — пропускаем (с nonce если CSP_STRICT)
+      return nextWithNonce(req);
     }
 
     // нет роли или роль не разрешена — редирект на логин
@@ -109,7 +136,7 @@ export default withAuth(
       return NextResponse.redirect(new URL("/doctor", req.url));
     }
 
-    return NextResponse.next();
+    return nextWithNonce(req);
   },
   {
     callbacks: {
@@ -120,27 +147,32 @@ export default withAuth(
         if (req.method === 'OPTIONS') return true;
 
         // Публичные API endpoints (доступны без авторизации)
-        const publicPaths = [
-          '/api/mobile/',              // Мобильное приложение (JWT проверка внутри)
-          '/api/auth/',                // NextAuth endpoints
-          '/api/services/categories',  // Категории услуг
-          '/api/services/catalog',     // Каталог услуг
-          '/api/services/list',        // Список услуг
-          '/api/services/',            // Все публичные services endpoints
-          '/api/doctors/list',         // Список докторов
-          '/api/doctors/',             // Все публичные doctor endpoints
-          '/api/availability',         // Доступность врачей
-          '/api/doctor/slots',         // Доступные слоты для бронирования
-          '/api/bookings/guest',       // Гостевое бронирование БЕЗ регистрации ✨
-          '/api/register',             // Регистрация
-          '/api/resend',               // Повторная отправка письма
-          '/api/request-password-reset', // Запрос сброса пароля
-          '/api/reset-password',       // Сброс пароля
-          '/api/health',               // Health check
+        // Exact paths: no startsWith prefix — prevents accidental exposure of new routes
+        const publicExact = new Set([
+          '/api/auth/',
+          '/api/services/categories',
+          '/api/services/catalog',
+          '/api/services/list',
+          '/api/doctors/list',
+          '/api/availability',
+          '/api/doctor/slots',
+          '/api/bookings/guest',
+          '/api/register',
+          '/api/resend',
+          '/api/request-password-reset',
+          '/api/reset-password',
+          '/api/health',
+        ]);
+        // Prefix-match only for well-scoped namespaces
+        const publicPrefixes = [
+          '/api/mobile/',   // JWT checked per-route inside
+          '/api/auth/',     // NextAuth internal
         ];
 
-        // Разрешаем публичные endpoints без токена
-        if (publicPaths.some(p => path.startsWith(p))) {
+        if (
+          publicExact.has(path) ||
+          publicPrefixes.some(p => path.startsWith(p))
+        ) {
           return true;
         }
 

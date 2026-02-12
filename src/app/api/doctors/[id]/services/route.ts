@@ -47,6 +47,18 @@ export async function POST(
     }
 
     const { id: doctorId } = await params;
+
+    // DOCTOR can only modify their own services
+    if (session.user.role === "DOCTOR") {
+      const me = await prisma.doctor.findFirst({
+        where: { userId: session.user.id },
+        select: { id: true },
+      });
+      if (!me || me.id !== doctorId) {
+        return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
+      }
+    }
+
     const body = await req.json();
     const { serviceIds } = body;
 

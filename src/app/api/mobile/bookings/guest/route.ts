@@ -4,6 +4,11 @@ import { createCorsResponse } from '../../../../../lib/jwt';
 import { sendMail } from '../../../../../lib/mailer';
 import { z } from 'zod';
 import crypto from 'crypto';
+import { logger } from '../../../../../lib/logger';
+import { rateLimit, sanitizeIp } from '../../../../../lib/rate-limit';
+import { serverErrorMsg } from '../../../../../lib/api-error';
+
+const guestRateLimit = rateLimit({ windowMs: 60_000, max: 5, keyPrefix: 'mobile-guest-booking' });
 
 // Обработка OPTIONS для CORS preflight
 export async function OPTIONS(request: NextRequest) {
@@ -30,6 +35,15 @@ const guestBookingSchema = z.object({
  * Публичный endpoint (не требует авторизации)
  */
 export async function POST(request: NextRequest) {
+  const ip = sanitizeIp(request.headers.get('x-forwarded-for'));
+  const rl = await guestRateLimit(ip);
+  if (!rl.ok) {
+    return NextResponse.json(
+      { error: 'Слишком много запросов. Повторите позже.' },
+      { status: 429, headers: { 'Retry-After': String(rl.retryAfterSec) } }
+    );
+  }
+
   try {
     const body = await request.json();
     const parsed = guestBookingSchema.safeParse(body);
@@ -139,7 +153,7 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    console.info(`[MOBILE_GUEST_BOOKING] Created guest booking ${booking.id} for ${clientName} (${clientEmail})`);
+    logger.debug('[MOBILE_GUEST_BOOKING] Guest booking created', { bookingId: booking.id });
 
     // Создать токен для подтверждения записи
     const rawToken = crypto.randomBytes(32).toString('hex');
@@ -169,8 +183,6 @@ export async function POST(request: NextRequest) {
     });
 
     // Отправить email подтверждения
-    console.info(`[MOBILE_GUEST_BOOKING] Attempting to send email to ${clientEmail}`);
-
     try {
       await sendMail({
         to: clientEmail,
@@ -236,9 +248,9 @@ export async function POST(request: NextRequest) {
           </html>
         `,
       });
-      console.info(`[MOBILE_GUEST_BOOKING] Confirmation email sent to ${clientEmail}`);
+      logger.debug('[MOBILE_GUEST_BOOKING] Confirmation email sent');
     } catch (emailError: any) {
-      console.error('[MOBILE_GUEST_BOOKING] Failed to send confirmation email:', emailError);
+      logger.error('[MOBILE_GUEST_BOOKING] Failed to send confirmation email', emailError);
       // Не прерываем процесс - бронирование создано, но email не отправлен
     }
 
@@ -253,18 +265,10 @@ export async function POST(request: NextRequest) {
         endUtc: booking.endUtc,
         status: booking.status,
         clientName: booking.clientName,
-        clientEmail: booking.clientEmail,
       },
     }, { status: 201 });
 
   } catch (error) {
-    console.error('[MOBILE_GUEST_BOOKING] Error:', error);
-    return NextResponse.json(
-      {
-        error: 'Не удалось создать запись',
-        message: error instanceof Error ? error.message : 'Внутренняя ошибка сервера'
-      },
-      { status: 500 }
-    );
+    return serverErrorMsg('[MOBILE_GUEST_BOOKING]', error, 'Не удалось создать запись');
   }
 }

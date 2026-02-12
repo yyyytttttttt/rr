@@ -3,6 +3,7 @@ import { prisma } from "../../../lib/prizma";
 import { z } from "zod";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../../lib/auth";
+import { serverError } from "../../../lib/api-error";
 
 const bodySchema = z.object({
   // один из двух способов: привязать к уже существующему userId ИЛИ создать пользователя по email
@@ -82,6 +83,12 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
+  // [SEC] создание врача — только ADMIN
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id || session.user.role !== "ADMIN") {
+    return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
+  }
+
   try {
     const json = await req.json();
     const parsed = bodySchema.safeParse(json);
@@ -144,11 +151,7 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json({ ok: true, doctor }, { status: 201 });
-  } catch (e: any) {
-    console.error("CREATE_DOCTOR_ERR", e);
-    return NextResponse.json(
-      { error: "INTERNAL", message: e?.message ?? "Unknown error" },
-      { status: 500 }
-    );
+  } catch (e: unknown) {
+    return serverError('CREATE_DOCTOR_ERR', e);
   }
 }

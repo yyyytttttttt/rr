@@ -73,7 +73,6 @@ export default function BookingPanel({ userName, userEmail, initialDate }: Props
         const catRes = await fetch('/api/services/categories');
         if (catRes.ok) {
           const catData = await catRes.json();
-          console.log('📂 Categories loaded:', catData.categories);
           setCategories(catData.categories || []);
         } else {
           console.error('❌ Categories request failed:', catRes.status);
@@ -83,7 +82,6 @@ export default function BookingPanel({ userName, userEmail, initialDate }: Props
         const servRes = await fetch('/api/services/catalog');
         if (servRes.ok) {
           const servData = await servRes.json();
-          console.log('💼 Services loaded:', servData.services);
           setServices(servData.services || []);
         } else {
           console.error('❌ Services request failed:', servRes.status);

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAuth, createCorsResponse } from "../../../../../../../lib/jwt";
 import { prisma } from "../../../../../../../lib/prizma";
 import { z } from "zod";
+import { logger } from "../../../../../../../lib/logger";
 
 const bodySchema = z.object({
   serviceId: z.string().min(1, "Service ID is required"),
@@ -25,7 +26,7 @@ export async function GET(
 
   const { doctorId } = await params;
 
-  console.log("[MOBILE_ADMIN_DOCTOR_SERVICES] GET request for doctor:", doctorId);
+  logger.debug('[MOBILE_ADMIN_DOCTOR_SERVICES] GET', { doctorId });
 
   // Only ADMIN can access this endpoint
   if (auth.payload.role !== 'ADMIN') {
@@ -94,7 +95,7 @@ export async function POST(
 
   const { doctorId } = await params;
 
-  console.log("[MOBILE_ADMIN_DOCTOR_SERVICES] POST request for doctor:", doctorId);
+  logger.debug('[MOBILE_ADMIN_DOCTOR_SERVICES] POST', { doctorId });
 
   // Only ADMIN can access this endpoint
   if (auth.payload.role !== 'ADMIN') {
@@ -102,12 +103,11 @@ export async function POST(
   }
 
   const body = await req.json();
-  console.log("[MOBILE_ADMIN_DOCTOR_SERVICES] body:", body);
 
   const parsed = bodySchema.safeParse(body);
 
   if (!parsed.success) {
-    console.error("[MOBILE_ADMIN_DOCTOR_SERVICES] Validation failed:", parsed.error.flatten());
+    logger.warn('[MOBILE_ADMIN_DOCTOR_SERVICES] Validation failed');
     return NextResponse.json(
       { error: "Ошибка валидации", details: parsed.error.flatten() },
       { status: 400 }
@@ -115,7 +115,7 @@ export async function POST(
   }
 
   const { serviceId } = parsed.data;
-  console.log("[MOBILE_ADMIN_DOCTOR_SERVICES] Linking service:", serviceId, "to doctor:", doctorId);
+  logger.debug('[MOBILE_ADMIN_DOCTOR_SERVICES] Linking service', { serviceId, doctorId });
 
   // Verify doctor exists
   const doctor = await prisma.doctor.findUnique({
@@ -145,6 +145,6 @@ export async function POST(
     select: { doctorId: true, serviceId: true, isActive: true },
   });
 
-  console.log("[MOBILE_ADMIN_DOCTOR_SERVICES] Link created/updated:", link);
+  logger.debug('[MOBILE_ADMIN_DOCTOR_SERVICES] Link created/updated', { serviceId, doctorId });
   return NextResponse.json({ ok: true, link }, { status: 201 });
 }

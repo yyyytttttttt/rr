@@ -63,8 +63,7 @@ export default function HistoryPanel({ userId }: Props) {
         const bookingsArray = data.bookings || data.items || [];
         setBookings(bookingsArray);
       } else {
-        const error = await res.json();
-        console.error('Bookings API error:', error);
+        console.error('Bookings API error', { status: res.status });
         toast.error('Не удалось загрузить записи');
       }
     } catch (error) {
@@ -191,7 +190,6 @@ export default function HistoryPanel({ userId }: Props) {
           </h1>
           <button
             onClick={() => {
-              console.log('[HistoryPanel] Manual refresh triggered');
               setRefreshKey(prev => prev + 1);
             }}
             className="px-[clamp(1rem,0.7692rem+1.0256vw,2rem)] py-[clamp(0.5rem,0.3846rem+0.5128vw,1rem)] rounded-[clamp(0.5rem,0.4423rem+0.2564vw,0.75rem)] bg-[#F5F0E4] text-[#967450] text-[clamp(0.875rem,0.7885rem+0.3846vw,1.125rem)] font-ManropeRegular hover:bg-[#4c503b] hover:text-white transition-colors duration-300"
@@ -222,7 +220,7 @@ export default function HistoryPanel({ userId }: Props) {
             {bookings.map((b, index) => {
               // Защита от отсутствующих данных
               if (!b.service || !b.doctor) {
-                console.warn('[HistoryPanel] Booking missing data:', b.id, b);
+                console.error('[HistoryPanel] Booking missing data', { id: b.id });
                 return null;
               }
 

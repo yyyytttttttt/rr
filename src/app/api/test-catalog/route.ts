@@ -5,6 +5,9 @@ import { prisma } from "../../../lib/prizma";
  * TEST endpoint to debug catalog API
  */
 export async function GET() {
+  if (process.env.NODE_ENV === 'production') {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  }
   try {
     // Test 1: All active services
     const allActiveServices = await prisma.service.findMany({
@@ -66,7 +69,7 @@ export async function GET() {
   } catch (error) {
     console.error("Test catalog error:", error);
     return NextResponse.json(
-      { error: String(error) },
+      { error: 'Internal server error' },
       { status: 500 }
     );
   }

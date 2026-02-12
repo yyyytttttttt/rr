@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../../../../../../lib/auth";
 import { prisma } from "../../../../../../lib/prizma";
 import { z } from "zod";
+import { logger } from "../../../../../../lib/logger";
 
 const bodySchema = z.object({
   serviceId: z.string().min(1, "Service ID is required"),
@@ -121,12 +122,12 @@ export async function POST(
     }
   }
   const body = await req.json();
-  console.log("POST /api/admin/doctors/[doctorId]/services - doctorId:", doctorId, "body:", body);
+  logger.debug('POST /api/admin/doctors/[doctorId]/services', { doctorId });
 
   const parsed = bodySchema.safeParse(body);
 
   if (!parsed.success) {
-    console.error("Validation failed:", parsed.error.flatten());
+    logger.warn('Validation failed');
     return NextResponse.json(
       { error: "Validation error", details: parsed.error.flatten() },
       { status: 400 }
@@ -134,7 +135,7 @@ export async function POST(
   }
 
   const { serviceId } = parsed.data;
-  console.log("Linking service:", serviceId, "to doctor:", doctorId);
+  logger.debug('Linking service', { serviceId, doctorId });
 
   // Verify doctor exists
   const doctor = await prisma.doctor.findUnique({
@@ -164,6 +165,6 @@ export async function POST(
     select: { doctorId: true, serviceId: true, isActive: true },
   });
 
-  console.log("Link created/updated:", link);
+  logger.debug('Link created/updated', { serviceId, doctorId });
   return NextResponse.json({ ok: true, link }, { status: 201 });
 }

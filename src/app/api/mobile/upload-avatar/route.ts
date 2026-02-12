@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '../../../../lib/prizma';
 import { requireAuth, createCorsResponse } from '../../../../lib/jwt';
 import { v2 as cloudinary } from 'cloudinary';
+import { logger } from '../../../../lib/logger';
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -37,11 +38,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Проверка типа файла
+    // Проверка типа файла — SVG запрещён (может содержать XSS)
     const mime = file.type || '';
-    if (!mime.startsWith('image/')) {
+    const ALLOWED_MIME = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/avif'];
+    if (!ALLOWED_MIME.includes(mime)) {
       return NextResponse.json(
-        { error: 'Only images are allowed' },
+        { error: 'Only jpeg/png/gif/webp/avif images are allowed' },
         { status: 400 }
       );
     }
@@ -83,11 +85,11 @@ export async function POST(request: NextRequest) {
       data: { image: upload.url },
     });
 
-    console.info(`[MOBILE_UPLOAD_AVATAR] Avatar uploaded for user ${userId}`);
+    logger.info('[MOBILE_UPLOAD_AVATAR] Avatar uploaded');
 
     return NextResponse.json({ success: true, url: upload.url });
   } catch (error) {
-    console.error('[MOBILE_UPLOAD_AVATAR] Error:', error);
+    logger.error('[MOBILE_UPLOAD_AVATAR] Error:', error);
     return NextResponse.json(
       { error: 'Failed to upload avatar' },
       { status: 500 }

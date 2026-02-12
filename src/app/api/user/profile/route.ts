@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../../../../lib/auth";
 import { prisma } from "../../../../lib/prizma";
 import { z } from "zod";
+import { logger } from "../../../../lib/logger";
 
 const updateProfileSchema = z.object({
   name: z
@@ -76,12 +77,6 @@ export async function PATCH(req: Request) {
     }
 
     // Update user profile
-    console.log(`[PATCH /api/user/profile] Updating user ${session.user.id}:`, {
-      name,
-      phone: phone || null,
-      birthDateISO: birthDateISO || null,
-    });
-
     const updated = await prisma.user.update({
       where: { id: session.user.id },
       data: {
@@ -99,7 +94,7 @@ export async function PATCH(req: Request) {
       },
     });
 
-    console.log(`[PATCH /api/user/profile] Successfully updated user ${session.user.id}`);
+    logger.debug('[PATCH /api/user/profile] Profile updated');
 
     return NextResponse.json({
       ok: true,
@@ -109,7 +104,7 @@ export async function PATCH(req: Request) {
       }
     });
   } catch (error) {
-    console.error("Failed to update profile:", error);
+    logger.error('[PATCH /api/user/profile] Failed to update profile', error);
     return NextResponse.json({ error: "INTERNAL_SERVER_ERROR" }, { status: 500 });
   }
 }
@@ -144,7 +139,7 @@ export async function GET(req: Request) {
       }
     });
   } catch (error) {
-    console.error("Failed to fetch profile:", error);
+    logger.error('[GET /api/user/profile] Failed to fetch profile', error);
     return NextResponse.json({ error: "INTERNAL_SERVER_ERROR" }, { status: 500 });
   }
 }

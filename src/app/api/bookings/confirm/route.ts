@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '../../../../lib/prizma';
 import crypto from 'crypto';
+import { logger } from '../../../../lib/logger';
 
 /**
  * GET /api/bookings/confirm?token=xxx&bookingId=xxx
@@ -126,7 +127,7 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    console.info(`[BOOKING_CONFIRM] Booking ${bookingId} confirmed via email`);
+    logger.debug('[BOOKING_CONFIRM] Booking confirmed', { bookingId });
 
     return NextResponse.json({
       success: true,
@@ -143,7 +144,7 @@ export async function GET(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('[BOOKING_CONFIRM] Error:', error);
+    logger.error('[BOOKING_CONFIRM] Error', error);
     return NextResponse.json(
       { error: 'Ошибка при подтверждении записи', code: 'SERVER_ERROR' },
       { status: 500 }

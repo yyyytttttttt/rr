@@ -3,8 +3,14 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../../../../lib/prizma';
 import { createCorsResponse } from '../../../../lib/jwt';
+import { sanitizeIp } from '../../../../lib/rate-limit';
+import { logger } from '../../../../lib/logger';
 
-const JWT_SECRET = process.env.NEXTAUTH_SECRET || 'your-secret-key';
+const JWT_SECRET = (() => {
+  const s = process.env.NEXTAUTH_SECRET;
+  if (!s) throw new Error('[SEC] NEXTAUTH_SECRET is not set');
+  return s;
+})();
 
 // Rate limiting - в памяти (для production лучше использовать Redis)
 interface RateLimitEntry {
@@ -55,9 +61,10 @@ export async function OPTIONS(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   // Получаем IP адрес для rate limiting
-  const ip = request.headers.get('x-forwarded-for')?.split(',')[0] ||
-             request.headers.get('x-real-ip') ||
-             'unknown';
+  const ip = sanitizeIp(
+    request.headers.get('x-forwarded-for'),
+    request.headers.get('x-real-ip'),
+  );
 
   const now = Date.now();
 
@@ -68,7 +75,7 @@ export async function POST(request: NextRequest) {
     // Если заблокирован - возвращаем ошибку
     if (attempts.blockedUntil && now < attempts.blockedUntil) {
       const minutesLeft = Math.ceil((attempts.blockedUntil - now) / 60000);
-      console.warn(`[MOBILE_AUTH] Blocked login attempt from IP: ${ip}`);
+      logger.warn('[MOBILE_AUTH] Blocked login attempt');
 
       return NextResponse.json(
         {
@@ -120,7 +127,7 @@ export async function POST(request: NextRequest) {
 
     // Проверить email verification
     if (!user.emailVerified) {
-      console.warn(`[MOBILE_AUTH] Email not verified: ${email}`);
+      logger.warn('[MOBILE_AUTH] Email not verified');
       return NextResponse.json(
         { error: 'EMAIL_NOT_VERIFIED', message: 'Email не подтвержден' },
         { status: 403 }
@@ -139,7 +146,7 @@ export async function POST(request: NextRequest) {
         const blockedUntil = now + BLOCK_DURATION;
         setLoginAttempt(ip, { count: newCount, lastAttempt: now, blockedUntil });
 
-        console.warn(`[MOBILE_AUTH] IP ${ip} blocked after ${newCount} failed attempts`);
+        logger.warn('[MOBILE_AUTH] IP blocked after max failed attempts');
 
         return NextResponse.json(
           {
@@ -154,7 +161,7 @@ export async function POST(request: NextRequest) {
       // Обновляем счетчик
       setLoginAttempt(ip, { count: newCount, lastAttempt: now });
 
-      console.warn(`[MOBILE_AUTH] Failed login attempt ${newCount}/${MAX_ATTEMPTS} from IP: ${ip} for email: ${email}`);
+      logger.warn('[MOBILE_AUTH] Failed login attempt', { attempt: newCount, max: MAX_ATTEMPTS });
 
       return NextResponse.json(
         {
@@ -168,7 +175,7 @@ export async function POST(request: NextRequest) {
     // Успешная авторизация - очищаем счетчик попыток
     loginAttempts.delete(ip);
 
-    console.info(`[MOBILE_AUTH] Successful login for email: ${email} from IP: ${ip}`);
+    logger.debug('[MOBILE_AUTH] Successful login');
 
     // Создаем JWT токен для авторизации последующих запросов
     const token = jwt.sign(
@@ -196,7 +203,7 @@ export async function POST(request: NextRequest) {
       }
     });
   } catch (error) {
-    console.error('[MOBILE_AUTH] Error:', error);
+    logger.error('[MOBILE_AUTH] Error', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

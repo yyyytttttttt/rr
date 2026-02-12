@@ -16,6 +16,17 @@ export async function DELETE(
 
     const { id: doctorId, serviceId } = await params;
 
+    // DOCTOR can only modify their own services
+    if (session.user.role === "DOCTOR") {
+      const me = await prisma.doctor.findFirst({
+        where: { userId: session.user.id },
+        select: { id: true },
+      });
+      if (!me || me.id !== doctorId) {
+        return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
+      }
+    }
+
     // Проверяем что связь существует
     const doctorService = await prisma.doctorService.findUnique({
       where: {

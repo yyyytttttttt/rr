@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "../../../../../lib/prizma";
 import { requireAuth, createCorsResponse } from "../../../../../lib/jwt";
 import { z } from "zod";
+import { serverError } from "../../../../../lib/api-error";
 
 // Обработка OPTIONS для CORS preflight
 export async function OPTIONS(request: NextRequest) {
@@ -130,14 +131,7 @@ export async function GET(req: NextRequest) {
     });
 
   } catch (error) {
-    console.error('[MOBILE_DOCTOR_OPENINGS] GET Error:', error);
-    return NextResponse.json(
-      {
-        error: 'Ошибка при загрузке слотов',
-        message: error instanceof Error ? error.message : 'Внутренняя ошибка сервера'
-      },
-      { status: 500 }
-    );
+    return serverError('[MOBILE_DOCTOR_OPENINGS] GET Error', error);
   }
 }
 
@@ -239,14 +233,7 @@ export async function POST(req: NextRequest) {
     }, { status: 201 });
 
   } catch (error) {
-    console.error('[MOBILE_DOCTOR_OPENINGS] POST Error:', error);
-    return NextResponse.json(
-      {
-        error: 'Ошибка при создании слотов',
-        message: error instanceof Error ? error.message : 'Внутренняя ошибка сервера'
-      },
-      { status: 500 }
-    );
+    return serverError('[MOBILE_DOCTOR_OPENINGS] POST Error', error);
   }
 }
 
@@ -316,13 +303,6 @@ export async function DELETE(req: NextRequest) {
     });
 
   } catch (error) {
-    console.error('[MOBILE_DOCTOR_OPENINGS] DELETE Error:', error);
-    return NextResponse.json(
-      {
-        error: 'Ошибка при удалении слотов',
-        message: error instanceof Error ? error.message : 'Внутренняя ошибка сервера'
-      },
-      { status: 500 }
-    );
+    return serverError('[MOBILE_DOCTOR_OPENINGS] DELETE Error', error);
   }
 }

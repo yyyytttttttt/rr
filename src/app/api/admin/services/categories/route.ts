@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../../../../../lib/auth";
 import { prisma } from "../../../../../lib/prizma";
 import { z } from "zod";
+import { serverError } from "../../../../../lib/api-error";
 
 /**
  * GET /api/admin/services/categories
@@ -36,12 +37,8 @@ export async function GET() {
     });
 
     return NextResponse.json({ categories });
-  } catch (error: any) {
-    console.error("GET_CATEGORIES_ERROR", error);
-    return NextResponse.json(
-      { error: "INTERNAL", message: error?.message ?? "Unknown error" },
-      { status: 500 }
-    );
+  } catch (error: unknown) {
+    return serverError('GET_CATEGORIES_ERROR', error);
   }
 }
 
@@ -96,11 +93,7 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json({ ok: true, category }, { status: 201 });
-  } catch (error: any) {
-    console.error("CREATE_CATEGORY_ERROR", error);
-    return NextResponse.json(
-      { error: "INTERNAL", message: error?.message ?? "Unknown error" },
-      { status: 500 }
-    );
+  } catch (error: unknown) {
+    return serverError('CREATE_CATEGORY_ERROR', error);
   }
 }

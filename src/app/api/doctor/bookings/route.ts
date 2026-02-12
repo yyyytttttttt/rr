@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../../../lib/auth";
 import { prisma } from "../../../../lib/prizma";
+import { serverError } from "../../../../lib/api-error";
 
 export async function GET(req: NextRequest) {
   try {
@@ -120,11 +121,7 @@ export async function GET(req: NextRequest) {
         },
       })),
     });
-  } catch (error: any) {
-    console.error("Error fetching doctor bookings:", error);
-    return NextResponse.json(
-      { error: "Internal server error", message: error.message },
-      { status: 500 }
-    );
+  } catch (error: unknown) {
+    return serverError('Error fetching doctor bookings', error);
   }
 }

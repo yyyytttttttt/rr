@@ -40,7 +40,7 @@ export async function POST(req: Request) {
     select: { role: true },
   });
 
-  const isAdmin = user?.role === "ADMIN" || user?.role === "DOCTOR";
+  const isAdmin = user?.role === "ADMIN";
 
   // If not admin, check if user is the doctor
   if (!isAdmin) {
@@ -333,7 +333,7 @@ export async function POST(req: Request) {
         errors.push({
           slot,
           error: "CREATE_FAILED",
-          message: (e as Error).message,
+          message: "Failed to create opening",
           startUtc: slotStartUtc.toISOString(),
         });
       }

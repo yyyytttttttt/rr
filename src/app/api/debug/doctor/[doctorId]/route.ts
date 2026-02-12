@@ -1,15 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "../../../../../lib/prizma";
+import { getServerSession } from "next-auth";
+import { authOptions } from "../../../../../lib/auth";
 
 /**
  * GET /api/debug/doctor/[doctorId]
  * Debug endpoint для проверки конфигурации врача
- * ВАЖНО: Удалить в продакшене или защитить авторизацией!
  */
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ doctorId: string }> }
 ) {
+  if (process.env.NODE_ENV === 'production') {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  }
+  // [SEC] debug endpoint — admin/doctor only
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id || (session.user.role !== "ADMIN" && session.user.role !== "DOCTOR")) {
+    return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
+  }
+
   const { doctorId } = await params;
 
   try {

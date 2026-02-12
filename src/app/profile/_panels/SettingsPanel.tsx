@@ -203,8 +203,6 @@ export default function SettingsPanel({ userName, userEmail, userImage }: Props)
 
     setSaving(true);
     try {
-      console.log("Saving profile:", result.data);
-
       const res = await fetch("/api/user/profile", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -216,13 +214,12 @@ export default function SettingsPanel({ userName, userEmail, userImage }: Props)
       });
 
       const data = await res.json();
-      console.log("Save response:", data);
 
       if (res.ok) {
         toast.success("Профиль успешно обновлен");
         setErrors({});
       } else {
-        console.error("Save error:", data);
+        console.error("Save error", { error: data?.error });
         toast.error(data.error || "Не удалось обновить профиль");
       }
     } catch (error) {

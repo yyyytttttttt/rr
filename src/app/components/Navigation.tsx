@@ -7,7 +7,7 @@ import Link from 'next/link'
 const Navigation = () => {
     const pathname= usePathname()
     const session =useSession()
-    console.log(session)
+    // session object intentionally not logged
   return (
     <div className='flex w-full items-center justify-center gap-4 bg-amber-300'>{
         session.data&& (<Link href="/profile">profile</Link>)}

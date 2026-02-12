@@ -334,7 +334,7 @@ export async function POST(req: NextRequest) {
           errors.push({
             slot,
             error: "CREATE_FAILED",
-            message: (e as Error).message,
+            message: "Failed to create opening",
             startUtc: slotStartUtc.toISOString(),
           });
         }

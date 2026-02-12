@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "../../../../../lib/prizma";
 import { createCorsResponse } from "../../../../../lib/jwt";
+import { serverError } from "../../../../../lib/api-error";
 
 export async function OPTIONS(request: NextRequest) {
   return createCorsResponse(request);
@@ -43,10 +44,6 @@ export async function GET() {
     console.log(`[MOBILE_SERVICES_CATEGORIES] Found ${categories.length} categories`);
     return NextResponse.json({ categories });
   } catch (error) {
-    console.error('[MOBILE_SERVICES_CATEGORIES] Error:', error);
-    return NextResponse.json(
-      { error: 'Ошибка при загрузке категорий', details: error instanceof Error ? error.message : 'Unknown error' },
-      { status: 500 }
-    );
+    return serverError('[MOBILE_SERVICES_CATEGORIES] Error', error);
   }
 }

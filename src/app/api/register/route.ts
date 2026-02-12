@@ -1,10 +1,13 @@
 export const runtime = 'nodejs';
-import { NextResponse } from "next/server";
-import { prisma } from "../../../lib/prizma";        // проверь путь к твоему singleton PrismaClient
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "../../../lib/prizma";
 import bcrypt from "bcrypt";
 import { z } from "zod";
 import crypto from "crypto";
-import {sendMail} from '../../../lib/mailer'
+import { sendMail } from '../../../lib/mailer';
+import { rateLimit, sanitizeIp } from '../../../lib/rate-limit';
+
+const registerRateLimit = rateLimit({ windowMs: 60_000, max: 5, keyPrefix: 'register' });
 
 const schema = z.object({
   email: z.string().trim().email(),
@@ -15,7 +18,13 @@ const schema = z.object({
 });
 
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
+  const ip = sanitizeIp(req.headers.get('x-forwarded-for'));
+  const rl = await registerRateLimit(ip);
+  if (!rl.ok) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429, headers: { 'Retry-After': String(rl.retryAfterSec) } });
+  }
+
   const body = await req.json().catch(() => null);
 
   const parse = schema.safeParse(body);

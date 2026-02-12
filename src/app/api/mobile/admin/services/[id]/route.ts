@@ -112,32 +112,37 @@ export async function PUT(
 
   const data = parsed.data;
 
-  const service = await prisma.service.update({
-    where: { id },
-    data: {
-      name: data.name,
-      description: data.description ?? null,
-      priceCents: data.priceCents,
-      currency: data.currency,
-      durationMin: data.durationMin,
-      isActive: data.isActive ?? true,
-      bufferMinOverride: data.bufferMinOverride ?? null,
-      categoryId: data.categoryId ?? null,
-    },
-    select: {
-      id: true,
-      name: true,
-      description: true,
-      priceCents: true,
-      currency: true,
-      durationMin: true,
-      isActive: true,
-      bufferMinOverride: true,
-    },
-  });
+  try {
+    const service = await prisma.service.update({
+      where: { id },
+      data: {
+        name: data.name,
+        description: data.description ?? null,
+        priceCents: data.priceCents,
+        currency: data.currency,
+        durationMin: data.durationMin,
+        isActive: data.isActive ?? true,
+        bufferMinOverride: data.bufferMinOverride ?? null,
+        categoryId: data.categoryId ?? null,
+      },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        priceCents: true,
+        currency: true,
+        durationMin: true,
+        isActive: true,
+        bufferMinOverride: true,
+      },
+    });
 
-  console.log("[MOBILE_ADMIN_SERVICE_UPDATE] Updated service:", service.id);
-  return NextResponse.json({ ok: true, service });
+    console.log("[MOBILE_ADMIN_SERVICE_UPDATE] Updated service:", service.id);
+    return NextResponse.json({ ok: true, service });
+  } catch (error) {
+    console.error("[MOBILE_ADMIN_SERVICE_UPDATE] Error:", error);
+    return NextResponse.json({ error: "Ошибка сервера" }, { status: 500 });
+  }
 }
 
 export async function DELETE(
@@ -173,8 +178,12 @@ export async function DELETE(
     );
   }
 
-  await prisma.service.delete({ where: { id } });
-
-  console.log("[MOBILE_ADMIN_SERVICE_DELETE] Deleted service:", id);
-  return NextResponse.json({ ok: true });
+  try {
+    await prisma.service.delete({ where: { id } });
+    console.log("[MOBILE_ADMIN_SERVICE_DELETE] Deleted service:", id);
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    console.error("[MOBILE_ADMIN_SERVICE_DELETE] Error:", error);
+    return NextResponse.json({ error: "Ошибка сервера" }, { status: 500 });
+  }
 }

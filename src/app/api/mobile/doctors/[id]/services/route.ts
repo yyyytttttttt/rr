@@ -71,11 +71,16 @@ export async function POST(
 
     const doctor = await prisma.doctor.findUnique({
       where: { id: doctorId },
-      select: { id: true },
+      select: { id: true, userId: true },
     });
 
     if (!doctor) {
       return NextResponse.json({ error: "Врач не найден" }, { status: 404 });
+    }
+
+    // DOCTOR can only add services to themselves
+    if (auth.payload.role === "DOCTOR" && doctor.userId !== auth.payload.userId) {
+      return NextResponse.json({ error: "FORBIDDEN" }, { status: 403 });
     }
 
     const result = await prisma.doctorService.createMany({

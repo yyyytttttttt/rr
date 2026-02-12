@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAuth, createCorsResponse } from "../../../../../lib/jwt";
 import { prisma } from "../../../../../lib/prizma";
 import { z } from "zod";
+import { serverError } from "../../../../../lib/api-error";
 
 const bodySchema = z.object({
   userId: z.string().min(1).optional(),
@@ -152,11 +153,7 @@ export async function POST(req: NextRequest) {
     console.log("[MOBILE_ADMIN_DOCTORS] Created doctor:", doctor.id);
 
     return NextResponse.json({ ok: true, doctor }, { status: 201 });
-  } catch (e: any) {
-    console.error("[MOBILE_ADMIN_DOCTORS] Error creating doctor:", e);
-    return NextResponse.json(
-      { error: "Ошибка сервера", message: e?.message ?? "Unknown error" },
-      { status: 500 }
-    );
+  } catch (e: unknown) {
+    return serverError('[MOBILE_ADMIN_DOCTORS] Error creating doctor', e);
   }
 }

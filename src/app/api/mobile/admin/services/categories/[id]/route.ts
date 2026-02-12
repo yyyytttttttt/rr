@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAuth, createCorsResponse } from "../../../../../../../lib/jwt";
 import { prisma } from "../../../../../../../lib/prizma";
 import { z } from "zod";
+import { serverError } from "../../../../../../../lib/api-error";
 
 const updateCategorySchema = z.object({
   name: z.string().min(1, "Название обязательно"),
@@ -82,12 +83,8 @@ export async function PUT(
 
     console.log("[MOBILE_ADMIN_CATEGORY_UPDATE] Updated category:", category.id);
     return NextResponse.json({ ok: true, category });
-  } catch (error: any) {
-    console.error("[MOBILE_ADMIN_CATEGORY_UPDATE] UPDATE_CATEGORY_ERROR", error);
-    return NextResponse.json(
-      { error: "INTERNAL", message: error?.message ?? "Неизвестная ошибка" },
-      { status: 500 }
-    );
+  } catch (error: unknown) {
+    return serverError('[MOBILE_ADMIN_CATEGORY_UPDATE] UPDATE_CATEGORY_ERROR', error);
   }
 }
 
@@ -147,11 +144,7 @@ export async function DELETE(
 
     console.log("[MOBILE_ADMIN_CATEGORY_DELETE] Deleted category:", id);
     return NextResponse.json({ ok: true });
-  } catch (error: any) {
-    console.error("[MOBILE_ADMIN_CATEGORY_DELETE] DELETE_CATEGORY_ERROR", error);
-    return NextResponse.json(
-      { error: "INTERNAL", message: error?.message ?? "Неизвестная ошибка" },
-      { status: 500 }
-    );
+  } catch (error: unknown) {
+    return serverError('[MOBILE_ADMIN_CATEGORY_DELETE] DELETE_CATEGORY_ERROR', error);
   }
 }

@@ -3,6 +3,7 @@ import { prisma } from "../../../../../lib/prizma";
 import { requireAuth, createCorsResponse } from "../../../../../lib/jwt";
 import { generateOccurrences } from "../../../../../lib/rrule";
 import { z } from "zod";
+import { serverError } from "../../../../../lib/api-error";
 
 // Обработка OPTIONS для CORS preflight
 export async function OPTIONS(request: NextRequest) {
@@ -263,13 +264,6 @@ export async function GET(req: NextRequest) {
     });
 
   } catch (error) {
-    console.error('[MOBILE_DOCTOR_CALENDAR] Error:', error);
-    return NextResponse.json(
-      {
-        error: 'Ошибка при загрузке календаря',
-        message: error instanceof Error ? error.message : 'Внутренняя ошибка сервера'
-      },
-      { status: 500 }
-    );
+    return serverError('[MOBILE_DOCTOR_CALENDAR] Error', error);
   }
 }

@@ -47,7 +47,7 @@ export async function POST(req) {
     select: { role: true },
   });
 
-  const isAdmin = user?.role === "ADMIN" || user?.role === "DOCTOR";
+  const isAdmin = user?.role === "ADMIN";
 
   // If not admin, check if user is the doctor
   if (!isAdmin) {

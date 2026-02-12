@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "../../../../lib/prizma";
 import { createCorsResponse } from "../../../../lib/jwt";
 import { z } from "zod";
+import { serverError } from "../../../../lib/api-error";
 import { RRule, RRuleSet } from "rrule";
 import {
   toZonedTime,
@@ -467,11 +468,7 @@ export async function GET(req: Request) {
         dayLocal: day,
       },
     });
-  } catch (e: any) {
-    console.error("SLOTS_API_ERROR", e);
-    return NextResponse.json(
-      { error: "INTERNAL", message: e?.message ?? "Unknown error" },
-      { status: 500 }
-    );
+  } catch (e: unknown) {
+    return serverError('SLOTS_API_ERROR', e);
   }
 }

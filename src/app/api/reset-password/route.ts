@@ -1,6 +1,7 @@
 export const runtime = "nodejs";
 import { NextResponse } from "next/server";
 import { prisma } from "../../../lib/prizma";
+import { invalidateTokenVersionCache } from "../../../lib/auth";
 import {z} from "zod";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
@@ -62,11 +63,15 @@ export async function POST(req: Request) {
   await prisma.$transaction([
     prisma.user.update({
       where: { email },
-      data: { password: hash, passwordUpdatedAt: new Date() },
+      data: { password: hash, passwordUpdatedAt: new Date(), tokenVersion: { increment: 1 } },
     }),
     prisma.passwordResetToken.deleteMany({
       where: { identifier: email },
     }),
   ]);
+
+  // [SEC] Инвалидируем кэш tokenVersion после смены пароля
+  invalidateTokenVersionCache(user.id);
+
   return NextResponse.json({ ok: true });
 }

@@ -5,6 +5,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../../../lib/auth";
 import { prisma } from "../../../lib/prizma";
 import { v2 as cloudinary } from "cloudinary";
+import { logger } from "../../../lib/logger";
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -32,8 +33,9 @@ export async function POST(req) {
 
  
   const mime = file.type || "";
-  if (!(mime && mime.startsWith("image/"))) {
-    return NextResponse.json({ error: "Only images allowed" }, { status: 400 });
+  const ALLOWED_MIME = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'image/avif'];
+  if (!ALLOWED_MIME.includes(mime)) {
+    return NextResponse.json({ error: "Only jpeg/png/gif/webp/avif allowed" }, { status: 400 });
   }
 
   const size = file.size ?? 0;
@@ -76,7 +78,7 @@ export async function POST(req) {
 
     return NextResponse.json({ ok: true, url: upload.url }, { status: 200 });
   } catch (e) {
-    console.error("[UPLOAD_AVATAR]", e);
+    logger.error("[UPLOAD_AVATAR]", e);
     return NextResponse.json({ error: "Upload failed" }, { status: 500 });
   }
 }

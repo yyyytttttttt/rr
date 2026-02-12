@@ -60,7 +60,6 @@ function ResetPasswordForm() {
       setIsSubmitting(true);
 
       const requestBody = { email, token, oldPassword, password };
-      console.log('Отправка запроса:', requestBody);
 
       const res = await fetch('/api/reset-password', {
         method: 'POST',
@@ -70,7 +69,6 @@ function ResetPasswordForm() {
 
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
-        console.error('Ошибка от сервера:', body);
         const errorMsg = body?.error;
 
         // Преобразуем коды ошибок в понятные сообщения

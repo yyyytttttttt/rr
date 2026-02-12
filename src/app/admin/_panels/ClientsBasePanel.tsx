@@ -48,8 +48,6 @@ export default function ClientsBasePanel({ userId, filters }: PanelProps) {
       if (!res.ok) throw new Error("Failed to fetch clients");
 
       const data = await res.json();
-      console.log("Clients data:", data);
-      console.log("First client:", data.items?.[0]);
       setClients(data.items || []);
       setTotal(data.total || 0);
     } catch (error) {
