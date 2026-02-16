@@ -59,7 +59,6 @@ const MENU_ITEMS: MenuItem[] = [
         </defs>
       </svg>
     ),
-    badge: 1,
   },
   {
     view: "history",

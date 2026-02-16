@@ -27,6 +27,7 @@ export default async function ProfilePage({ searchParams }: Props) {
       email: true,
       image: true,
       phone: true,
+      birthDate: true,
     },
   });
 
@@ -50,6 +51,7 @@ export default async function ProfilePage({ searchParams }: Props) {
     userEmail: user.email || "",
     userImage: user.image || "",
     userPhone: user.phone || null,
+    userBirthDate: user.birthDate?.toISOString() ?? null,
     initialDate: params.date,
   };
 

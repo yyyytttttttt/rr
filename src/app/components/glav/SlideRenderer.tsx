@@ -9,6 +9,7 @@ import SliderSection2 from '../SliderSection2'
 import SliderSection4 from '../SliderSection4'
 import SliderSection5 from "../SliderSection5"
 import SliderSection6 from '../SliderSection6'
+import SliderSectionNews from '../SliderSectionNews'
 
 import { DescProps, mobileBarType, Slide } from '../../types/GlavProps'
 
@@ -29,6 +30,10 @@ function SlideRenderer({ slide }:{slide:Slide}) {
         <MobileBar title={m.title} text={m.text} buttons={m.buttons} buttonsVertical={m.buttonsVertical} />
       </SliderSection2>
     )
+  }
+
+  if (slide.type === 'sliderNews') {
+    return <SliderSectionNews />
   }
 
   if (slide.type === 'slider4') {
@@ -52,7 +57,7 @@ function SlideRenderer({ slide }:{slide:Slide}) {
   const d = slide.desktop
   const m = slide.mobile
   return (
-    <StaticSection3 src={slide.src} images={slide.images}>
+    <StaticSection3 src={slide.src} images={slide.images} objectFit={slide.objectFit}>
       <DesktopCard pos={d.pos} title={d.title} lines={d.lines} buttons={d.buttons} buttonsVertical={d.buttonsVertical} />
       <MobileBar title={m.title} text={m.text} buttons={m.buttons} buttonsVertical={m.buttonsVertical} />
     </StaticSection3>

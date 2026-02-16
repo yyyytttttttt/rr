@@ -19,7 +19,7 @@ const SliderSection5 = () => {
       { title: 'Инъекционная косметология', subTitile:'Врач-косметолог,',subTitile1:'дерматовенеролог, трихолог', image: '/images/us10.png' },
       { title: 'Инъекционная косметология', subTitile:'Врач-косметолог,',subTitile1:'дерматовенеролог, трихолог', image: '/images/us10.png' },
       { title: 'Инъекционная косметология', subTitile:'Врач-косметолог,',subTitile1:'дерматовенеролог, трихолог', image: '/images/us10.png' },
-       { title: 'Инъекционная косметология', subTitile:'Врач-косметолог,',subTitile1:'дерматовенеролог, трихолог', image: '/images/us10.png' },
+      { title: 'Инъекционная косметология', subTitile:'Врач-косметолог,',subTitile1:'дерматовенеролог, трихолог', image: '/images/us10.png' },
       { title: 'Инъекционная косметология', subTitile:'Врач-косметолог,',subTitile1:'дерматовенеролог, трихолог', image: '/images/us10.png' },
       { title: 'Инъекционная косметология', subTitile:'Врач-косметолог,',subTitile1:'дерматовенеролог, трихолог', image: '/images/us10.png' },
     ],

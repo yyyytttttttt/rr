@@ -18,17 +18,4 @@ export const slides = [
       { label: 'Написать в чат',   variant: 'ghost'   },
     ],
   },
-  {
-    media: { desktop: '/images/sl20.png', mobile: '/images/mobile2.png' },
-    title: ['Ты — центр', 'этого пространства'],
-    lines: [
-      '«Новая Я» — это не просто эстетика и стиль.',
-      'Сопровождение, поддержка и услуги, которые помогают',
-      'выбрать себя заново…',
-    ],
-    buttons: [
-      { label: 'Выбрать услугу', variant: 'primary' },
-      { label: 'Написать в чат', variant: 'ghost'   },
-    ],
-  },
 ]

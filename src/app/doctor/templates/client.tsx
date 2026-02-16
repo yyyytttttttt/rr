@@ -120,12 +120,10 @@ export default function ClientTemplates({ doctorId, doctorName }: ClientTemplate
     <div className="min-h-screen bg-[#FFFCF3]">
       <Toaster position="top-center" />
 
-      <div className=" mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+      <div className=" mx-auto px-4 py-6 sm:py-8">
         {/* Шапка */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-          <h1 className="text-xl sm:text-2xl font-ManropeBold text-[#4F5338]">
-            Шаблоны расписания
-          </h1>
+          
           <button
             onClick={() => setShowCreateModal(true)}
             className="rounded-lg bg-[#5C6744] px-4 py-2 text-sm font-ManropeMedium text-white hover:bg-[#4F5938] transition-colors whitespace-nowrap self-start sm:self-auto"
@@ -404,12 +402,12 @@ function TemplateModal({
   return (
     <div className="fixed inset-0 z-[10000] flex items-center justify-center p-2 sm:p-4">
       <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative w-full max-w-2xl bg-white rounded-xl sm:rounded-2xl shadow-2xl max-h-[95vh] sm:max-h-[90vh] overflow-hidden flex flex-col">
+      <div className="relative w-full max-w-2xl bg-[#FFFCF3] rounded-[20px] shadow-2xl max-h-[85dvh] overflow-hidden flex flex-col">
         <div className="flex items-center justify-between gap-3 px-4 sm:px-6 py-3 sm:py-4 border-b border-[#E8E2D5] shrink-0">
           <h2 className="flex-1 min-w-0 text-lg sm:text-xl font-ManropeBold text-[#4F5338] truncate">
             {template ? "Редактирование шаблона" : "Новый шаблон"}
           </h2>
-          <button onClick={onClose} className="flex-shrink-0 p-1 text-[#636846] hover:text-[#4F5338] transition-colors rounded-lg hover:bg-[#F5F0E4]" aria-label="Закрыть">
+          <button onClick={onClose} className="flex-shrink-0 w-11 h-11 flex items-center justify-center text-[#636846] hover:text-[#4F5338] transition-colors rounded-full hover:bg-[#E8E2D5]" aria-label="Закрыть">
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -422,7 +420,7 @@ function TemplateModal({
             <label className="block text-sm font-ManropeMedium text-[#4F5338] mb-2">Название</label>
             <input
               type="text"
-              className="w-full rounded-lg border border-[#E8E2D5] px-3 py-2.5 text-sm font-ManropeRegular text-[#4F5338] focus:outline-none focus:ring-2 focus:ring-[#5C6744] focus:border-transparent transition-all"
+              className="w-full rounded-lg border border-[#E8E2D5] px-3 py-2.5 text-base sm:text-sm font-ManropeRegular text-[#4F5338] focus:outline-none focus:ring-2 focus:ring-[#5C6744] focus:border-transparent transition-all"
               placeholder="Обычная неделя"
               {...form.register("name")}
             />
@@ -437,7 +435,7 @@ function TemplateModal({
           <div>
             <label className="block text-sm font-ManropeMedium text-[#4F5338] mb-2">Описание (опционально)</label>
             <textarea
-              className="w-full rounded-lg border border-[#E8E2D5] px-3 py-2.5 text-sm font-ManropeRegular text-[#4F5338] focus:outline-none focus:ring-2 focus:ring-[#5C6744] focus:border-transparent transition-all resize-none"
+              className="w-full rounded-lg border border-[#E8E2D5] px-3 py-2.5 text-base sm:text-sm font-ManropeRegular text-[#4F5338] focus:outline-none focus:ring-2 focus:ring-[#5C6744] focus:border-transparent transition-all resize-none"
               rows={2}
               placeholder="Рабочие дни с 9 до 18"
               {...form.register("description")}
@@ -485,11 +483,11 @@ function TemplateModal({
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div>
-                        <label className="block text-[clamp(0.875rem,0.8077rem+0.2885vw,1.125rem)] font-ManropeMedium text-[#4F5338] mb-[clamp(0.375rem,0.3173rem+0.2564vw,0.625rem)]">
+                        <label className="block text-sm font-ManropeMedium text-[#4F5338] mb-2">
                           День недели
                         </label>
                         <select
-                          className="w-full rounded-[clamp(0.5rem,0.4423rem+0.2564vw,0.75rem)] border border-[#E8E2D5] px-[clamp(0.75rem,0.6346rem+0.5128vw,1.25rem)] py-[clamp(0.625rem,0.5096rem+0.5128vw,1.125rem)] text-[clamp(0.875rem,0.8077rem+0.2885vw,1.125rem)] font-ManropeRegular text-[#4F5338] focus:outline-none focus:ring-2 focus:ring-[#5C6744] focus:border-transparent transition-all"
+                          className="w-full rounded-lg border border-[#E8E2D5] px-3 py-2.5 text-base sm:text-sm font-ManropeRegular text-[#4F5338] focus:outline-none focus:ring-2 focus:ring-[#5C6744] focus:border-transparent transition-all"
                           value={slot.dayOfWeek}
                           onChange={(e) =>
                             updateSlot(index, "dayOfWeek", Number(e.target.value))
@@ -504,12 +502,12 @@ function TemplateModal({
                       </div>
 
                       <div>
-                        <label className="block text-[clamp(0.875rem,0.8077rem+0.2885vw,1.125rem)] font-ManropeMedium text-[#4F5338] mb-[clamp(0.375rem,0.3173rem+0.2564vw,0.625rem)]">
+                        <label className="block text-sm font-ManropeMedium text-[#4F5338] mb-2">
                           Длительность приёма (мин)
                         </label>
                         <input
                           type="number"
-                          className="w-full rounded-[clamp(0.5rem,0.4423rem+0.2564vw,0.75rem)] border border-[#E8E2D5] px-[clamp(0.75rem,0.6346rem+0.5128vw,1.25rem)] py-[clamp(0.625rem,0.5096rem+0.5128vw,1.125rem)] text-[clamp(0.875rem,0.8077rem+0.2885vw,1.125rem)] font-ManropeRegular text-[#4F5338] focus:outline-none focus:ring-2 focus:ring-[#5C6744] focus:border-transparent transition-all"
+                          className="w-full rounded-lg border border-[#E8E2D5] px-3 py-2.5 text-base sm:text-sm font-ManropeRegular text-[#4F5338] focus:outline-none focus:ring-2 focus:ring-[#5C6744] focus:border-transparent transition-all"
                           placeholder="30"
                           min="5"
                           max="480"
@@ -525,32 +523,42 @@ function TemplateModal({
                       </div>
 
                       <div>
-                        <label className="block text-[clamp(0.875rem,0.8077rem+0.2885vw,1.125rem)] font-ManropeMedium text-[#4F5338] mb-[clamp(0.375rem,0.3173rem+0.2564vw,0.625rem)]">Начало</label>
-                        <input
-                          type="time"
-                          className="w-full rounded-[clamp(0.5rem,0.4423rem+0.2564vw,0.75rem)] border border-[#E8E2D5] px-[clamp(0.75rem,0.6346rem+0.5128vw,1.25rem)] py-[clamp(0.625rem,0.5096rem+0.5128vw,1.125rem)] text-[clamp(0.875rem,0.8077rem+0.2885vw,1.125rem)] font-ManropeRegular text-[#4F5338] focus:outline-none focus:ring-2 focus:ring-[#5C6744] focus:border-transparent transition-all"
-                          value={slot.startTime}
-                          onChange={(e) => updateSlot(index, "startTime", e.target.value)}
-                        />
+                        <label className="block text-sm font-ManropeMedium text-[#4F5338] mb-2">Начало</label>
+                        <div className="relative">
+                          <input
+                            type="time"
+                            className="w-full appearance-none rounded-lg border border-[#E8E2D5] px-3 py-2.5 pr-10 text-base sm:text-sm font-ManropeRegular text-[#4F5338] bg-white focus:outline-none focus:ring-2 focus:ring-[#5C6744] focus:border-transparent transition-all [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+                            value={slot.startTime}
+                            onChange={(e) => updateSlot(index, "startTime", e.target.value)}
+                          />
+                          <svg className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#636846]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                        </div>
                       </div>
 
                       <div>
-                        <label className="block text-[clamp(0.875rem,0.8077rem+0.2885vw,1.125rem)] font-ManropeMedium text-[#4F5338] mb-[clamp(0.375rem,0.3173rem+0.2564vw,0.625rem)]">Конец</label>
-                        <input
-                          type="time"
-                          className="w-full rounded-[clamp(0.5rem,0.4423rem+0.2564vw,0.75rem)] border border-[#E8E2D5] px-[clamp(0.75rem,0.6346rem+0.5128vw,1.25rem)] py-[clamp(0.625rem,0.5096rem+0.5128vw,1.125rem)] text-[clamp(0.875rem,0.8077rem+0.2885vw,1.125rem)] font-ManropeRegular text-[#4F5338] focus:outline-none focus:ring-2 focus:ring-[#5C6744] focus:border-transparent transition-all"
-                          value={slot.endTime}
-                          onChange={(e) => updateSlot(index, "endTime", e.target.value)}
-                        />
+                        <label className="block text-sm font-ManropeMedium text-[#4F5338] mb-2">Конец</label>
+                        <div className="relative">
+                          <input
+                            type="time"
+                            className="w-full appearance-none rounded-lg border border-[#E8E2D5] px-3 py-2.5 pr-10 text-base sm:text-sm font-ManropeRegular text-[#4F5338] bg-white focus:outline-none focus:ring-2 focus:ring-[#5C6744] focus:border-transparent transition-all [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+                            value={slot.endTime}
+                            onChange={(e) => updateSlot(index, "endTime", e.target.value)}
+                          />
+                          <svg className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#636846]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                        </div>
                       </div>
 
                       <div>
-                        <label className="block text-[clamp(0.875rem,0.8077rem+0.2885vw,1.125rem)] font-ManropeMedium text-[#4F5338] mb-[clamp(0.375rem,0.3173rem+0.2564vw,0.625rem)]">
+                        <label className="block text-sm font-ManropeMedium text-[#4F5338] mb-2">
                           Буфер (мин, опционально)
                         </label>
                         <input
                           type="number"
-                          className="w-full rounded-[clamp(0.5rem,0.4423rem+0.2564vw,0.75rem)] border border-[#E8E2D5] px-[clamp(0.75rem,0.6346rem+0.5128vw,1.25rem)] py-[clamp(0.625rem,0.5096rem+0.5128vw,1.125rem)] text-[clamp(0.875rem,0.8077rem+0.2885vw,1.125rem)] font-ManropeRegular text-[#4F5338] focus:outline-none focus:ring-2 focus:ring-[#5C6744] focus:border-transparent transition-all"
+                          className="w-full rounded-lg border border-[#E8E2D5] px-3 py-2.5 text-base sm:text-sm font-ManropeRegular text-[#4F5338] focus:outline-none focus:ring-2 focus:ring-[#5C6744] focus:border-transparent transition-all"
                           placeholder="15"
                           min="0"
                           value={slot.bufferMinOverride ?? ""}
@@ -572,19 +580,21 @@ function TemplateModal({
         </div>
 
         {/* Футер */}
-        <div className="sticky bottom-0 bg-white border-t border-[#E8E2D5] px-6 py-4 flex justify-end gap-3">
-          <button
-            onClick={onClose}
-            className="rounded-lg bg-[#F5F0E4] px-5 py-2.5 text-sm font-ManropeMedium text-[#967450] hover:bg-[#EBE5D6] transition-colors"
-          >
-            Отмена
-          </button>
-          <button
-            onClick={handleSubmit}
-            className="rounded-lg bg-[#5C6744] px-5 py-2.5 text-sm font-ManropeMedium text-white hover:bg-[#4F5938] transition-colors"
-          >
-            {template ? "Сохранить" : "Создать шаблон"}
-          </button>
+        <div className="sticky bottom-0 bg-[#FFFCF3] border-t border-[#E8E2D5] px-4 sm:px-6 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:py-4">
+          <div className="flex flex-col sm:flex-row sm:justify-end gap-2 sm:gap-3">
+            <button
+              onClick={onClose}
+              className="rounded-lg bg-[#F5F0E4] px-5 py-2.5 min-h-11 sm:min-h-0 text-sm font-ManropeMedium text-[#967450] hover:bg-[#EBE5D6] transition-colors"
+            >
+              Отмена
+            </button>
+            <button
+              onClick={handleSubmit}
+              className="rounded-lg bg-[#5C6744] px-5 py-2.5 min-h-11 sm:min-h-0 text-sm font-ManropeMedium text-white hover:bg-[#4F5938] transition-colors"
+            >
+              {template ? "Сохранить" : "Создать шаблон"}
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -657,7 +667,7 @@ function ApplyTemplateModal({
   return (
     <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative w-full max-w-[clamp(36rem,32rem+16vw,52rem)] bg-white rounded-[clamp(1rem,0.8846rem+0.5128vw,1.5rem)] shadow-2xl overflow-hidden">
+      <div className="relative w-full max-w-[clamp(36rem,32rem+16vw,52rem)] bg-[#FFFCF3] rounded-[20px] shadow-2xl max-h-[85dvh] overflow-hidden flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between gap-4 px-[clamp(1.5rem,1.2692rem+1.0256vw,2.5rem)] py-[clamp(1.25rem,1.0192rem+1.0256vw,2.25rem)] border-b border-[#E8E2D5]">
           <h2 className="flex-1 min-w-0 text-[clamp(1.25rem,1.1346rem+0.5128vw,1.75rem)] font-ManropeBold text-[#4F5338] truncate">
@@ -665,7 +675,7 @@ function ApplyTemplateModal({
           </h2>
           <button
             onClick={onClose}
-            className="flex-shrink-0 p-1 text-[#636846] hover:text-[#4F5338] transition-colors rounded-lg hover:bg-[#F5F0E4]"
+            className="flex-shrink-0 w-11 h-11 flex items-center justify-center text-[#636846] hover:text-[#4F5338] transition-colors rounded-full hover:bg-[#E8E2D5]"
             aria-label="Закрыть"
           >
             <svg
@@ -702,12 +712,12 @@ function ApplyTemplateModal({
           </div>
 
           <div>
-            <label className="block text-[clamp(0.875rem,0.8077rem+0.2885vw,1.125rem)] font-ManropeMedium text-[#4F5338] mb-[clamp(0.375rem,0.3173rem+0.2564vw,0.625rem)]">
+            <label className="block text-sm font-ManropeMedium text-[#4F5338] mb-2">
               Дата начала недели (понедельник)
             </label>
             <input
               type="date"
-              className="w-full rounded-[clamp(0.5rem,0.4423rem+0.2564vw,0.75rem)] border border-[#E8E2D5] px-[clamp(0.75rem,0.6346rem+0.5128vw,1.25rem)] py-[clamp(0.625rem,0.5096rem+0.5128vw,1.125rem)] text-[clamp(0.875rem,0.8077rem+0.2885vw,1.125rem)] font-ManropeRegular text-[#4F5338] focus:outline-none focus:ring-2 focus:ring-[#5C6744] focus:border-transparent transition-all"
+              className="w-full rounded-lg border border-[#E8E2D5] px-3 py-2.5 text-base sm:text-sm font-ManropeRegular text-[#4F5338] focus:outline-none focus:ring-2 focus:ring-[#5C6744] focus:border-transparent transition-all"
               value={weekStart}
               onChange={(e) => setWeekStart(e.target.value)}
             />
@@ -718,21 +728,23 @@ function ApplyTemplateModal({
         </div>
 
         {/* Footer */}
-        <div className="sticky bottom-0 bg-white border-t border-[#E8E2D5] px-6 py-4 flex justify-end gap-3">
-          <button
-            onClick={onClose}
-            disabled={applying}
-            className="rounded-lg bg-[#F5F0E4] px-5 py-2.5 text-sm font-ManropeMedium text-[#967450] hover:bg-[#EBE5D6] transition-colors disabled:opacity-50"
-          >
-            Отмена
-          </button>
-          <button
-            onClick={handleApply}
-            disabled={applying}
-            className="rounded-lg bg-[#5C6744] px-5 py-2.5 text-sm font-ManropeMedium text-white hover:bg-[#4F5938] transition-colors disabled:opacity-50"
-          >
-            {applying ? "Применение..." : "Применить"}
-          </button>
+        <div className="sticky bottom-0 bg-[#FFFCF3] border-t border-[#E8E2D5] px-4 sm:px-6 pt-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] sm:py-4">
+          <div className="flex flex-col sm:flex-row sm:justify-end gap-2 sm:gap-3">
+            <button
+              onClick={onClose}
+              disabled={applying}
+              className="rounded-lg bg-[#F5F0E4] px-5 py-2.5 min-h-11 sm:min-h-0 text-sm font-ManropeMedium text-[#967450] hover:bg-[#EBE5D6] transition-colors disabled:opacity-50"
+            >
+              Отмена
+            </button>
+            <button
+              onClick={handleApply}
+              disabled={applying}
+              className="rounded-lg bg-[#5C6744] px-5 py-2.5 min-h-11 sm:min-h-0 text-sm font-ManropeMedium text-white hover:bg-[#4F5938] transition-colors disabled:opacity-50"
+            >
+              {applying ? "Применение..." : "Применить"}
+            </button>
+          </div>
         </div>
       </div>
     </div>

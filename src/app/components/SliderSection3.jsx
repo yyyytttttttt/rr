@@ -17,7 +17,7 @@ import { useVh100 } from '../hooks/useVh100'
  *  - alt?: string              // alt для изображения
  *  - children?: ReactNode      // оверлеи
  */
-export default function StaticSection3({ src = '', images, alt = '', children }) {
+export default function StaticSection3({ src = '', images, alt = '', objectFit = 'object-cover', children }) {
   const useResponsiveImage = !!images
   const vh100 = useVh100()
 
@@ -63,7 +63,7 @@ export default function StaticSection3({ src = '', images, alt = '', children })
               priority={false}
               quality={100}
               sizes="100vw"
-              className="object-cover"
+              className={objectFit}
             />
           </div>
           {/* Tablet 480px - 999px */}
@@ -75,7 +75,7 @@ export default function StaticSection3({ src = '', images, alt = '', children })
               priority={false}
               quality={100}
               sizes="100vw"
-              className="object-cover"
+              className={objectFit}
             />
           </div>
           {/* Desktop 1000px - 1929px */}
@@ -87,7 +87,7 @@ export default function StaticSection3({ src = '', images, alt = '', children })
               priority={false}
               quality={100}
               sizes="100vw"
-              className="object-cover"
+              className={objectFit}
             />
           </div>
           {/* Large 1930px+ */}
@@ -99,7 +99,7 @@ export default function StaticSection3({ src = '', images, alt = '', children })
               priority={false}
               quality={100}
               sizes="100vw"
-              className="object-cover"
+              className={objectFit}
             />
           </div>
         </>

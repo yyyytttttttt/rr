@@ -1,62 +1,50 @@
+'use client'
+
 import React from 'react'
-import BeforeAfter from '../components/galery/BeforeAfter'
+import { useRouter } from 'next/navigation'
+import { BeforeAfterHero } from '../components/galery/BeforeAfter'
 
-const SliderSection6 = () => {
-  const items = [
-  {
-    id: '1',
-    before: { src: '/images/sl51.png', alt: 'До процедуры' },
-    after: { src: '/images/sl52.png', alt: 'После процедуры' },
-    thumb: { src: '/images/sl51.png', alt: 'Результат 1' },
-  },
-  {
-    id: '2',
-    before: { src: '/images/sl100.png', alt: 'До лечения' },
-    after: { src: '/images/sl101.png', alt: 'После лечения' },
-    thumb: { src: '/images/sl100.png', alt: 'Результат 2' },
-  },
-  {
-    id: '3',
-    before: { src: '/images/cr.png', alt: 'До процедуры' },
-    after: { src: '/images/cr1.png', alt: 'После процедуры' },
-    thumb: { src: '/images/cr.png', alt: 'Результат 3' },
-  },
-  {
-    id: '4',
-    before: { src: '/images/us1.png', alt: 'Исходное состояние' },
-    after: { src: '/images/us2.png', alt: 'Результат процедуры' },
-    thumb: { src: '/images/us1.png', alt: 'Результат 4' },
-  },
-  {
-    id: '5',
-    before: { src: '/images/sl1.png', alt: 'До' },
-    after: { src: '/images/sl2.png', alt: 'После' },
-    thumb: { src: '/images/sl1.png', alt: 'Результат 5' },
-  },
-  {
-    id: '6',
-    before: { src: '/images/pr.png', alt: 'До коррекции' },
-    after: { src: '/images/pr1.png', alt: 'После коррекции' },
-    thumb: { src: '/images/pr.png', alt: 'Результат 6' },
-  },
-]
+const BEFORE = { src: '/images/sl51.png', alt: 'До процедуры' }
+const AFTER = { src: '/images/sl52.png', alt: 'После процедуры' }
+
+export default function SliderSection6() {
+  const router = useRouter()
+
   return (
-    <div className='relative h-app min-h-0 flex-none w-screen bg-[#FFFCF3] overflow-hidden'>
-      <div className="absolute inset-0" />
+    <div className="relative h-app min-h-0 flex-none w-screen bg-[#FFFCF3] overflow-hidden">
+      <div className="absolute inset-0 flex items-center justify-center px-4 sm:px-6 md:px-10 lg:px-16">
+        <div className="w-full max-w-[1400px]">
 
-      {/* Центрированный контейнер */}
-      <div className="absolute inset-0 flex items-center justify-center px-0 py-6 sm:px-4 sm:py-8 md:px-6 md:py-10 lg:px-8 lg:py-4%">
-        <div className="w-full h-full flex items-center justify-center max-w-[95%] sm:max-w-[90%] md:max-w-[85%] lg:max-w-[80%] xl:max-w-[75%] 2xl:max-w-[84%]">
-          <div className="w-full scale-[0.85] sm:scale-90 md:scale-95 lg:scale-100 origin-center">
-            <BeforeAfter
-              items={items}
-              onButtonClick={() => console.log('go to section')}
-            />
+          <div className="flex flex-col md:grid md:grid-cols-[0.6fr_1.4fr] md:gap-12 lg:gap-16 md:items-center">
+
+            {/* Image — top on mobile, right on desktop */}
+            <div className="order-1 md:order-2">
+              <BeforeAfterHero
+                before={BEFORE}
+                after={AFTER}
+                initial={50}
+              />
+            </div>
+
+            {/* Text — below on mobile, left on desktop */}
+            <div className="order-2 md:order-1 mt-10 md:mt-0">
+              <h2 className="text-[clamp(1.25rem,1rem+1vw,2.5rem)] font-ManropeBold text-[#4F5338] leading-tight">
+                Галерея наших работ
+              </h2>
+              <p className="mt-4 text-[clamp(0.8125rem,0.7rem+0.5vw,1.125rem)] font-ManropeRegular leading-relaxed text-[#636846]">
+                Видео результаты процедур, выполненных нашими специалистами. Мы гордимся доверием наших клиентов и с радостью делимся их преображениями.
+              </p>
+              <button
+                onClick={() => router.push('/galery/')}
+                className="mt-6 inline-flex items-center justify-center rounded-lg px-8 py-3.5 bg-[#F5F0E4] text-[#967450] font-ManropeRegular text-[clamp(0.8125rem,0.7rem+0.5vw,1.0625rem)] transition-all duration-300 hover:bg-[#EDE5D5] cursor-pointer w-full md:w-auto"
+              >
+                Перейти в раздел
+              </button>
+            </div>
           </div>
+
         </div>
       </div>
     </div>
   )
 }
-
-export default SliderSection6

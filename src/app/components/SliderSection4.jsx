@@ -1,136 +1,107 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { Swiper, SwiperSlide } from 'swiper/react'
-import { Pagination, Navigation } from 'swiper/modules'
+import { Navigation } from 'swiper/modules'
 
 import 'swiper/css'
-import 'swiper/css/pagination'
 import 'swiper/css/navigation'
 
 export default function ProjectsSlider() {
+  const router = useRouter()
+  const [progress, setProgress] = useState(0)
+
   const projects = useMemo(
     () => [
-      { title: 'Инъекционная косметология', image: '/images/us1.png' },
-      { title: 'Трихология', image: '/images/us2.png' },
-      { title: 'Чистки лица', image: '/images/us3.png' },
-      { title: 'Массажная терапия', image: '/images/us2.png' },
-      { title: 'Эстетические процедуры', image: '/images/us1.png' },
+      { title: 'Эстетическая\nкосметология', image: '/images/us1.png' },
+      { title: 'Аппаратная\nкосметология', image: '/images/us3.png' },
+      { title: 'Инъекционная\nкосметология', image: '/images/us2.png' },
+      { title: 'Трихология', image: '/images/us1.png' },
+      { title: 'Массажная\nтерапия', image: '/images/us3.png' },
     ],
     []
   )
 
   return (
-    <section className="relative z-10 w-full h-app flex items-center justify-center px-4">
-      {/* Заголовок */}
-     
-
-      {/* Слайдер */}
-      <Swiper
-        className="projects-swiper overflow-visible w-full max-w-[1920px]"
-        modules={[Pagination, Navigation]}
-        loop
-        centeredSlides
-        watchSlidesProgress
-        speed={650}
-        spaceBetween={20}
-        slidesPerView={1.15}
-        breakpoints={{
-          320: { slidesPerView: 1, spaceBetween: 6 },
-          480: { slidesPerView: 1.25, spaceBetween: 20 },
-          768: { slidesPerView: 2, spaceBetween: 24 },
-          1024: { slidesPerView: 3, spaceBetween: 12 },
-        }}
-        pagination={{
-          el: '.projects-pagination',
-          clickable: true,
-          renderBullet: (index, className) =>
-            `<span class="${className} projects-bullet"></span>`,
-        }}
-        navigation={{
-          prevEl: '.nav-slide-3-prev',
-          nextEl: '.nav-slide-3-next',
-        }}
-        onBeforeInit={(sw) => {
-          sw.params.navigation.prevEl = '.nav-slide-3-prev'
-          sw.params.navigation.nextEl = '.nav-slide-3-next'
-        }}
-        onInit={(sw) => {
-          sw.navigation.init()
-          sw.navigation.update()
-        }}
-      >
-        {projects.map((proj, index) => (
-          <SwiperSlide key={index} className="!h-auto">
-            <article className="projects-card group relative overflow-hidden shadow-xl mx-auto rounded-3xl transition-all duration-300">
-              {/* Адаптивная высота без fixed: через aspect-ratio */}
-              <div className="relative w-full aspect-5/4">
+    <section className="relative z-10 w-full h-app flex flex-col justify-center px-4 sm:px-6">
+      {/* Slider area */}
+      <div className="w-full max-w-[1920px] mx-auto">
+        <Swiper
+          className="w-full"
+          modules={[Navigation]}
+          speed={500}
+          spaceBetween={12}
+          slidesPerView={2}
+          breakpoints={{
+            320: { slidesPerView: 2.15, spaceBetween: 10 },
+            480: { slidesPerView: 2.5, spaceBetween: 14 },
+            640: { slidesPerView: 3, spaceBetween: 16 },
+            1024: { slidesPerView: 4, spaceBetween: 20 },
+            1280: { slidesPerView: 4.5, spaceBetween: 20 },
+          }}
+          navigation={{
+            prevEl: '.nav-slide-3-prev',
+            nextEl: '.nav-slide-3-next',
+          }}
+          onBeforeInit={(sw) => {
+            sw.params.navigation.prevEl = '.nav-slide-3-prev'
+            sw.params.navigation.nextEl = '.nav-slide-3-next'
+          }}
+          onInit={(sw) => {
+            sw.navigation.init()
+            sw.navigation.update()
+          }}
+          onProgress={(_sw, p) => setProgress(p)}
+        >
+          {projects.map((proj, index) => (
+            <SwiperSlide key={index}>
+              <div className="relative w-full aspect-[3/4] overflow-hidden rounded-2xl cursor-pointer transition-transform duration-200 hover:scale-[1.02]">
                 <Image
                   src={proj.image}
-                  alt={proj.title}
+                  alt={proj.title.replace('\n', ' ')}
                   fill
-                  sizes="(max-width: 480px) 92vw, (max-width: 1024px) 48vw, 32vw"
-                  quality={100}
-                  className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-                  priority={index === 0}
+                  sizes="(max-width: 640px) 48vw, (max-width: 1024px) 33vw, 25vw"
+                  className="object-cover"
+                  quality={90}
+                  priority={index <= 1}
                 />
-              </div>
-
-              {/* Оверлей */}
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent via-black/30 to-black/70" />
-
-              {/* Подпись */}
-              <div className="absolute bottom-5 left-4 right-4 z-20">
-                <div className="px-4 py-2  text-white font-ManropeSemiBold text-start text-[clamp(0.875rem,0.6154rem+1.1538vw,2rem)] tracking-tight ">
+                <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-black/60 to-transparent" />
+                <div className="absolute bottom-4 left-4 right-4 text-[clamp(0.875rem,0.7rem+0.7vw,1.25rem)] font-ManropeMedium leading-[1.2] text-white whitespace-pre-line">
                   {proj.title}
                 </div>
               </div>
-            </article>
-          </SwiperSlide>
-        ))}
-      </Swiper>
+            </SwiperSlide>
+          ))}
+        </Swiper>
 
-      {/* Пагинация */}
-     
+        {/* Progress bar */}
+        <div className="mt-5">
+          <div className="relative h-[4px] w-full rounded-full bg-[#D9D4C9]">
+            <div
+              className="absolute top-0 h-[4px] rounded-full bg-[#636846] transition-all duration-300"
+              style={{ width: '40%', left: `${progress * 60}%` }}
+            />
+          </div>
+        </div>
+      </div>
 
-      {/* Стили */}
-      <style jsx global>{`
-        .projects-swiper .swiper-slide {
-          transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-          opacity: 0.5;
-          transform: scale(0.85);
-        }
-        .projects-swiper .swiper-slide-active {
-          opacity: 1;
-          transform: scale(1);
-          z-index: 10;
-        }
-        .projects-swiper .swiper-slide-prev,
-        .projects-swiper .swiper-slide-next {
-          opacity: 0.7;
-          transform: scale(0.9);
-        }
-        .projects-bullet {
-          width: 8px;
-          height: 8px;
-          background: #967450;
-          opacity: 0.3;
-          border-radius: 50%;
-          transition: all 0.3s;
-          cursor: pointer;
-        }
-        .projects-bullet.swiper-pagination-bullet-active {
-          width: 24px;
-          opacity: 1;
-          background: #967450;
-          border-radius: 4px;
-        }
-        .projects-card {
-          backface-visibility: hidden;
-          perspective: 1000px;
-        }
-      `}</style>
+      {/* Text block below slider — mobile only */}
+      <div className="w-full max-w-[1920px] mx-auto mt-12 px-1 md:hidden">
+        <h2 className="text-[clamp(1.25rem,1rem+1vw,2.25rem)] font-ManropeBold text-[#2b2b2b] leading-tight">
+          Наши услуги
+        </h2>
+        <p className="mt-3 text-[14px] font-ManropeRegular leading-relaxed text-[#6A7058]">
+          Красота, спокойствие и уверенность — всё начинается с заботы о себе. Выбери то, что откликается именно тебе.
+        </p>
+        <button
+          onClick={() => router.push('/Servic/')}
+          className="mt-5 w-full inline-flex items-center justify-center rounded-xl px-8 py-3.5 border border-[#C4BAA8] text-[clamp(0.8125rem,0.7rem+0.5vw,1.0625rem)] font-ManropeMedium text-[#636846] transition-all duration-300 hover:bg-[#636846] hover:text-white hover:border-[#636846] cursor-pointer"
+        >
+          Перейти в раздел
+        </button>
+      </div>
     </section>
   )
 }

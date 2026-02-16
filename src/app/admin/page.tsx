@@ -5,7 +5,6 @@ import AdminContent from "./_components/AdminContent";
 
 type View =
   | "specialists.schedule"
-  | "specialists.manage"
   | "specialists.base"
   | "clients.base"
   | "clients.bookings"
@@ -15,7 +14,6 @@ type View =
 
 const VALID_VIEWS: View[] = [
   "specialists.schedule",
-  "specialists.manage",
   "specialists.base",
   "clients.base",
   "clients.bookings",

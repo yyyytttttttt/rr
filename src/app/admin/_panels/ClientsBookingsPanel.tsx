@@ -22,6 +22,9 @@ type Booking = {
   startTime: string;
   status: string;
   paymentStatus: string;
+  promoCodeSnapshot: string | null;
+  finalAmountCents: number | null;
+  currency: string;
 };
 
 export default function ClientsBookingsPanel({ userId, filters }: PanelProps) {
@@ -33,7 +36,7 @@ export default function ClientsBookingsPanel({ userId, filters }: PanelProps) {
     date: null,
   });
   const [page, setPage] = useState(1);
-  const [pageSize] = useState(20);
+  const [pageSize] = useState(15);
   const [total, setTotal] = useState(0);
   const [selectedBookingId, setSelectedBookingId] = useState<string | null>(null);
 
@@ -74,6 +77,7 @@ export default function ClientsBookingsPanel({ userId, filters }: PanelProps) {
         page: page.toString(),
         pageSize: pageSize.toString(),
         ...(filterValues.status && { status: filterValues.status }),
+        ...(filterValues.date && { date: filterValues.date }),
       });
 
       const res = await fetch(`/api/bookings?${params}`);
@@ -89,6 +93,9 @@ export default function ClientsBookingsPanel({ userId, filters }: PanelProps) {
         startTime: item.startUtc,
         status: item.status,
         paymentStatus: item.paymentStatus || "REQUIRES_PAYMENT",
+        promoCodeSnapshot: item.promoCodeSnapshot || null,
+        finalAmountCents: item.finalAmountCents ?? item.priceCents ?? null,
+        currency: item.currency || "RUB",
       }));
 
       setBookings(items);
@@ -137,6 +144,18 @@ export default function ClientsBookingsPanel({ userId, filters }: PanelProps) {
       render: (item) => format(new Date(item.startTime), "d MMM yyyy, HH:mm", { locale: ru }),
     },
     {
+      key: "promo",
+      label: "Промокод",
+      render: (item) =>
+        item.promoCodeSnapshot ? (
+          <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-50 text-green-700">
+            {item.promoCodeSnapshot}
+          </span>
+        ) : (
+          <span className="text-xs text-gray-400">—</span>
+        ),
+    },
+    {
       key: "status",
       label: "Статус",
       render: (item) => {
@@ -171,7 +190,7 @@ export default function ClientsBookingsPanel({ userId, filters }: PanelProps) {
   ];
 
   return (
-    <div className="space-y-6 px-[2%]">
+    <div className="space-y-6 px-4 py-4">
       <SearchBar placeholder="Поиск записей (клиент/врач/услуга/телефон)" onSearch={setSearchQuery} />
       <Filters chips={filterChips} onChange={handleFilterChange} onReset={handleResetFilters} />
 

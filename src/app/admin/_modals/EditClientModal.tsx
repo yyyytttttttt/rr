@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import toast from "react-hot-toast";
+import { format } from "date-fns";
+import { ru } from "date-fns/locale";
 
 type Props = {
   open: boolean;
@@ -16,6 +18,16 @@ type ClientData = {
   name: string;
   email: string;
   phone: string;
+};
+
+type BookingHistoryItem = {
+  id: string;
+  startUtc: string;
+  endUtc: string;
+  status: string;
+  serviceName: string;
+  doctorName: string;
+  finalAmountCents: number | null;
 };
 
 // Функция форматирования телефона
@@ -73,6 +85,8 @@ export default function EditClientModal({ open, onClose, clientId, onSuccess }: 
   const [phone, setPhone] = useState("");
   const [birthDate, setBirthDate] = useState("");
   const [additionalPhone, setAdditionalPhone] = useState("");
+  const [bookings, setBookings] = useState<BookingHistoryItem[]>([]);
+  const [loadingBookings, setLoadingBookings] = useState(false);
 
   useEffect(() => {
     if (open && clientId) {
@@ -82,14 +96,36 @@ export default function EditClientModal({ open, onClose, clientId, onSuccess }: 
     }
   }, [open, clientId]);
 
+  useEffect(() => {
+    if (open && clientId && activeTab === "history") {
+      loadBookingHistory();
+    }
+  }, [open, clientId, activeTab]);
+
   const resetForm = () => {
     setName("");
     setEmail("");
     setPhone("");
     setBirthDate("");
     setAdditionalPhone("");
+    setBookings([]);
     setActiveTab("personal");
     setLoadingData(true);
+  };
+
+  const loadBookingHistory = async () => {
+    setLoadingBookings(true);
+    try {
+      const params = new URLSearchParams({ userId: clientId, pageSize: "50" });
+      const res = await fetch(`/api/bookings?${params}`);
+      if (!res.ok) throw new Error("Failed to load bookings");
+      const data = await res.json();
+      setBookings(data.items || []);
+    } catch {
+      setBookings([]);
+    } finally {
+      setLoadingBookings(false);
+    }
   };
 
   const loadClientData = async () => {
@@ -172,7 +208,7 @@ export default function EditClientModal({ open, onClose, clientId, onSuccess }: 
           <div className="flex gap-[clamp(2rem,1.5385rem+2.0513vw,4rem)] px-[clamp(1.5rem,1.2692rem+1.0256vw,2.5rem)] border-b border-[#E8E2D5]">
             <button
               onClick={() => setActiveTab("personal")}
-              className={`pb-[clamp(0.75rem,0.6346rem+0.5128vw,1.25rem)] text-[clamp(0.875rem,0.8077rem+0.2885vw,1.125rem)] font-ManropeMedium transition-all ${
+              className={`py-[clamp(0.75rem,0.6346rem+0.5128vw,1.25rem)] text-[clamp(0.875rem,0.8077rem+0.2885vw,1.125rem)] font-ManropeMedium transition-all ${
                 activeTab === "personal"
                   ? "text-[#4F5338] border-b-2 border-[var(--admin-text-heading)]"
                   : "text-[#9A8F7D] hover:text-[#636846]"
@@ -182,7 +218,7 @@ export default function EditClientModal({ open, onClose, clientId, onSuccess }: 
             </button>
             <button
               onClick={() => setActiveTab("history")}
-              className={`pb-[clamp(0.75rem,0.6346rem+0.5128vw,1.25rem)] text-[clamp(0.875rem,0.8077rem+0.2885vw,1.125rem)] font-ManropeMedium transition-all ${
+              className={`py-[clamp(0.75rem,0.6346rem+0.5128vw,1.25rem)] text-[clamp(0.875rem,0.8077rem+0.2885vw,1.125rem)] font-ManropeMedium transition-all ${
                 activeTab === "history"
                   ? "text-[#4F5338] border-b-2 border-[var(--admin-text-heading)]"
                   : "text-[#9A8F7D] hover:text-[#636846]"
@@ -291,11 +327,54 @@ export default function EditClientModal({ open, onClose, clientId, onSuccess }: 
                   </Dialog.Close>
                 </div>
               </form>
-            ) : (
+            ) : loadingBookings ? (
+              <div className="flex justify-center items-center py-[clamp(3rem,2.5385rem+2.0513vw,5rem)]">
+                <div className="w-8 h-8 border-2 border-[#E8E2D5] border-t-[var(--admin-text-accent)] rounded-full animate-spin" />
+              </div>
+            ) : bookings.length === 0 ? (
               <div className="py-[clamp(3rem,2.5385rem+2.0513vw,5rem)] text-center">
                 <p className="text-[clamp(0.875rem,0.8077rem+0.2885vw,1.125rem)] font-ManropeRegular text-[#636846]">
-                  История записей пока пуста
+                  У клиента пока нет записей
                 </p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {bookings.map((b) => {
+                  const statusMap: Record<string, { label: string; color: string }> = {
+                    CONFIRMED: { label: "Подтверждено", color: "bg-[#E8F3E8] text-[#3D6B3D]" },
+                    PENDING: { label: "Ожидает", color: "bg-[#FFF5E8] text-[#967450]" },
+                    COMPLETED: { label: "Завершено", color: "bg-[#F0EBE1] text-[#4F5338]" },
+                    CANCELED: { label: "Отменено", color: "bg-[#FFE5E5] text-[#C63D3D]" },
+                    NO_SHOW: { label: "Не пришёл", color: "bg-[#FFE5E5] text-[#C63D3D]" },
+                  };
+                  const st = statusMap[b.status] || { label: b.status, color: "bg-[#F5F0E4] text-[#636846]" };
+
+                  return (
+                    <div key={b.id} className="bg-[#F5F0E4] rounded-xl p-4 space-y-2">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="text-sm font-ManropeBold text-[#4F5338] truncate">{b.serviceName}</p>
+                          <p className="text-xs font-ManropeRegular text-[#636846] mt-0.5">{b.doctorName}</p>
+                        </div>
+                        <span className={`shrink-0 px-2.5 py-1 text-xs font-ManropeMedium rounded-full ${st.color}`}>
+                          {st.label}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between text-xs font-ManropeRegular text-[#636846]">
+                        <span>
+                          {format(new Date(b.startUtc), "d MMM yyyy, HH:mm", { locale: ru })}
+                          {" — "}
+                          {format(new Date(b.endUtc), "HH:mm", { locale: ru })}
+                        </span>
+                        {b.finalAmountCents != null && b.finalAmountCents > 0 && (
+                          <span className="font-ManropeMedium text-[#4F5338]">
+                            {(b.finalAmountCents / 100).toLocaleString("ru-RU")} ₽
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>

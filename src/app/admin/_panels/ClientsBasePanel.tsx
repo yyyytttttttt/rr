@@ -26,7 +26,7 @@ export default function ClientsBasePanel({ userId, filters }: PanelProps) {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(1);
-  const [pageSize] = useState(20);
+  const [pageSize] = useState(15);
   const [total, setTotal] = useState(0);
   const [editingClientId, setEditingClientId] = useState<string | null>(null);
 
@@ -98,7 +98,7 @@ export default function ClientsBasePanel({ userId, filters }: PanelProps) {
   ];
 
   return (
-    <div className="min-h-screen bg-[#FFFCF3] px-[clamp(1rem,0.5385rem+2.0513vw,3rem)] py-[clamp(2rem,1.7692rem+1.0256vw,3rem)]">
+    <div className="min-h-screen bg-[#FFFCF3] px-4 py-4">
       {/* Поисковая строка */}
       <div className="mb-[clamp(1.5rem,1.2692rem+1.0256vw,2.5rem)]">
         <SearchBar placeholder="Поиск (имя/телефон/почта)" onSearch={setSearchQuery} />

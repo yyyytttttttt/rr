@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -58,6 +58,107 @@ function formatPrice(cents: number, currency: string) {
   }).format((cents ?? 0) / 100);
 }
 
+const PAGE_SIZE = 9;
+
+/* ---- Custom Category Dropdown ---- */
+type DropdownOption = { value: string; label: string };
+
+function CategoryDropdown({
+  options,
+  value,
+  onChange,
+  placeholder = "Все категории",
+  inline = false,
+}: {
+  options: DropdownOption[];
+  value: string | null;
+  onChange: (value: string | null) => void;
+  placeholder?: string;
+  inline?: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  const selectedLabel = value ? options.find((o) => o.value === value)?.label || placeholder : placeholder;
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((p) => !p)}
+        className={`w-full flex items-center justify-between px-4 py-3 bg-white border rounded-xl text-sm font-ManropeRegular transition-all cursor-pointer ${
+          open
+            ? "border-[#967450] ring-2 ring-[#967450]"
+            : "border-[#E8E2D5] hover:border-[#967450]"
+        } ${value ? "text-[#4F5338]" : "text-[#636846]"}`}
+      >
+        <span className="truncate">{selectedLabel}</span>
+        <svg
+          className={`w-4 h-4 text-[#636846] shrink-0 ml-2 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      {open && (
+        <div className={`${inline ? "" : "absolute z-30"} mt-1.5 w-full bg-white border border-[#E8E2D5] rounded-xl ${inline ? "" : "shadow-lg"} overflow-hidden`}>
+          <div className={`${inline ? "" : "max-h-60"} overflow-y-auto py-1`}>
+            <button
+              type="button"
+              onClick={() => { onChange(null); setOpen(false); }}
+              className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-ManropeRegular transition-colors ${
+                !value
+                  ? "bg-[#F5F0E4] text-[#967450] font-ManropeMedium"
+                  : "text-[#4F5338] hover:bg-[#FFFCF3]"
+              }`}
+            >
+              <span className="w-5 h-5 flex items-center justify-center rounded-full border border-[#E8E2D5] shrink-0">
+                {!value && (
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#967450]" />
+                )}
+              </span>
+              {placeholder}
+            </button>
+            {options.map((opt) => {
+              const selected = value === opt.value;
+              return (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => { onChange(opt.value); setOpen(false); }}
+                  className={`w-full flex items-center gap-3 px-4 py-3 text-sm transition-colors ${
+                    selected
+                      ? "bg-[#F5F0E4] text-[#967450] font-ManropeMedium"
+                      : "text-[#4F5338] font-ManropeRegular hover:bg-[#FFFCF3]"
+                  }`}
+                >
+                  <span className="w-5 h-5 flex items-center justify-center rounded-full border border-[#E8E2D5] shrink-0">
+                    {selected && (
+                      <span className="w-2.5 h-2.5 rounded-full bg-[#967450]" />
+                    )}
+                  </span>
+                  {opt.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ----------- Component ---------- */
 export default function ServicesPanel({ userId, filters }: Props) {
   const [services, setServices] = useState<Service[]>([]);
@@ -70,6 +171,7 @@ export default function ServicesPanel({ userId, filters }: Props) {
   const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
   const [showDoctorsModal, setShowDoctorsModal] = useState(false);
   const [selectedServiceForDoctors, setSelectedServiceForDoctors] = useState<Service | null>(null);
+  const [page, setPage] = useState(1);
 
   const form = useForm<ServiceFormData>({
     resolver: zodResolver(serviceSchema),
@@ -206,6 +308,9 @@ export default function ServicesPanel({ userId, filters }: Props) {
     }
   }
 
+  // Reset page when filters change
+  useEffect(() => { setPage(1); }, [debouncedSearch, categoryFilter]);
+
   /* ---------- Filtering ---------- */
   const filteredServices = useMemo(() => {
     const term = debouncedSearch.trim().toLowerCase();
@@ -221,10 +326,13 @@ export default function ServicesPanel({ userId, filters }: Props) {
     });
   }, [services, debouncedSearch, categoryFilter]);
 
+  const totalPages = Math.ceil(filteredServices.length / PAGE_SIZE);
+  const paginatedServices = filteredServices.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
   /* ----------- Render ------------ */
   if (loading) {
     return (
-      <div className="w-full px-[2%] py-6 space-y-6">
+      <div className="w-full px-4 py-6 space-y-8">
         <div className="animate-pulse space-y-4">
           <div className="h-12 bg-gradient-to-r from-[#F5F0E4] to-[#E8E2D5] rounded-xl" />
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -238,7 +346,7 @@ export default function ServicesPanel({ userId, filters }: Props) {
   }
 
   return (
-    <div className="w-full px-[2%] py-6 space-y-6">
+    <div className="w-full px-4 py-6 space-y-8">
       {/* Filters */}
       <div className="bg-gradient-to-br from-white to-[#FFFCF3] rounded-2xl border border-[#E8E2D5] p-4 md:p-6 shadow-sm">
         <div className="grid gap-4 md:grid-cols-2">
@@ -255,21 +363,12 @@ export default function ServicesPanel({ userId, filters }: Props) {
             </svg>
           </div>
 
-          <div className="relative">
-            <select
-              value={categoryFilter || ""}
-              onChange={(e) => setCategoryFilter(e.target.value || null)}
-              className="w-full appearance-none px-4 py-3 pr-10 bg-white border border-[#E8E2D5] rounded-xl text-sm font-ManropeRegular text-[#4F5338] focus:outline-none focus:ring-2 focus:ring-[#967450] focus:border-transparent cursor-pointer transition-all"
-            >
-              <option value="">Все категории</option>
-              {categories.map((cat) => (
-                <option key={cat.id} value={cat.id}>{cat.name}</option>
-              ))}
-            </select>
-            <svg className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#636846] pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </div>
+          <CategoryDropdown
+            options={categories.map((c) => ({ value: c.id, label: c.name }))}
+            value={categoryFilter}
+            onChange={setCategoryFilter}
+            placeholder="Все категории"
+          />
         </div>
       </div>
 
@@ -299,7 +398,7 @@ export default function ServicesPanel({ userId, filters }: Props) {
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 auto-rows-fr">
-          {filteredServices.map((service) => (
+          {paginatedServices.map((service) => (
             <article
               key={service.id}
               className="group relative bg-gradient-to-br from-white to-[#FFFCF3] rounded-2xl border border-[#E8E2D5] p-5 hover:shadow-lg hover:scale-[1.02] transition-all duration-300 hover:border-[#967450] flex flex-col"
@@ -394,6 +493,66 @@ export default function ServicesPanel({ userId, filters }: Props) {
         </div>
       )}
 
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="bg-white rounded-2xl border border-[#E8E2D5] px-4 py-3 flex items-center justify-between flex-wrap gap-4">
+          <div className="text-xs sm:text-sm font-ManropeRegular text-[#636846]">
+            Показано{" "}
+            <span className="font-ManropeMedium text-[#4F5338]">{(page - 1) * PAGE_SIZE + 1}</span>
+            {" - "}
+            <span className="font-ManropeMedium text-[#4F5338]">{Math.min(page * PAGE_SIZE, filteredServices.length)}</span>
+            {" из "}
+            <span className="font-ManropeMedium text-[#4F5338]">{filteredServices.length}</span>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page === 1}
+              className="px-3 py-2 text-xs sm:text-sm font-ManropeMedium text-[#967450] bg-[#F5F0E4] border border-[#E8E2D5] rounded-lg hover:bg-[#E8E2D5] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              ← Назад
+            </button>
+
+            <div className="flex items-center gap-1">
+              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                let pageNum: number;
+                if (totalPages <= 5) {
+                  pageNum = i + 1;
+                } else if (page <= 3) {
+                  pageNum = i + 1;
+                } else if (page >= totalPages - 2) {
+                  pageNum = totalPages - 4 + i;
+                } else {
+                  pageNum = page - 2 + i;
+                }
+                return (
+                  <button
+                    key={pageNum}
+                    onClick={() => setPage(pageNum)}
+                    className={`w-8 h-8 text-xs sm:text-sm font-ManropeMedium rounded-lg transition-colors ${
+                      page === pageNum
+                        ? "bg-[#5C6744] text-white"
+                        : "text-[#967450] bg-[#F5F0E4] border border-[#E8E2D5] hover:bg-[#E8E2D5]"
+                    }`}
+                  >
+                    {pageNum}
+                  </button>
+                );
+              })}
+            </div>
+
+            <button
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={page === totalPages}
+              className="px-3 py-2 text-xs sm:text-sm font-ManropeMedium text-[#967450] bg-[#F5F0E4] border border-[#E8E2D5] rounded-lg hover:bg-[#E8E2D5] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              Вперёд →
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Modal */}
       <Dialog.Root open={showModal} onOpenChange={(isOpen) => !isOpen && setShowModal(false)}>
         <Dialog.Portal>
@@ -443,41 +602,19 @@ export default function ServicesPanel({ userId, filters }: Props) {
                   />
                 </div>
 
-                {/* Цена и Валюта */}
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-ManropeMedium text-[#4F5338] mb-2">
-                      Цена (в копейках) <span className="text-[#C74545]">*</span>
-                    </label>
-                    <input
-                      type="number"
-                      {...form.register("priceCents", { valueAsNumber: true })}
-                      className={`w-full px-4 py-3 bg-[#F5F0E4] border rounded-xl text-sm font-ManropeRegular text-[#4F5338] focus:outline-none focus:ring-2 transition-all ${
-                        form.formState.errors.priceCents ? "border-[#C74545] ring-2 ring-[#C74545]/20" : "border-transparent focus:ring-[#967450]"
-                      }`}
-                    />
-                    <p className="mt-1 text-xs text-[#636846]">Например: 5000 = 50,00 ₽</p>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-ManropeMedium text-[#4F5338] mb-2">
-                      Валюта <span className="text-[#C74545]">*</span>
-                    </label>
-                    <div className="relative">
-                      <select
-                        {...form.register("currency")}
-                        className="w-full appearance-none px-4 py-3 pr-10 bg-[#F5F0E4] border border-transparent rounded-xl text-sm font-ManropeRegular text-[#4F5338] focus:outline-none focus:ring-2 focus:ring-[#967450] cursor-pointer transition-all"
-                      >
-                        <option value="RUB">RUB</option>
-                        <option value="USD">USD</option>
-                        <option value="EUR">EUR</option>
-                        <option value="ILS">ILS</option>
-                      </select>
-                      <svg className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#636846] pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </div>
-                  </div>
+                {/* Цена */}
+                <div>
+                  <label className="block text-sm font-ManropeMedium text-[#4F5338] mb-2">
+                    Цена (в копейках) <span className="text-[#C74545]">*</span>
+                  </label>
+                  <input
+                    type="number"
+                    {...form.register("priceCents", { valueAsNumber: true })}
+                    className={`w-full px-4 py-3 bg-[#F5F0E4] border rounded-xl text-sm font-ManropeRegular text-[#4F5338] focus:outline-none focus:ring-2 transition-all ${
+                      form.formState.errors.priceCents ? "border-[#C74545] ring-2 ring-[#C74545]/20" : "border-transparent focus:ring-[#967450]"
+                    }`}
+                  />
+                  <p className="mt-1 text-xs text-[#636846]">Например: 5000 = 50,00 ₽</p>
                 </div>
 
                 {/* Длительность */}
@@ -497,20 +634,13 @@ export default function ServicesPanel({ userId, filters }: Props) {
                 {/* Категория */}
                 <div>
                   <label className="block text-sm font-ManropeMedium text-[#4F5338] mb-2">Категория</label>
-                  <div className="relative">
-                    <select
-                      {...form.register("categoryId")}
-                      className="w-full appearance-none px-4 py-3 pr-10 bg-[#F5F0E4] border border-transparent rounded-xl text-sm font-ManropeRegular text-[#4F5338] focus:outline-none focus:ring-2 focus:ring-[#967450] cursor-pointer transition-all"
-                    >
-                      <option value="">Без категории</option>
-                      {categories.map((cat) => (
-                        <option key={cat.id} value={cat.id}>{cat.name}</option>
-                      ))}
-                    </select>
-                    <svg className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#636846] pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </div>
+                  <CategoryDropdown
+                    options={categories.map((c) => ({ value: c.id, label: c.name }))}
+                    value={form.watch("categoryId") || null}
+                    onChange={(v) => form.setValue("categoryId", v || "", { shouldDirty: true })}
+                    placeholder="Без категории"
+                    inline
+                  />
                 </div>
 
                 {/* Активна */}

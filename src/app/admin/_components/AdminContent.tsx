@@ -6,10 +6,10 @@ import { useState } from "react";
 import AdminHeader from "./AdminHeader";
 import AddBookingModal from "../_modals/AddBookingModal";
 import AddDoctorModal from "../_modals/AddDoctorModal";
+import AddClientModal from "../_modals/AddClientModal";
 
 type View =
   | "specialists.schedule"
-  | "specialists.manage"
   | "specialists.base"
   | "clients.base"
   | "clients.bookings"
@@ -32,9 +32,6 @@ type Props = {
 
 // NOTE: Lazy load panels
 const SpecialistsSchedulePanel = dynamic(() => import("../_panels/SpecialistsSchedulePanel"), {
-  loading: () => <PanelSkeleton />,
-});
-const SpecialistsManagePanel = dynamic(() => import("../_panels/SpecialistsManagePanel"), {
   loading: () => <PanelSkeleton />,
 });
 const SpecialistsBasePanel = dynamic(() => import("../_panels/SpecialistsBasePanel"), {
@@ -67,7 +64,6 @@ function PanelSkeleton() {
 
 const VIEW_TITLES: Record<View, string> = {
   "specialists.schedule": "Смотреть занятость",
-  "specialists.manage": "Управление записями",
   "specialists.base": "База специалистов",
   "clients.base": "База клиентов",
   "clients.bookings": "Записи клиентов",
@@ -80,16 +76,16 @@ export default function AdminContent({ view, panelProps, userName, userEmail, us
   const router = useRouter();
   const [showAddBookingModal, setShowAddBookingModal] = useState(false);
   const [showAddDoctorModal, setShowAddDoctorModal] = useState(false);
+  const [showAddClientModal, setShowAddClientModal] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
 
   const handleAction = () => {
     if (view === "specialists.base") {
       setShowAddDoctorModal(true);
-    } else if (view === "specialists.manage" || view === "clients.bookings") {
+    } else if (view === "clients.bookings") {
       setShowAddBookingModal(true);
     } else if (view === "clients.base") {
-      // TODO: Open add client modal
-      alert("Функция добавления клиента в разработке");
+      setShowAddClientModal(true);
     } else if (view === "services.manage") {
       // Dispatch event to ServicesPanel
       window.dispatchEvent(new Event('admin:createService'));
@@ -103,11 +99,10 @@ export default function AdminContent({ view, panelProps, userName, userEmail, us
     <main className="flex-1 pb-20 md:pb-24 lg:pb-8 overflow-x-hidden">
       <AdminHeader title={VIEW_TITLES[view]} view={view} userName={userName} userImage={userImage} onAction={handleAction} />
 
-      <div className="admin-container py-4 sm:py-6 md:py-8 max-w-[100vw] mb-8 md:mb-12 lg:mb-16">
+      <div className="max-w-[100vw]">
         {view === "specialists.schedule" && <SpecialistsSchedulePanel key={refreshKey} {...panelProps} />}
-        {view === "specialists.manage" && <SpecialistsManagePanel key={refreshKey} {...panelProps} />}
         {view === "specialists.base" && <SpecialistsBasePanel key={refreshKey} {...panelProps} />}
-        {view === "clients.base" && <ClientsBasePanel {...panelProps} />}
+        {view === "clients.base" && <ClientsBasePanel key={refreshKey} {...panelProps} />}
         {view === "clients.bookings" && <ClientsBookingsPanel key={refreshKey} {...panelProps} />}
         {view === "services.manage" && <ServicesPanel {...panelProps} />}
         {view === "services.categories" && <CategoriesPanel {...panelProps} />}
@@ -128,8 +123,15 @@ export default function AdminContent({ view, panelProps, userName, userEmail, us
         open={showAddDoctorModal}
         onClose={() => setShowAddDoctorModal(false)}
         onSuccess={() => {
-          setShowAddDoctorModal(false);
-          // Reload specialists panel
+          setRefreshKey(prev => prev + 1);
+        }}
+      />
+
+      <AddClientModal
+        open={showAddClientModal}
+        onClose={() => setShowAddClientModal(false)}
+        onSuccess={() => {
+          setShowAddClientModal(false);
           setRefreshKey(prev => prev + 1);
         }}
       />

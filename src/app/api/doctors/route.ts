@@ -4,11 +4,14 @@ import { z } from "zod";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../../lib/auth";
 import { serverError } from "../../../lib/api-error";
+import bcrypt from "bcrypt";
+import crypto from "crypto";
 
 const bodySchema = z.object({
   // один из двух способов: привязать к уже существующему userId ИЛИ создать пользователя по email
   userId: z.string().min(1).optional(),
   email: z.string().email().optional(),
+  name: z.string().min(1).optional(),
 
   // карточка врача
   title: z.string().optional(),
@@ -99,7 +102,7 @@ export async function POST(req: Request) {
       );
     }
     const {
-      userId, email, title,
+      userId, email, name, title,
       tzid, minLeadMin, gridStepMin, slotDurationMin, bufferMin,
     } = parsed.data;
 
@@ -112,20 +115,60 @@ export async function POST(req: Request) {
 
     // 1) получаем/создаём пользователя с ролью DOCTOR
     let doctorUserId = userId ?? null;
+    let generatedPassword: string | null = null;
 
     if (!doctorUserId && email) {
-      // создадим пользователя с ролью DOCTOR, если его ещё нет
-      const user = await prisma.user.upsert({
+      // Проверим, существует ли пользователь
+      const existing = await prisma.user.findUnique({
         where: { email },
-        update: { role: "DOCTOR" },
-        create: { email, role: "DOCTOR" },
-        select: { id: true },
+        select: { id: true, doctor: { select: { id: true } } },
       });
-      doctorUserId = user.id;
+
+      if (existing?.doctor) {
+        return NextResponse.json(
+          { error: "Этот пользователь уже является специалистом" },
+          { status: 409 }
+        );
+      }
+
+      if (existing) {
+        // Пользователь есть — просто меняем роль
+        await prisma.user.update({
+          where: { id: existing.id },
+          data: { role: "DOCTOR" },
+        });
+        doctorUserId = existing.id;
+      } else {
+        // Создаём нового пользователя с безопасным паролем
+        generatedPassword = crypto.randomBytes(12).toString("base64url").slice(0, 16);
+        const hashedPassword = await bcrypt.hash(generatedPassword, 12);
+
+        const newUser = await prisma.user.create({
+          data: {
+            email,
+            name: name?.trim() || null,
+            password: hashedPassword,
+            role: "DOCTOR",
+            emailVerified: new Date(),
+          },
+          select: { id: true },
+        });
+        doctorUserId = newUser.id;
+      }
     }
 
     // если передали userId — убедимся, что он существует и, при необходимости, выставим роль
     if (doctorUserId && userId) {
+      const existingDoctor = await prisma.doctor.findUnique({
+        where: { userId: doctorUserId },
+        select: { id: true },
+      });
+      if (existingDoctor) {
+        return NextResponse.json(
+          { error: "Этот пользователь уже является специалистом" },
+          { status: 409 }
+        );
+      }
       await prisma.user.update({
         where: { id: doctorUserId },
         data: { role: "DOCTOR" },
@@ -150,7 +193,11 @@ export async function POST(req: Request) {
       },
     });
 
-    return NextResponse.json({ ok: true, doctor }, { status: 201 });
+    const response: any = { ok: true, doctor };
+    if (generatedPassword && email) {
+      response.credentials = { email, password: generatedPassword };
+    }
+    return NextResponse.json(response, { status: 201 });
   } catch (e: unknown) {
     return serverError('CREATE_DOCTOR_ERR', e);
   }

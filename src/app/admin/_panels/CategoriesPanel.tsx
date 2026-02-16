@@ -220,7 +220,7 @@ export default function CategoriesPanel({ userId, filters }: Props) {
   }
 
   return (
-    <div className="space-y-[1.5rem] px-[2%] max-w-full overflow-x-hidden">
+    <div className="space-y-[1.5rem] px-4 py-4 max-w-full overflow-x-hidden">
       {/* Search */}
       <div className="bg-white rounded-2xl border border-[#E8E2D5] p-[clamp(1rem,0.8846rem+0.5128vw,1.5rem)]">
         <input
@@ -261,7 +261,7 @@ export default function CategoriesPanel({ userId, filters }: Props) {
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[var(--admin-border)]">
+            <tbody className="divide-y divide-[#F0EBE1]">
               {filteredCategories.length === 0 && (
                 <tr>
                   <td colSpan={7} className="px-[clamp(1rem,0.8846rem+0.5128vw,1.5rem)] py-[2rem] text-center text-base font-ManropeRegular text-[#636846]">
@@ -322,7 +322,7 @@ export default function CategoriesPanel({ userId, filters }: Props) {
         </div>
 
         {/* Mobile Cards View */}
-        <div className="md:hidden divide-y divide-[var(--admin-border)]">
+        <div className="md:hidden divide-y divide-[#F0EBE1]">
           {filteredCategories.length === 0 ? (
             <div className="px-[clamp(1rem,0.8846rem+0.5128vw,1.5rem)] py-[2rem] text-center text-base font-ManropeRegular text-[#636846]">
               Категории не найдены

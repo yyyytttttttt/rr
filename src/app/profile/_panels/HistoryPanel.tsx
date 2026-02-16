@@ -13,6 +13,11 @@ type Booking = {
   note: string | null;
   service: { name: string; priceCents: number; currency: string };
   doctor: { name: string; image: string | null };
+  baseAmountCents?: number | null;
+  discountAmountCents?: number | null;
+  finalAmountCents?: number | null;
+  promoCodeSnapshot?: string | null;
+  paymentMethod?: string | null;
 };
 
 type Props = {
@@ -20,10 +25,14 @@ type Props = {
   tzid: string;
 };
 
+const PAGE_SIZE = 5;
+
 export default function HistoryPanel({ userId }: Props) {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
   const [cancelModal, setCancelModal] = useState<{ isOpen: boolean; bookingId: string | null }>({
     isOpen: false,
     bookingId: null,
@@ -31,7 +40,7 @@ export default function HistoryPanel({ userId }: Props) {
 
   useEffect(() => {
     loadBookings();
-  }, [refreshKey]);
+  }, [refreshKey, page]);
 
   // Обновление при фокусе на странице (когда возвращаются после создания записи)
   useEffect(() => {
@@ -56,12 +65,14 @@ export default function HistoryPanel({ userId }: Props) {
   }, [cancelModal.isOpen]);
 
   const loadBookings = async () => {
+    setLoading(true);
     try {
-      const res = await fetch('/api/bookings?mine=1');
+      const res = await fetch(`/api/bookings?mine=1&page=${page}&pageSize=${PAGE_SIZE}`);
       if (res.ok) {
         const data = await res.json();
         const bookingsArray = data.bookings || data.items || [];
         setBookings(bookingsArray);
+        setTotal(data.total || 0);
       } else {
         console.error('Bookings API error', { status: res.status });
         toast.error('Не удалось загрузить записи');
@@ -184,12 +195,13 @@ export default function HistoryPanel({ userId }: Props) {
   return (
     <div className="min-h-screen bg-[#FFFCF3]">
       <div className="mx-auto w-full px-[clamp(1rem,0.5385rem+2.0513vw,3rem)] py-[clamp(2rem,1.7692rem+1.0256vw,3rem)]">
-        <div className="flex items-center justify-between mb-[clamp(2rem,1.5385rem+2.0513vw,4rem)]">
+        <div className="flex items-center justify-between mb-[clamp(1.5rem,1.5385rem+2.0513vw,4rem)]">
           <h1 className="text-[clamp(1.5rem,1.3846rem+0.5128vw,2rem)] font-ManropeBold text-[#4F5338]">
             История записей
           </h1>
           <button
             onClick={() => {
+              setPage(1);
               setRefreshKey(prev => prev + 1);
             }}
             className="px-[clamp(1rem,0.7692rem+1.0256vw,2rem)] py-[clamp(0.5rem,0.3846rem+0.5128vw,1rem)] rounded-[clamp(0.5rem,0.4423rem+0.2564vw,0.75rem)] bg-[#F5F0E4] text-[#967450] text-[clamp(0.875rem,0.7885rem+0.3846vw,1.125rem)] font-ManropeRegular hover:bg-[#4c503b] hover:text-white transition-colors duration-300"
@@ -216,11 +228,9 @@ export default function HistoryPanel({ userId }: Props) {
             </div>
           </div>
         ) : (
-          <div className="space-y-[clamp(2rem,1.5385rem+2.0513vw,4rem)]">
+          <div className="space-y-[clamp(2.5rem,1.5385rem+2.0513vw,4rem)]">
             {bookings.map((b, index) => {
-              // Защита от отсутствующих данных
               if (!b.service || !b.doctor) {
-                console.error('[HistoryPanel] Booking missing data', { id: b.id });
                 return null;
               }
 
@@ -228,74 +238,97 @@ export default function HistoryPanel({ userId }: Props) {
               <div key={b.id} className="space-y-[clamp(0.75rem,0.6346rem+0.5128vw,1.25rem)]">
                 {/* Заголовок «Запись № …» */}
                 <div className="text-[clamp(1.25rem,1.1346rem+0.5128vw,1.75rem)] font-Manrope-SemiBold text-[#4F5338]">
-                  Запись № {bookings.length - index}
+                  Запись № {total - ((page - 1) * PAGE_SIZE + index)}
                 </div>
 
                 {/* Две карточки в ряд */}
                 <div className="grid gap-[clamp(1rem,0.8846rem+0.5128vw,1.5rem)] md:grid-cols-[2fr_1.5fr]">
                   {/* Левая карточка — детали */}
-                  <div className="rounded-[clamp(1rem,0.8846rem+0.5128vw,1.5rem)] border border-[#F5F0E4] bg-white overflow-hidden">
-                    <div className="grid grid-cols-[1fr,2fr,auto] items-center">
-                      {/* Процедура */}
-                      <div className="px-[clamp(1rem,0.7692rem+1.0256vw,2rem)] py-[clamp(0.75rem,0.5769rem+0.7692vw,1.5rem)] text-[clamp(1rem,0.8846rem+0.5128vw,1.5rem)] font-Manrope-SemiBold text-[#4F5338]">Процедура</div>
-                      <div className="px-[clamp(1rem,0.7692rem+1.0256vw,2rem)] py-[clamp(0.75rem,0.5769rem+0.7692vw,1.5rem)] text-[clamp(1rem,0.8846rem+0.5128vw,1.5rem)] font-ManropeMedium text-[#636846]">
+                  <div className="rounded-[clamp(1rem,0.8846rem+0.5128vw,1.5rem)] border border-[#F5F0E4] bg-white overflow-hidden divide-y divide-[#F1EADF]">
+                    {/* Процедура */}
+                    <div className="flex items-center min-h-[3.25rem] sm:min-h-0">
+                      <div className="w-[7rem] sm:w-[clamp(7rem,5.5rem+4vw,11rem)] shrink-0 pl-4 pr-2 sm:px-[clamp(1rem,0.7692rem+1.0256vw,2rem)] py-3.5 sm:py-[clamp(0.75rem,0.5769rem+0.7692vw,1.5rem)] text-[13px] sm:text-[clamp(0.875rem,0.8rem+0.4vw,1.25rem)] font-Manrope-SemiBold text-[#4F5338]">
+                        Процедура
+                      </div>
+                      <div className="flex-1 min-w-0 pl-3 pr-3 sm:px-[clamp(0.5rem,0.3rem+0.5vw,1rem)] py-3.5 sm:py-[clamp(0.75rem,0.5769rem+0.7692vw,1.5rem)] text-[13px] sm:text-[clamp(0.875rem,0.8rem+0.4vw,1.25rem)] font-ManropeMedium text-[#636846]">
                         {b.service.name}
                       </div>
-                      <div className="px-[clamp(1rem,0.7692rem+1.0256vw,2rem)] py-[clamp(0.75rem,0.5769rem+0.7692vw,1.5rem)]" />
+                    </div>
 
-                      {/* Специалист */}
-                      <div className="col-start-1 row-start-2 px-[clamp(1rem,0.7692rem+1.0256vw,2rem)] py-[clamp(0.75rem,0.5769rem+0.7692vw,1.5rem)] text-[clamp(1rem,0.8846rem+0.5128vw,1.5rem)] font-Manrope-SemiBold text-[#4F5338] border-t border-[#F1EADF]">
+                    {/* Специалист */}
+                    <div className="flex items-center min-h-[3.25rem] sm:min-h-0">
+                      <div className="w-[7rem] sm:w-[clamp(7rem,5.5rem+4vw,11rem)] shrink-0 pl-4 pr-2 sm:px-[clamp(1rem,0.7692rem+1.0256vw,2rem)] py-3.5 sm:py-[clamp(0.75rem,0.5769rem+0.7692vw,1.5rem)] text-[13px] sm:text-[clamp(0.875rem,0.8rem+0.4vw,1.25rem)] font-Manrope-SemiBold text-[#4F5338]">
                         Специалист
                       </div>
-                      <div className="row-start-2 px-[clamp(1rem,0.7692rem+1.0256vw,2rem)] py-[clamp(0.75rem,0.5769rem+0.7692vw,1.5rem)] text-[clamp(1rem,0.8846rem+0.5128vw,1.5rem)] font-ManropeMedium text-[#636846] border-t border-[#F1EADF]">
+                      <div className="flex-1 min-w-0 pl-3 pr-1 sm:px-[clamp(0.5rem,0.3rem+0.5vw,1rem)] py-3.5 sm:py-[clamp(0.75rem,0.5769rem+0.7692vw,1.5rem)] text-[13px] sm:text-[clamp(0.875rem,0.8rem+0.4vw,1.25rem)] font-ManropeMedium text-[#636846]">
                         {b.doctor.name}
                       </div>
-                      <div className="row-start-2 px-[clamp(1rem,0.7692rem+1.0256vw,2rem)] py-[clamp(0.75rem,0.5769rem+0.7692vw,1.5rem)] flex items-center justify-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-[#967450] opacity-60">
+                      <div className="shrink-0 w-10 h-10 mr-1 sm:mr-0 sm:w-auto sm:h-auto sm:pr-[clamp(0.75rem,0.5rem+0.5vw,1.5rem)] flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" className="w-[18px] h-[18px] sm:w-6 sm:h-6 text-[#967450]">
                           <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
                       </div>
+                    </div>
 
-                      {/* Дата и время */}
-                      <div className="col-start-1 row-start-3 px-[clamp(1rem,0.7692rem+1.0256vw,2rem)] py-[clamp(0.75rem,0.5769rem+0.7692vw,1.5rem)] text-[clamp(1rem,0.8846rem+0.5128vw,1.5rem)] font-Manrope-SemiBold text-[#4F5338] border-t border-[#F1EADF]">
+                    {/* Дата и время */}
+                    <div className="flex items-center min-h-[3.25rem] sm:min-h-0">
+                      <div className="w-[7rem] sm:w-[clamp(7rem,5.5rem+4vw,11rem)] shrink-0 pl-4 pr-2 sm:px-[clamp(1rem,0.7692rem+1.0256vw,2rem)] py-3.5 sm:py-[clamp(0.75rem,0.5769rem+0.7692vw,1.5rem)] text-[13px] sm:text-[clamp(0.875rem,0.8rem+0.4vw,1.25rem)] font-Manrope-SemiBold text-[#4F5338] whitespace-nowrap">
                         Дата и время
                       </div>
-                      <div className="row-start-3 px-[clamp(1rem,0.7692rem+1.0256vw,2rem)] py-[clamp(0.75rem,0.5769rem+0.7692vw,1.5rem)] text-[clamp(1rem,0.8846rem+0.5128vw,1.5rem)] font-ManropeMedium text-[#636846] border-t border-[#F1EADF]">
-                        {format(new Date(b.startUtc), 'd.MM.yyyy, HH:mm', { locale: ru })}
+                      <div className="flex-1 min-w-0 pl-3 pr-3 sm:px-[clamp(0.5rem,0.3rem+0.5vw,1rem)] py-3.5 sm:py-[clamp(0.75rem,0.5769rem+0.7692vw,1.5rem)] text-[13px] sm:text-[clamp(0.875rem,0.8rem+0.4vw,1.25rem)] font-ManropeMedium text-[#636846]">
+                        {format(new Date(b.startUtc), 'dd.MM.yyyy, HH:mm', { locale: ru })}
                       </div>
-                      <div className="row-start-3 px-[clamp(1rem,0.7692rem+1.0256vw,2rem)] py-[clamp(0.75rem,0.5769rem+0.7692vw,1.5rem)]" />
+                    </div>
 
-                      {/* Адрес */}
-                      <div className="col-start-1 row-start-4 px-[clamp(1rem,0.7692rem+1.0256vw,2rem)] py-[clamp(0.75rem,0.5769rem+0.7692vw,1.5rem)] text-[clamp(1rem,0.8846rem+0.5128vw,1.5rem)] font-Manrope-SemiBold text-[#4F5338] border-t border-[#F1EADF]">
+                    {/* Адрес */}
+                    <a href="/how-to-find/" className="flex items-center min-h-[3.25rem] sm:min-h-0 hover:bg-[#FAFAF5] transition-colors">
+                      <div className="w-[7rem] sm:w-[clamp(7rem,5.5rem+4vw,11rem)] shrink-0 pl-4 pr-2 sm:px-[clamp(1rem,0.7692rem+1.0256vw,2rem)] py-3.5 sm:py-[clamp(0.75rem,0.5769rem+0.7692vw,1.5rem)] text-[13px] sm:text-[clamp(0.875rem,0.8rem+0.4vw,1.25rem)] font-Manrope-SemiBold text-[#4F5338]">
                         Адрес
                       </div>
-                      <div className="row-start-4 px-[clamp(1rem,0.7692rem+1.0256vw,2rem)] py-[clamp(0.75rem,0.5769rem+0.7692vw,1.5rem)] text-[clamp(1rem,0.8846rem+0.5128vw,1.5rem)] font-ManropeMedium text-[#636846] border-t border-[#F1EADF]">
+                      <div className="flex-1 min-w-0 pl-3 pr-1 sm:px-[clamp(0.5rem,0.3rem+0.5vw,1rem)] py-3.5 sm:py-[clamp(0.75rem,0.5769rem+0.7692vw,1.5rem)] text-[13px] sm:text-[clamp(0.875rem,0.8rem+0.4vw,1.25rem)] font-ManropeMedium text-[#636846]">
                         г. Балашиха, ул. Заречная 48
                       </div>
-                      <div className="row-start-4 px-[clamp(1rem,0.7692rem+1.0256vw,2rem)] py-[clamp(0.75rem,0.5769rem+0.7692vw,1.5rem)] flex items-center justify-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-[#967450] opacity-60">
+                      <div className="shrink-0 w-10 h-10 mr-1 sm:mr-0 sm:w-auto sm:h-auto sm:pr-[clamp(0.75rem,0.5rem+0.5vw,1.5rem)] flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" className="w-[18px] h-[18px] sm:w-6 sm:h-6 text-[#967450]">
                           <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
                       </div>
+                    </a>
 
-                      {/* Статус */}
-                      <div className="col-start-1 row-start-5 px-[clamp(1rem,0.7692rem+1.0256vw,2rem)] py-[clamp(0.75rem,0.5769rem+0.7692vw,1.5rem)] text-[clamp(1rem,0.8846rem+0.5128vw,1.5rem)] font-Manrope-SemiBold text-[#4F5338] border-t border-[#F1EADF]">
+                    {/* Статус */}
+                    <div className="flex items-center min-h-[3.25rem] sm:min-h-0">
+                      <div className="w-[7rem] sm:w-[clamp(7rem,5.5rem+4vw,11rem)] shrink-0 pl-4 pr-2 sm:px-[clamp(1rem,0.7692rem+1.0256vw,2rem)] py-3.5 sm:py-[clamp(0.75rem,0.5769rem+0.7692vw,1.5rem)] text-[13px] sm:text-[clamp(0.875rem,0.8rem+0.4vw,1.25rem)] font-Manrope-SemiBold text-[#4F5338]">
                         Статус
                       </div>
-                      <div className="row-start-5 px-[clamp(1rem,0.7692rem+1.0256vw,2rem)] py-[clamp(0.75rem,0.5769rem+0.7692vw,1.5rem)] text-[clamp(1rem,0.8846rem+0.5128vw,1.5rem)] font-ManropeMedium text-[#636846] border-t border-[#F1EADF]">
+                      <div className="flex-1 min-w-0 pl-3 pr-3 sm:px-[clamp(0.5rem,0.3rem+0.5vw,1rem)] py-3.5 sm:py-[clamp(0.75rem,0.5769rem+0.7692vw,1.5rem)]">
                         {statusPill(b)}
                       </div>
-                      <div className="row-start-5 px-[clamp(1rem,0.7692rem+1.0256vw,2rem)] py-[clamp(0.75rem,0.5769rem+0.7692vw,1.5rem)]" />
                     </div>
                   </div>
 
                   {/* Правая карточка — оплата и действия */}
-                  <div className="rounded-[clamp(1rem,0.8846rem+0.5128vw,1.5rem)] border border-[#EEE7DC] bg-white p-[clamp(1.5rem,1.1538rem+1.5385vw,3rem)]">
-                    <div className="mb-[clamp(0.5rem,0.3846rem+0.5128vw,1rem)] flex items-center justify-between">
-                      <div className="text-[#4F5338] font-Manrope-SemiBold text-[clamp(1rem,0.8846rem+0.5128vw,1.5rem)]">Оплачено онлайн</div>
-                      <div className="text-[#4F5338] font-Manrope-SemiBold text-[clamp(1rem,0.8846rem+0.5128vw,1.5rem)]">
-                        {formatPrice(b.service.priceCents, b.service.currency)}
+                  <div className="rounded-[clamp(1rem,0.8846rem+0.5128vw,1.5rem)] border border-[#EEE7DC] bg-white p-[clamp(1.25rem,1.1538rem+1.5385vw,3rem)]">
+                    <div className="mb-[clamp(0.5rem,0.3846rem+0.5128vw,1rem)]">
+                      <div className="flex items-center justify-between">
+                        <div className="text-[#4F5338] font-Manrope-SemiBold text-[clamp(1rem,0.8846rem+0.5128vw,1.5rem)]">
+                          {b.paymentMethod === 'onsite' ? 'Оплата на месте' : 'Оплачено онлайн'}
+                        </div>
+                        <div className="text-[#4F5338] font-Manrope-SemiBold text-[clamp(1rem,0.8846rem+0.5128vw,1.5rem)]">
+                          {formatPrice(b.finalAmountCents ?? b.service.priceCents, b.service.currency)}
+                        </div>
                       </div>
+                      {b.discountAmountCents != null && b.discountAmountCents > 0 && (
+                        <div className="mt-1 space-y-0.5">
+                          <div className="flex items-center justify-between text-[clamp(0.8125rem,0.7692rem+0.1923vw,0.9375rem)] font-ManropeRegular text-[#7A7A7A]">
+                            <span>Стоимость</span>
+                            <span>{formatPrice(b.baseAmountCents ?? b.service.priceCents, b.service.currency)}</span>
+                          </div>
+                          <div className="flex items-center justify-between text-[clamp(0.8125rem,0.7692rem+0.1923vw,0.9375rem)] font-ManropeRegular text-[#5C6744]">
+                            <span>Скидка{b.promoCodeSnapshot ? ` (${b.promoCodeSnapshot})` : ''}</span>
+                            <span>-{formatPrice(b.discountAmountCents, b.service.currency)}</span>
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     {/* Пункты списка */}
@@ -357,6 +390,30 @@ export default function HistoryPanel({ userId }: Props) {
               </div>
               );
             })}
+            {/* Пагинация */}
+            {total > PAGE_SIZE && (
+              <div className="flex items-center justify-center gap-[clamp(0.5rem,0.3846rem+0.5128vw,1rem)] pt-[clamp(1rem,0.7692rem+1.0256vw,2rem)]">
+                <button
+                  type="button"
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  disabled={page <= 1}
+                  className="rounded-[clamp(0.5rem,0.4423rem+0.2564vw,0.75rem)] bg-[#F5F0E4] text-[#967450] text-[clamp(0.875rem,0.7885rem+0.3846vw,1.125rem)] py-[clamp(0.5rem,0.3846rem+0.5128vw,1rem)] px-[clamp(1rem,0.7692rem+1.0256vw,2rem)] font-ManropeRegular hover:bg-[#4c503b] hover:text-white transition-colors duration-300 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-[#F5F0E4] disabled:hover:text-[#967450]"
+                >
+                  Назад
+                </button>
+                <span className="text-[clamp(0.875rem,0.7885rem+0.3846vw,1.125rem)] font-ManropeMedium text-[#636846]">
+                  {page} / {Math.ceil(total / PAGE_SIZE)}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setPage(p => Math.min(Math.ceil(total / PAGE_SIZE), p + 1))}
+                  disabled={page >= Math.ceil(total / PAGE_SIZE)}
+                  className="rounded-[clamp(0.5rem,0.4423rem+0.2564vw,0.75rem)] bg-[#F5F0E4] text-[#967450] text-[clamp(0.875rem,0.7885rem+0.3846vw,1.125rem)] py-[clamp(0.5rem,0.3846rem+0.5128vw,1rem)] px-[clamp(1rem,0.7692rem+1.0256vw,2rem)] font-ManropeRegular hover:bg-[#4c503b] hover:text-white transition-colors duration-300 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-[#F5F0E4] disabled:hover:text-[#967450]"
+                >
+                  Далее
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>

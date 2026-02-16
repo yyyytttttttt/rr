@@ -16,6 +16,7 @@ type PanelProps = {
   userEmail: string;
   userImage: string;
   userPhone?: string | null;
+  userBirthDate?: string | null;
   initialDate?: string;
 };
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import toast from "react-hot-toast";
 
@@ -45,6 +45,13 @@ export default function DoctorServicesModal({ open, onClose, doctorId, doctorNam
   const [showAddServices, setShowAddServices] = useState(false);
   const [selectedServices, setSelectedServices] = useState<Set<string>>(new Set());
 
+  // Search & filter state
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [catDropdownOpen, setCatDropdownOpen] = useState(false);
+  const searchRef = useRef<HTMLInputElement>(null);
+  const catDropdownRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     if (open && doctorId) {
       loadServices();
@@ -52,21 +59,41 @@ export default function DoctorServicesModal({ open, onClose, doctorId, doctorNam
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, doctorId]);
 
+  // Focus search on open add panel
+  useEffect(() => {
+    if (showAddServices) {
+      setTimeout(() => searchRef.current?.focus(), 100);
+    } else {
+      setSearchQuery("");
+      setSelectedCategory(null);
+      setCatDropdownOpen(false);
+    }
+  }, [showAddServices]);
+
+  // Close category dropdown on click outside
+  useEffect(() => {
+    if (!catDropdownOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (catDropdownRef.current && !catDropdownRef.current.contains(e.target as Node)) {
+        setCatDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [catDropdownOpen]);
+
   const loadServices = async () => {
     setLoading(true);
     try {
-      // Загружаем услуги врача
       const doctorRes = await fetch(`/api/doctors/${doctorId}/services`);
       if (!doctorRes.ok) throw new Error("Failed to fetch doctor services");
       const doctorData = await doctorRes.json();
       setDoctorServices(doctorData.services || []);
 
-      // Загружаем все доступные услуги
-      const allRes = await fetch("/api/services/catalog");
+      const allRes = await fetch("/api/admin/services/list");
       if (!allRes.ok) throw new Error("Failed to fetch all services");
       const allData = await allRes.json();
 
-      // Фильтруем услуги, которые еще не привязаны к врачу
       const doctorServiceIds = new Set((doctorData.services || []).map((ds: DoctorService) => ds.serviceId));
       const available = (allData.services || []).filter((s: AvailableService) => !doctorServiceIds.has(s.id));
       setAvailableServices(available);
@@ -77,6 +104,35 @@ export default function DoctorServicesModal({ open, onClose, doctorId, doctorNam
       setLoading(false);
     }
   };
+
+  // Extract unique categories from available services
+  const categories = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const s of availableServices) {
+      if (s.category) map.set(s.category.id, s.category.name);
+    }
+    return Array.from(map, ([id, name]) => ({ id, name })).sort((a, b) =>
+      a.name.localeCompare(b.name, "ru")
+    );
+  }, [availableServices]);
+
+  // Filtered available services
+  const filteredAvailable = useMemo(() => {
+    let list = availableServices;
+    if (selectedCategory) {
+      list = list.filter((s) => s.category?.id === selectedCategory);
+    }
+    if (searchQuery.trim()) {
+      const q = searchQuery.trim().toLowerCase();
+      list = list.filter(
+        (s) =>
+          s.name.toLowerCase().includes(q) ||
+          s.description?.toLowerCase().includes(q) ||
+          s.category?.name.toLowerCase().includes(q)
+      );
+    }
+    return list;
+  }, [availableServices, selectedCategory, searchQuery]);
 
   const handleAddServices = async () => {
     if (selectedServices.size === 0) {
@@ -179,71 +235,264 @@ export default function DoctorServicesModal({ open, onClose, doctorId, doctorNam
 
                 {/* Форма добавления услуг */}
                 {showAddServices && (
-                  <div className="bg-[#FFFCF3] rounded-[clamp(0.75rem,0.6346rem+0.5128vw,1.25rem)] p-[clamp(1rem,0.8846rem+0.5128vw,1.5rem)] border border-[#E8E2D5]">
-                    <h3 className="text-[clamp(0.875rem,0.8077rem+0.2885vw,1.125rem)] font-ManropeBold text-[#4F5338] mb-[clamp(0.75rem,0.6346rem+0.5128vw,1.25rem)]">
-                      Выберите услуги для добавления
-                    </h3>
+                  <div className="bg-[#FFFCF3] rounded-[clamp(0.75rem,0.6346rem+0.5128vw,1.25rem)] border border-[#E8E2D5] overflow-hidden">
+                    {/* Search + category header */}
+                    <div className="p-[clamp(1rem,0.8846rem+0.5128vw,1.5rem)] pb-0">
+                      <h3 className="text-[clamp(0.875rem,0.8077rem+0.2885vw,1.125rem)] font-ManropeBold text-[#4F5338] mb-3">
+                        Выберите услуги для добавления
+                      </h3>
 
-                    {availableServices.length === 0 ? (
-                      <p className="text-[clamp(0.875rem,0.8077rem+0.2885vw,1.125rem)] font-ManropeRegular text-[#636846] text-center py-4">
-                        Все доступные услуги уже добавлены
-                      </p>
-                    ) : (
-                      <>
-                        <div className="space-y-2 max-h-64 overflow-y-auto mb-4">
-                          {availableServices.map((service) => (
-                            <label
-                              key={service.id}
-                              className="flex items-start gap-3 p-3 bg-white rounded-lg border border-[#E8E2D5] hover:border-[#967450] cursor-pointer transition-colors"
-                            >
-                              <input
-                                type="checkbox"
-                                checked={selectedServices.has(service.id)}
-                                onChange={() => toggleServiceSelection(service.id)}
-                                className="mt-1 w-4 h-4 text-[#5C6744] rounded focus:ring-[#967450]"
-                              />
-                              <div className="flex-1 min-w-0">
-                                <div className="font-ManropeMedium text-[clamp(0.875rem,0.8077rem+0.2885vw,1.125rem)] text-[#4F5338]">
-                                  {service.name}
+                      {/* Search input */}
+                      <div className="relative mb-3">
+                        <div className="absolute inset-y-0 left-0 pl-3.5 lg:pl-4 flex items-center pointer-events-none">
+                          <svg className="w-[1.1rem] h-[1.1rem] lg:w-5 lg:h-5 text-[#9A8F7D]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                          </svg>
+                        </div>
+                        <input
+                          ref={searchRef}
+                          type="text"
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          placeholder="Поиск по названию или описанию..."
+                          className="w-full pl-10 lg:pl-12 pr-10 py-2.5 lg:py-3 bg-white border border-[#E8E2D5] rounded-xl text-sm lg:text-base font-ManropeRegular text-[#4F5338] placeholder:text-[#B0A890] focus:outline-none focus:ring-2 focus:ring-[#967450]/40 focus:border-[#967450] transition-all"
+                        />
+                        {searchQuery && (
+                          <button
+                            type="button"
+                            onClick={() => setSearchQuery("")}
+                            className="absolute inset-y-0 right-0 pr-3.5 flex items-center text-[#9A8F7D] hover:text-[#636846] transition-colors"
+                          >
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Category dropdown */}
+                      {categories.length > 0 && (
+                        <div className="relative mb-3" ref={catDropdownRef}>
+                          <button
+                            type="button"
+                            onClick={() => setCatDropdownOpen((v) => !v)}
+                            className={`w-full flex items-center justify-between gap-2 px-3.5 py-2.5 lg:px-4 lg:py-3 rounded-xl border text-sm lg:text-base font-ManropeMedium transition-all ${
+                              catDropdownOpen
+                                ? "border-[#967450] ring-2 ring-[#967450]/40 bg-white"
+                                : "border-[#E8E2D5] bg-white hover:border-[#C8C0AD]"
+                            }`}
+                          >
+                            <div className="flex items-center gap-2 min-w-0">
+                              <svg className="w-4 h-4 text-[#9A8F7D] shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
+                              </svg>
+                              <span className={selectedCategory ? "text-[#4F5338]" : "text-[#9A8F7D]"}>
+                                {selectedCategory
+                                  ? categories.find((c) => c.id === selectedCategory)?.name ?? "Категория"
+                                  : "Все категории"}
+                              </span>
+                              {selectedCategory && (
+                                <span className="ml-auto shrink-0 text-[10px] font-ManropeMedium text-[#967450] bg-[#F5F0E4] rounded-full px-1.5 py-0.5 leading-none">
+                                  {availableServices.filter((s) => s.category?.id === selectedCategory).length}
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-1 shrink-0">
+                              {selectedCategory && (
+                                <span
+                                  role="button"
+                                  onClick={(e) => { e.stopPropagation(); setSelectedCategory(null); setCatDropdownOpen(false); }}
+                                  className="p-0.5 rounded-md text-[#9A8F7D] hover:text-[#C63D3D] hover:bg-red-50 transition-colors"
+                                >
+                                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                  </svg>
+                                </span>
+                              )}
+                              <svg
+                                className={`w-4 h-4 text-[#9A8F7D] transition-transform duration-200 ${catDropdownOpen ? "rotate-180" : ""}`}
+                                fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
+                              >
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                              </svg>
+                            </div>
+                          </button>
+
+                          {/* Dropdown menu */}
+                          {catDropdownOpen && (
+                            <div className="absolute z-10 left-0 right-0 mt-1.5 bg-white border border-[#E8E2D5] rounded-xl shadow-lg shadow-black/8 overflow-hidden animate-in fade-in slide-in-from-top-1 duration-150">
+                              {/* All option */}
+                              <button
+                                type="button"
+                                onClick={() => { setSelectedCategory(null); setCatDropdownOpen(false); }}
+                                className={`w-full flex items-center gap-3 px-4 py-2.5 lg:py-3 text-left text-sm lg:text-base transition-colors ${
+                                  selectedCategory === null
+                                    ? "bg-[#5C6744]/[0.06] text-[#4F5338] font-ManropeMedium"
+                                    : "text-[#636846] font-ManropeRegular hover:bg-[#FAFAF5]"
+                                }`}
+                              >
+                                <div className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 ${
+                                  selectedCategory === null ? "bg-[#5C6744]" : "border border-[#D4CCBA]"
+                                }`}>
+                                  {selectedCategory === null && (
+                                    <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                  )}
                                 </div>
-                                {service.description && (
-                                  <div className="text-[clamp(0.75rem,0.6923rem+0.2564vw,1rem)] font-ManropeRegular text-[#636846] mt-1 line-clamp-2">
-                                    {service.description}
-                                  </div>
-                                )}
-                                <div className="flex items-center gap-3 mt-2 text-[clamp(0.75rem,0.6923rem+0.2564vw,1rem)] font-ManropeRegular text-[#636846]">
-                                  <span>{service.durationMin} мин</span>
-                                  <span>•</span>
-                                  <span className="font-ManropeMedium text-[#4F5338]">
-                                    {(service.priceCents / 100).toLocaleString("ru-RU")} {service.currency}
-                                  </span>
-                                </div>
+                                <span className="flex-1">Все категории</span>
+                                <span className="text-xs lg:text-sm text-[#B0A890]">{availableServices.length}</span>
+                              </button>
+
+                              <div className="h-px bg-[#E8E2D5]" />
+
+                              {/* Category options */}
+                              <div className="max-h-48 lg:max-h-56 overflow-y-auto overscroll-contain">
+                                {categories.map((cat) => {
+                                  const count = availableServices.filter((s) => s.category?.id === cat.id).length;
+                                  const isActive = selectedCategory === cat.id;
+                                  return (
+                                    <button
+                                      key={cat.id}
+                                      type="button"
+                                      onClick={() => { setSelectedCategory(cat.id); setCatDropdownOpen(false); }}
+                                      className={`w-full flex items-center gap-3 px-4 py-2.5 lg:py-3 text-left text-sm lg:text-base transition-colors ${
+                                        isActive
+                                          ? "bg-[#5C6744]/[0.06] text-[#4F5338] font-ManropeMedium"
+                                          : "text-[#636846] font-ManropeRegular hover:bg-[#FAFAF5]"
+                                      }`}
+                                    >
+                                      <div className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 ${
+                                        isActive ? "bg-[#5C6744]" : "border border-[#D4CCBA]"
+                                      }`}>
+                                        {isActive && (
+                                          <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                          </svg>
+                                        )}
+                                      </div>
+                                      <span className="flex-1 truncate">{cat.name}</span>
+                                      <span className="text-xs lg:text-sm text-[#B0A890] shrink-0">{count}</span>
+                                    </button>
+                                  );
+                                })}
                               </div>
-                            </label>
-                          ))}
+                            </div>
+                          )}
                         </div>
+                      )}
+                    </div>
 
-                        <div className="flex gap-3">
+                    {/* Services list */}
+                    <div className="px-[clamp(1rem,0.8846rem+0.5128vw,1.5rem)]">
+                      {availableServices.length === 0 ? (
+                        <p className="text-[clamp(0.875rem,0.8077rem+0.2885vw,1.125rem)] font-ManropeRegular text-[#636846] text-center py-6">
+                          Все доступные услуги уже добавлены
+                        </p>
+                      ) : filteredAvailable.length === 0 ? (
+                        <div className="text-center py-6">
+                          <div className="w-10 h-10 mx-auto mb-2 rounded-full bg-[#F5F0E4] flex items-center justify-center">
+                            <svg className="w-5 h-5 text-[#9A8F7D]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                            </svg>
+                          </div>
+                          <p className="text-sm lg:text-base font-ManropeRegular text-[#9A8F7D]">
+                            Ничего не найдено
+                          </p>
                           <button
-                            onClick={handleAddServices}
-                            disabled={updating || selectedServices.size === 0}
-                            className="flex-1 px-[clamp(1rem,0.8846rem+0.5128vw,1.5rem)] py-[clamp(0.625rem,0.5096rem+0.5128vw,1.125rem)] bg-[#5C6744] text-white rounded-[clamp(0.5rem,0.4423rem+0.2564vw,0.75rem)] text-[clamp(0.875rem,0.8077rem+0.2885vw,1.125rem)] font-ManropeMedium hover:bg-[#4F5938] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            type="button"
+                            onClick={() => { setSearchQuery(""); setSelectedCategory(null); }}
+                            className="mt-1.5 text-xs lg:text-sm font-ManropeMedium text-[#967450] hover:underline"
                           >
-                            {updating ? "Добавление..." : `Добавить (${selectedServices.size})`}
-                          </button>
-                          <button
-                            onClick={() => {
-                              setShowAddServices(false);
-                              setSelectedServices(new Set());
-                            }}
-                            disabled={updating}
-                            className="flex-1 px-[clamp(1rem,0.8846rem+0.5128vw,1.5rem)] py-[clamp(0.625rem,0.5096rem+0.5128vw,1.125rem)] bg-[#F5F0E4] text-[#967450] rounded-[clamp(0.5rem,0.4423rem+0.2564vw,0.75rem)] text-[clamp(0.875rem,0.8077rem+0.2885vw,1.125rem)] font-ManropeMedium hover:bg-[#E8E2D5] transition-colors"
-                          >
-                            Отмена
+                            Сбросить фильтры
                           </button>
                         </div>
-                      </>
-                    )}
+                      ) : (
+                        <div className="space-y-2 lg:space-y-2.5 max-h-64 lg:max-h-80 overflow-y-auto overscroll-contain pr-1 -mr-1">
+                          {filteredAvailable.map((service) => {
+                            const isChecked = selectedServices.has(service.id);
+                            return (
+                              <label
+                                key={service.id}
+                                className={`flex items-start gap-3 lg:gap-3.5 p-3 lg:p-4 rounded-xl border cursor-pointer transition-all ${
+                                  isChecked
+                                    ? "bg-[#5C6744]/[0.04] border-[#5C6744]/30 shadow-sm"
+                                    : "bg-white border-[#E8E2D5] hover:border-[#967450]/50"
+                                }`}
+                              >
+                                {/* Custom checkbox */}
+                                <div className="mt-0.5 lg:mt-1 shrink-0">
+                                  <div
+                                    className={`w-[1.15rem] h-[1.15rem] lg:w-5 lg:h-5 rounded-[5px] border-2 flex items-center justify-center transition-all ${
+                                      isChecked
+                                        ? "bg-[#5C6744] border-[#5C6744]"
+                                        : "border-[#C8C0AD] bg-white"
+                                    }`}
+                                  >
+                                    {isChecked && (
+                                      <svg className="w-3 h-3 lg:w-3.5 lg:h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                      </svg>
+                                    )}
+                                  </div>
+                                  <input
+                                    type="checkbox"
+                                    checked={isChecked}
+                                    onChange={() => toggleServiceSelection(service.id)}
+                                    className="sr-only"
+                                  />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    <span className="font-ManropeMedium text-sm lg:text-base text-[#4F5338]">
+                                      {service.name}
+                                    </span>
+                                    {service.category && (
+                                      <span className="inline-flex px-1.5 py-0.5 lg:px-2 lg:py-1 rounded-md bg-[#F5F0E4] text-[10px] lg:text-xs font-ManropeMedium text-[#967450] leading-tight">
+                                        {service.category.name}
+                                      </span>
+                                    )}
+                                  </div>
+                                  {service.description && (
+                                    <p className="text-xs lg:text-sm font-ManropeRegular text-[#636846] mt-0.5 lg:mt-1 line-clamp-1">
+                                      {service.description}
+                                    </p>
+                                  )}
+                                  <div className="flex items-center gap-2 mt-1.5 lg:mt-2 text-xs lg:text-sm font-ManropeRegular text-[#9A8F7D]">
+                                    <span>{service.durationMin} мин</span>
+                                    <span className="text-[#D4CCBA]">|</span>
+                                    <span className="font-ManropeMedium text-[#4F5338]">
+                                      {(service.priceCents / 100).toLocaleString("ru-RU")} {service.currency}
+                                    </span>
+                                  </div>
+                                </div>
+                              </label>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Action buttons — sticky footer */}
+                    <div className="flex gap-3 p-[clamp(1rem,0.8846rem+0.5128vw,1.5rem)] pt-3 border-t border-[#E8E2D5] mt-3 bg-[#FFFCF3]">
+                      <button
+                        onClick={handleAddServices}
+                        disabled={updating || selectedServices.size === 0}
+                        className="flex-1 px-[clamp(1rem,0.8846rem+0.5128vw,1.5rem)] py-[clamp(0.625rem,0.5096rem+0.5128vw,1.125rem)] bg-[#5C6744] text-white rounded-[clamp(0.5rem,0.4423rem+0.2564vw,0.75rem)] text-[clamp(0.875rem,0.8077rem+0.2885vw,1.125rem)] font-ManropeMedium hover:bg-[#4F5938] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {updating ? "Добавление..." : `Добавить (${selectedServices.size})`}
+                      </button>
+                      <button
+                        onClick={() => {
+                          setShowAddServices(false);
+                          setSelectedServices(new Set());
+                        }}
+                        disabled={updating}
+                        className="flex-1 px-[clamp(1rem,0.8846rem+0.5128vw,1.5rem)] py-[clamp(0.625rem,0.5096rem+0.5128vw,1.125rem)] bg-[#F5F0E4] text-[#967450] rounded-[clamp(0.5rem,0.4423rem+0.2564vw,0.75rem)] text-[clamp(0.875rem,0.8077rem+0.2885vw,1.125rem)] font-ManropeMedium hover:bg-[#E8E2D5] transition-colors"
+                      >
+                        Отмена
+                      </button>
+                    </div>
                   </div>
                 )}
 
@@ -275,13 +524,13 @@ export default function DoctorServicesModal({ open, onClose, doctorId, doctorNam
                               </p>
                             )}
                             <div className="flex flex-wrap items-center gap-3 text-[clamp(0.75rem,0.6923rem+0.2564vw,1rem)] font-ManropeRegular text-[#636846]">
-                              <span>⏱️ {service.durationMin} мин</span>
-                              {service.bufferMin && <span>🔄 Буфер: {service.bufferMin} мин</span>}
+                              <span>{service.durationMin} мин</span>
+                              {service.bufferMin && <span>Буфер: {service.bufferMin} мин</span>}
                               <span className="font-ManropeMedium text-[#4F5338]">
-                                💰 {(service.priceCents / 100).toLocaleString("ru-RU")} {service.currency}
+                                {(service.priceCents / 100).toLocaleString("ru-RU")} {service.currency}
                               </span>
                               {service.category && (
-                                <span className="px-2 py-0.5 bg-[#F5F0E4] rounded text-[#967450]">
+                                <span className="px-2 py-0.5 bg-[#F5F0E4] rounded text-[#967450] text-xs">
                                   {service.category.name}
                                 </span>
                               )}

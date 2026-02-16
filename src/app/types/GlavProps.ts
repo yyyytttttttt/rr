@@ -48,15 +48,20 @@ export type Slider6 ={
   desktop:DescProps
   mobile:mobileBarType
 }
+export type SliderNews = {
+  id: string
+  type: 'sliderNews'
+}
 export type StaticSlide = {
   type:'static'
   images: { default: string; xs: string; oneK: string; fourXL: string }
   desktop:DescProps
   mobile:mobileBarType
   src?: string
+  objectFit?: string
 
   id:string
 
 
 }
- export type Slide = ComponentSlide | Slider2 | Slider4 | Slider5 | Slider6 |StaticSlide
+ export type Slide = ComponentSlide | Slider2 | Slider4 | Slider5 | Slider6 | SliderNews | StaticSlide

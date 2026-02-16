@@ -108,7 +108,7 @@ export default function ServicesPage() {
   return (
     <LayoutOverlay3 title="Услуги">
       <main className="min-h-screen">
-        <div className="mx-auto max-w-[1920px] px-8 lg:px-[134px] pb-24">
+        <div className="mx-auto max-w-[1920px] px-[4%] lg:px-[134px] pb-24">
          {/* Хлебные крошки */}
       <nav className=" pt-[0%] text-[clamp(0.875rem,0.8077rem+0.2885vw,1.125rem)] text-[#636846] font-ManropeRegular">
         <ol className="flex items-center gap-2">

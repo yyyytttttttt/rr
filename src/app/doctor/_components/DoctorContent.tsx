@@ -96,7 +96,7 @@ export default function DoctorContent({ view, panelProps, doctor }: Props) {
         onAction={handleAction}
       />
 
-      <div className="admin-container py-4 sm:py-6 md:py-8 max-w-[100vw] mb-8 md:mb-12 lg:mb-16">
+      <div className="max-w-[100vw]">
         {view === "home" && <HomePanel key={refreshKey} {...panelProps} />}
         {view === "calendar" && <CalendarPanel key={refreshKey} {...panelProps} />}
         {view === "services" && <ServicesPanel key={refreshKey} {...panelProps} />}

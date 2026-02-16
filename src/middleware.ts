@@ -2,7 +2,15 @@
 import { withAuth, type NextRequestWithAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
 import type { JWT } from "next-auth/jwt";
-import { randomBytes } from "crypto";
+// Web Crypto (Edge-runtime compatible, no Node.js "crypto" module)
+function edgeRandomBase64(bytes: number): string {
+  const buf = new Uint8Array(bytes);
+  crypto.getRandomValues(buf);
+  // btoa-safe: convert Uint8Array → binary string → base64
+  let binary = '';
+  for (let i = 0; i < buf.length; i++) binary += String.fromCharCode(buf[i]);
+  return btoa(binary);
+}
 
 const CSP_STRICT = process.env.CSP_STRICT === '1';
 
@@ -22,7 +30,7 @@ function buildNonceCsp(nonce: string): string {
 /** NextResponse.next() with nonce injected into request headers + CSP on response. */
 function nextWithNonce(req: NextRequestWithAuth): NextResponse {
   if (!CSP_STRICT) return NextResponse.next();
-  const nonce = randomBytes(16).toString('base64');
+  const nonce = edgeRandomBase64(16);
   const reqHeaders = new Headers(req.headers);
   reqHeaders.set('x-nonce', nonce);
   const res = NextResponse.next({ request: { headers: reqHeaders } });
@@ -56,6 +64,7 @@ const roleMap: ReadonlyArray<{ prefix: `/${string}`; allow: readonly Role[] }> =
   { prefix: "/admin",   allow: ["ADMIN", "DOCTOR"] },
   { prefix: "/doctor",  allow: ["DOCTOR", "ADMIN"] },
   { prefix: "/profile", allow: ["USER", "DOCTOR", "ADMIN"] },
+  { prefix: "/passes",  allow: ["USER", "DOCTOR", "ADMIN"] },
 ];
 
 function findRule(pathname: string) {
@@ -162,6 +171,10 @@ export default withAuth(
           '/api/request-password-reset',
           '/api/reset-password',
           '/api/health',
+          '/api/business-card/vcard',
+          '/api/business-card/apple-pass',
+          '/api/business-card/google-pass',
+          '/business-card',
         ]);
         // Prefix-match only for well-scoped namespaces
         const publicPrefixes = [
@@ -169,9 +182,15 @@ export default withAuth(
           '/api/auth/',     // NextAuth internal
         ];
 
+        // Dynamic public routes (e.g. /api/services/:id/doctors)
+        const publicPatterns = [
+          /^\/api\/services\/[^/]+\/doctors$/,
+        ];
+
         if (
           publicExact.has(path) ||
-          publicPrefixes.some(p => path.startsWith(p))
+          publicPrefixes.some(p => path.startsWith(p)) ||
+          publicPatterns.some(re => re.test(path))
         ) {
           return true;
         }
@@ -191,6 +210,8 @@ export const config = {
     "/admin/:path*",
     "/doctor",
     "/doctor/:path*",
+    "/passes",
+    "/passes/:path*",
     "/protected/:path*",
     '/api/:path*',
   ],

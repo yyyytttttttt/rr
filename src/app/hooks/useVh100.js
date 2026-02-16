@@ -1,23 +1,8 @@
-
 'use client'
-import { useEffect, useMemo } from 'react'
+import { useMemo } from 'react'
 
+// --app-vh is set globally by the inline script in layout.js.
+// This hook only returns the style object — no duplicate listeners.
 export function useVh100() {
-  useEffect(() => {
-    const set = () => {
-      
-      const vh = window.innerHeight * 0.01
-      document.documentElement.style.setProperty('--app-vh', `${vh}px`)
-    }
-    set()
-    window.addEventListener('resize', set)
-    window.addEventListener('orientationchange', set)
-    return () => {
-      window.removeEventListener('resize', set)
-      window.removeEventListener('orientationchange', set)
-    }
-  }, [])
-
- 
   return useMemo(() => ({ height: 'calc(var(--app-vh, 1vh) * 100)' }), [])
 }

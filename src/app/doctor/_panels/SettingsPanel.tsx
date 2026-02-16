@@ -58,10 +58,8 @@ export default function SettingsPanel({
         </svg>
       </div>
 
-      <div className="relative z-10 max-w-full sm:max-w-[600px] md:max-w-[700px] lg:max-w-[clamp(35rem,32.6923rem+10.2564vw,45rem)] px-3 sm:px-4 md:px-6 xl:px-[clamp(1rem,0.5385rem+2.0513vw,3rem)] py-4 sm:py-6 md:py-8 xl:py-[clamp(2rem,1.5385rem+2.0513vw,4rem)]">
-        <h1 className="text-xl sm:text-2xl xl:text-[clamp(1.5rem,1.3846rem+0.5128vw,2rem)] font-Manrope-SemiBold text-[#4F5338] mb-4 sm:mb-6 xl:mb-[clamp(1.5rem,1.2692rem+1.0256vw,2.5rem)]">
-          Настройки профиля
-        </h1>
+      <div className="relative z-10 max-w-full sm:max-w-[600px] md:max-w-[700px] lg:max-w-[clamp(35rem,32.6923rem+10.2564vw,45rem)] px-4 py-6 sm:py-8">
+        
 
         {/* Карточка профиля */}
         <div className="rounded-[12px] sm:rounded-[16px] xl:rounded-[clamp(1rem,0.8846rem+0.5128vw,1.5rem)] border border-[#EEE7DC] bg-white p-4 sm:p-6 xl:p-[clamp(1.5rem,1.1538rem+1.5385vw,3rem)] mb-4 sm:mb-6 xl:mb-[clamp(1.5rem,1.2692rem+1.0256vw,2.5rem)]">

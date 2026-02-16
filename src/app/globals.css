@@ -51,45 +51,32 @@
 
   --breakpoint-xs: 30rem; /* 480px при base 16px */
 }
-/* Твои глобальные стили для слайдера вместо <style jsx global> */
-/* scale (loop-safe) */
-.projects-swiper .projects-card {
-  transform: scale(0.9);
-  opacity: 0.6;
-  transition: transform 600ms ease, opacity 600ms ease;
-  will-change: transform;
-}
-
-.projects-swiper .swiper-slide-prev .projects-card,
-.projects-swiper .swiper-slide-next .projects-card {
-  transform: scale(0.94);
-  opacity: 0.8;
-}
-
-.projects-swiper .swiper-slide-active .projects-card {
-  transform: scale(1);
-  opacity: 1;
-}
-
-/* pagination bullets */
-.projects-pagination .projects-bullet {
-  width: 10px;
-  height: 10px;
-  border-radius: 999px;
-  display: inline-block;
-  background: rgba(234, 189, 94, 0.35);
-  border: 1px solid rgba(234, 189, 94, 0.7);
-  transition: transform 250ms ease, background 250ms ease;
-}
-
-.projects-pagination .swiper-pagination-bullet-active.projects-bullet {
-  background: rgba(234, 189, 94, 1);
-  transform: scale(1.2);
-}
-
 /* Высота приложения с учетом мобильных браузеров */
 .h-app {
   height: calc(var(--app-vh, 1vh) * 100);
+}
+
+/* Prevent body bounce/overscroll on iOS */
+html, body {
+  overscroll-behavior: none;
+}
+
+/* ── Mobile (cssMode): нативный scroll-snap ── */
+.swiper-css-mode > .swiper-wrapper {
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.swiper-css-mode > .swiper-wrapper::-webkit-scrollbar {
+  display: none;
+}
+.swiper-css-mode > .swiper-wrapper > .swiper-slide {
+  scroll-snap-stop: always;
+}
+
+/* ── Desktop: плавный easing для JS-анимации ── */
+.swiper:not(.swiper-css-mode) .swiper-wrapper {
+  transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
 }
 
 .swiper-wrapper { align-items: stretch; }   /* тянем слайды по высоте ряда */
@@ -106,11 +93,6 @@
     transform: translateZ(0);
     -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
-  }
-
-  .swiper-wrapper {
-    -webkit-transform-style: preserve-3d;
-    transform-style: preserve-3d;
   }
 
   /* Убираем will-change на iOS - вызывает проблемы с памятью */
@@ -196,3 +178,56 @@
 .animate-slideInLeft {
   animation: slideInLeft 0.4s ease-out;
 }
+
+/* ── Shared pagination bullets ── */
+.slider-pagination {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+.slider-bullet {
+  width: 8px;
+  height: 8px;
+  background: #967450;
+  opacity: 0.3;
+  border-radius: 50%;
+  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+  cursor: pointer;
+}
+.slider-bullet.swiper-pagination-bullet-active {
+  width: 24px;
+  opacity: 1;
+  background: #967450;
+  border-radius: 4px;
+}
+
+/* ── Shared navigation arrows ── */
+.slider-nav-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255, 252, 243, 0.85);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(150, 116, 80, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  color: #967450;
+  flex-shrink: 0;
+}
+.slider-nav-btn:hover {
+  background: rgba(255, 252, 243, 1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  transform: scale(1.06);
+}
+.slider-nav-btn.swiper-button-disabled {
+  opacity: 0.3;
+  cursor: default;
+  transform: none;
+}
+
+/* ── Equalize swiper (SliderSection2) ── */
+.equalize-swiper .swiper-wrapper { align-items: stretch; }
+.equalize-swiper .swiper-slide { height: auto; display: flex; }

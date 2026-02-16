@@ -20,18 +20,23 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
         endUtc: true,
         status: true,
         note: true,
+        clientName: true,
+        clientEmail: true,
+        clientPhone: true,
         user: {
           select: {
             id: true,
             name: true,
             email: true,
             phone: true,
+            image: true,
           },
         },
         service: {
           select: {
             id: true,
             name: true,
+            durationMin: true,
             priceCents: true,
             currency: true,
           },
@@ -53,6 +58,11 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
             status: true,
           },
         },
+        baseAmountCents: true,
+        discountAmountCents: true,
+        finalAmountCents: true,
+        promoCodeSnapshot: true,
+        paymentMethod: true,
       },
     });
 
@@ -75,17 +85,24 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
       endUtc: booking.endUtc.toISOString(),
       status: booking.status,
       note: booking.note,
-      clientName: booking.user?.name || "Клиент",
-      clientEmail: booking.user?.email || "",
-      clientPhone: booking.user?.phone || "",
+      clientName: booking.clientName || booking.user?.name || "Клиент",
+      clientEmail: booking.clientEmail || booking.user?.email || "",
+      clientPhone: booking.clientPhone || booking.user?.phone || "",
+      clientImage: booking.user?.image || null,
       serviceName: booking.service.name,
       serviceId: booking.service.id,
+      durationMin: booking.service.durationMin,
       priceCents: booking.service.priceCents,
       currency: booking.service.currency,
       doctorName: booking.doctor.user.name || booking.doctor.title || "Врач",
       doctorId: booking.doctor.id,
       doctorImage: booking.doctor.user.image,
       paymentStatus: booking.payment?.status || null,
+      baseAmountCents: booking.baseAmountCents,
+      discountAmountCents: booking.discountAmountCents,
+      finalAmountCents: booking.finalAmountCents,
+      promoCodeSnapshot: booking.promoCodeSnapshot,
+      paymentMethod: booking.paymentMethod,
     };
 
     return NextResponse.json(result);

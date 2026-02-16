@@ -12,7 +12,7 @@ export default function Layout({ children, title }) {
   return (
     <div>
       {/* Верхняя панель */}
-      <header className="flex justify-between items-center mb-[2%] w-full px-[4%] py-3 z-50">
+      <header className="flex justify-between items-start mb-[2%] w-full px-[4%] py-3 z-50">
         <div className="group flex gap-2 items-center transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] w-[20%] sm:w-[15%] md:w-[12%] lg:w-[8%]">
           
           {/* ✅ ЛОГО -> НА ГЛАВНУЮ */}

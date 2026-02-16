@@ -192,7 +192,7 @@ export default function HomePanel({
   ];
 
   return (
-    <div className="min-h-screen bg-[#FFFCF3] px-[clamp(1rem,0.5385rem+2.0513vw,3rem)] py-[clamp(2rem,1.7692rem+1.0256vw,3rem)]">
+    <div className="min-h-screen bg-[#FFFCF3] px-4 py-6 sm:py-8">
       {/* Заголовок */}
       <h1 className="text-[clamp(1.5rem,1.2692rem+1.0256vw,2.5rem)] font-ManropeBold text-[#4F5338] mb-[clamp(2rem,1.5385rem+2.0513vw,4rem)]">
         {firstName}, добро пожаловать в личный кабинет врача

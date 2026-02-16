@@ -7,7 +7,6 @@ import AdminMenu from "./AdminMenu";
 
 type View =
   | "specialists.schedule"
-  | "specialists.manage"
   | "specialists.base"
   | "clients.base"
   | "clients.bookings"
@@ -24,7 +23,6 @@ type Props = {
 };
 
 const VIEW_ACTIONS: Partial<Record<View, { label: string; icon: string }>> = {
-  "specialists.manage": { label: "Добавить запись", icon: "+" },
   "specialists.base": { label: "Добавить специалиста", icon: "+" },
   "clients.base": { label: "Добавить клиента", icon: "+" },
   "clients.bookings": { label: "Добавить запись", icon: "+" },
@@ -39,10 +37,10 @@ export default function AdminHeader({ title, view, userName, userImage, onAction
   return (
     <>
       <header className="sticky top-0 z-[20] bg-white shadow-sm">
-        <div className="px-[2%] py-3">
+        <div className="px-4 py-3">
           <div className="flex items-center justify-between gap-4">
             {/* Left: Logo + Menu + Title */}
-            <div className="flex items-center gap-3 min-w-0 flex-1">
+            <div className="flex items-center gap-0 xs:gap-3 min-w-0 flex-1">
               {/* Logo */}
               <a href="/" className="flex items-center shrink-0">
                 <Image
@@ -87,7 +85,7 @@ export default function AdminHeader({ title, view, userName, userImage, onAction
               )}
 
               {/* User Info */}
-              <div className="flex items-center gap-2 px-2 md:px-3 py-1.5 bg-gradient-to-br from-[#F5F0E4] to-[#E8E2D5] rounded-xl">
+              <div className="flex items-center gap-2">
                 {userImage ? (
                   <img
                     src={userImage}

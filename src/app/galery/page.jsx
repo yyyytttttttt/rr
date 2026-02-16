@@ -10,17 +10,17 @@ import DirectionSelect from "../components/galeryPage/DirectionSelect";
 const GALLERY_SECTIONS = [
   {
     categoryId: "tricho",
-    categoryName: "Трихология",
+    categoryName: "Trichology",
     items: [
       {
-        title: "PRP-терапия волос",
-        desc: "Инъекционная стимуляция кожи головы для поддержки роста и качества волос",
+        title: "PRP Hair Therapy",
+        desc: "Injection-based scalp stimulation to support hair growth and quality",
         before: "https://www.innersourcemedicine.com/wp-content/uploads/2023/06/scalp-full-416x416.jpg",
         after: "https://prp-london.com/images/mesotherapy-hair-scalp-london.webp",
       },
       {
-        title: "Мезотерапия кожи головы",
-        desc: "Курс микроинъекций для улучшения питания фолликулов и состояния кожи головы",
+        title: "Scalp Mesotherapy",
+        desc: "A course of micro-injections to improve follicle nourishment and scalp condition",
         before: "https://prp-london.com/images/mesotherapy-hair-scalp-london.webp",
         after: "https://www.innersourcemedicine.com/wp-content/uploads/2023/06/scalp-full-416x416.jpg",
       },
@@ -29,17 +29,17 @@ const GALLERY_SECTIONS = [
 
   {
     categoryId: "inject",
-    categoryName: "Инъекционная косметология",
+    categoryName: "Injectable Cosmetology",
     items: [
       {
-        title: "Контурная пластика",
-        desc: "Коррекция объема и контуров, акценты на губы/скулы/овал лица",
+        title: "Dermal Fillers",
+        desc: "Volume and contour correction — lips, cheekbones, jawline",
         before: "https://valleyderm.com/wp-content/uploads/2024/02/dermal-fillers-2-min.jpg",
         after: "https://puraestheticsandwellness.com/wp-content/uploads/2025/05/dermal_fillers_session.webp",
       },
       {
-        title: "Биоревитализация",
-        desc: "Глубокое увлажнение, улучшение текстуры и тонуса кожи",
+        title: "Biorevitalization",
+        desc: "Deep hydration, improved skin texture and tone",
         before: "https://iniyaclinic.com/wp-content/uploads/elementor/thumbs/profhilo-treatment-qspaz0qx183grzdt4zfbfo7buc7izdzrnkyb35ippc.jpg",
         after: "https://iniyaclinic.com/wp-content/uploads/2024/05/skin-booster.png",
       },
@@ -70,9 +70,8 @@ export default function ServicesPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeId, setActiveId] = useState("all");
 
-  // Список направлений для селекта
   const options = useMemo(() => {
-    const base = [{ id: "all", label: "Все" }];
+    const base = [{ id: "all", label: "All" }];
     const fromSections = GALLERY_SECTIONS.map((s) => ({
       id: s.categoryId,
       label: s.categoryName,
@@ -115,7 +114,7 @@ export default function ServicesPage() {
   return (
     <LayoutOverlay3 title="Галерея">
       <main className="min-h-screen ">
-        <div className="mx-auto max-w-[1920px] px-8 lg:px-[134px] pb-24">
+        <div className="mx-auto max-w-[1920px] px-[4%] lg:px-[134px] pb-24">
           {/* Хлебные крошки */}
           <nav className="pt-[0%] text-[clamp(0.875rem,0.8077rem+0.2885vw,1.125rem)] text-[#636846] font-ManropeRegular">
             <ol className="flex items-center gap-2">

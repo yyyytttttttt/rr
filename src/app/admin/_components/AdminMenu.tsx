@@ -6,7 +6,6 @@ import { signOut } from "next-auth/react";
 
 type View =
   | "specialists.schedule"
-  | "specialists.manage"
   | "specialists.base"
   | "clients.base"
   | "clients.bookings"
@@ -29,7 +28,6 @@ type MenuItem = {
 const MENU_ITEMS: MenuItem[] = [
   // Специалисты
   { view: "specialists.schedule", label: "Смотреть занятость", icon: "", group: "Специалисты" },
-  { view: "specialists.manage", label: "Управление записями", icon: "", group: "Специалисты" },
   { view: "specialists.base", label: "База специалистов", icon: "", group: "Специалисты" },
 
   // Клиенты
@@ -72,7 +70,7 @@ export default function AdminMenu({ setOpen, currentView }: Props) {
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
-      className="fixed inset-0 z-[50] bg-[var(--admin-overlay-blur)] backdrop-blur-sm"
+      className="fixed inset-0 z-[9000] bg-black/30 backdrop-blur-sm"
       onClick={() => setOpen(false)}
       role="dialog"
       aria-modal="true"
@@ -83,13 +81,13 @@ export default function AdminMenu({ setOpen, currentView }: Props) {
         animate={{ x: 0 }}
         exit={{ x: "-100%" }}
         transition={{ type: "spring", damping: 30, stiffness: 300 }}
-        className="absolute left-0 top-0 h-full w-full max-w-[clamp(400px,90vw,500px)] bg-[#FFFCF6] shadow-[var(--shadow-2xl)] overflow-y-auto"
+        className="absolute left-0 top-0 h-full w-full max-w-[min(90vw,400px)] sm:max-w-[min(85vw,450px)] md:max-w-[500px] bg-[#FFFCF6] shadow-2xl overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="p-5 sm:p-6">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl sm:text-2xl font-ManropeBold text-[#4F5338] whitespace-nowrap">
+            <h2 className="text-xl sm:text-2xl font-ManropeBold text-[#4F5338]">
               Админ панель
             </h2>
             <button
@@ -104,11 +102,11 @@ export default function AdminMenu({ setOpen, currentView }: Props) {
           </div>
 
           {/* Navigation */}
-          <nav className="space-y-6" role="navigation" aria-label="Навигация администратора">
+          <nav className="space-y-5" role="navigation" aria-label="Навигация администратора">
             {Object.entries(groupedMenu).map(([groupName, items]) => (
               <section key={groupName}>
                 {/* Group title */}
-                <div className="flex items-center gap-2 mb-3 px-2">
+                <div className="flex items-center gap-2 mb-2 px-2">
                   <h3 className="text-xs font-ManropeBold text-[#967450] uppercase tracking-wider whitespace-nowrap">
                     {groupName}
                   </h3>
@@ -130,7 +128,7 @@ export default function AdminMenu({ setOpen, currentView }: Props) {
                           }`}
                           aria-current={isActive ? "page" : undefined}
                         >
-                          <span className="text-xl flex-shrink-0" aria-hidden="true">
+                          <span className="text-2xl flex-shrink-0" aria-hidden="true">
                             {item.icon}
                           </span>
                           <span className="text-sm sm:text-base font-ManropeMedium text-left flex-1">

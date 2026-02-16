@@ -47,9 +47,15 @@ model User {
   updatedAt          DateTime @updatedAt
   passwordUpdatedAt  DateTime? @default(now())
 
-  doctor    Doctor?
-  accounts  Account[]
-  bookings  Booking[] @relation("UserBookings")
+  doctor           Doctor?
+  accounts         Account[]
+  bookings         Booking[] @relation("UserBookings")
+  birthdayClaims   BirthdayClaim[]
+  promoRedemptions PromoRedemption[]
+  assignedPromoCodes PromoCode[] @relation("AssignedPromoCodes")
+  wellnessPasses     UserWellnessPass[]
+  wellnessPassDays   UserWellnessPassDay[]
+  wellnessState      UserWellnessState?
 }
 
 model Doctor {
@@ -185,10 +191,20 @@ model Booking {
   clientEmail String?
   clientPhone String?
 
+  // Pricing snapshot (server-calculated)
+  baseAmountCents     Int?
+  discountAmountCents Int?
+  finalAmountCents    Int?
+  promoCodeId         String?
+  promoCodeSnapshot   String?      // text of the promo code at time of booking
+  paymentMethod       String?      // "online" | "onsite"
+  serviceSnapshot     Json?        // { id, name, priceCents, durationMin }
+
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  payment    Payment?
+  payment         Payment?
+  promoRedemption PromoRedemption?
 
   // NOTE: Partial unique index created manually via migration
   // CREATE UNIQUE INDEX "Booking_doctorId_startUtc_active_key"
@@ -334,9 +350,136 @@ model PromoCode {
 
   isActive        Boolean  @default(true)
   description     String?
+
+  // Персональный промокод — может использовать только назначенный пользователь
+  assignedUserId  String?
+  assignedUser    User?    @relation("AssignedPromoCodes", fields: [assignedUserId], references: [id], onDelete: SetNull)
+
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
+  birthdayClaim   BirthdayClaim?
+  redemptions     PromoRedemption[]
+  rewardForPass   UserWellnessPass?
+
   @@index([code])
   @@index([validFrom, validUntil])
+  @@index([assignedUserId])
+}
+
+// ================= Birthday Bonus =================
+
+model BirthdayClaim {
+  id          String   @id @default(cuid())
+  userId      String
+  year        Int
+  promoCodeId String   @unique
+  claimedAt   DateTime @default(now())
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  promoCode PromoCode @relation(fields: [promoCodeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, year], name: "one_claim_per_year")
+  @@index([userId])
+}
+
+// ================= Promo Redemptions =================
+
+model PromoRedemption {
+  id                      String   @id @default(cuid())
+  promoCodeId             String
+  userId                  String
+  bookingId               String   @unique          // one promo per booking
+  discountPercentSnapshot Int?
+  discountCentsSnapshot   Int?
+  baseAmountCents         Int
+  discountAmountCents     Int
+  finalAmountCents        Int
+  redeemedAt              DateTime @default(now())
+
+  promoCode PromoCode @relation(fields: [promoCodeId], references: [id])
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  booking   Booking   @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@unique([promoCodeId, userId], name: "one_promo_per_user")
+  @@index([userId])
+  @@index([promoCodeId])
+}
+
+// ================= Wellness Pass (Пропуски здоровья) =================
+
+model WellnessPass {
+  id                    String   @id @default(cuid())
+  slug                  String   @unique
+  title                 String
+  description           String?
+  totalDays             Int
+  isActive              Boolean  @default(true)
+  rewardDiscountPercent Int      @default(5)
+  rewardValidDays       Int      @default(30)
+  rewardText            String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  days        WellnessPassDay[]
+  enrollments UserWellnessPass[]
+}
+
+model WellnessPassDay {
+  id        String @id @default(cuid())
+  passId    String
+  pass      WellnessPass @relation(fields: [passId], references: [id], onDelete: Cascade)
+  dayNumber Int
+  title     String
+  content   String
+
+  @@unique([passId, dayNumber])
+  @@index([passId])
+}
+
+model UserWellnessPass {
+  id                 String    @id @default(cuid())
+  userId             String
+  user               User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  passId             String
+  pass               WellnessPass @relation(fields: [passId], references: [id], onDelete: Cascade)
+  enrolledAt         DateTime  @default(now())
+  currentDayNumber   Int       @default(1)
+  lastCompletedAt    DateTime?
+  completedDaysCount Int       @default(0)
+  finishedAt         DateTime?
+
+  rewardPromoCodeId  String?   @unique
+  rewardPromoCode    PromoCode? @relation(fields: [rewardPromoCodeId], references: [id], onDelete: SetNull)
+
+  completedDays      UserWellnessPassDay[]
+  activeFor          UserWellnessState?
+
+  @@unique([userId, passId])
+  @@index([userId])
+  @@index([passId])
+}
+
+model UserWellnessPassDay {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  passId      String
+  dayNumber   Int
+  completedAt DateTime @default(now())
+
+  enrollment  UserWellnessPass @relation(fields: [userId, passId], references: [userId, passId], onDelete: Cascade)
+
+  @@unique([userId, passId, dayNumber])
+  @@index([userId])
+  @@index([passId])
+}
+
+// ================= Wellness State (active pass pointer) =================
+
+model UserWellnessState {
+  userId             String            @id
+  user               User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  activeEnrollmentId String?           @unique
+  activeEnrollment   UserWellnessPass? @relation(fields: [activeEnrollmentId], references: [id], onDelete: SetNull)
 }

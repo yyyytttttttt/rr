@@ -5,7 +5,13 @@ import { z } from "zod";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../../../lib/auth";
 import { generateOccurrences } from "../../../lib/rrule";
+import { startOfDay, addDays, endOfWeek } from "date-fns";
 import { logger } from "../../../lib/logger";
+import { calculateBookingQuote } from "../../../lib/booking-quote";
+import { rateLimit, sanitizeIp } from "../../../lib/rate-limit";
+import { serverError } from "../../../lib/api-error";
+
+const bookingLimiter = rateLimit({ windowMs: 60_000, max: 10, keyPrefix: 'booking-create' });
 
 const schema = z.object({
   doctorId: z.string().min(1),
@@ -15,6 +21,8 @@ const schema = z.object({
     (val) => (typeof val === 'string' && val.trim() === '' ? undefined : val),
     z.string().max(500).optional()
   ),
+  promoCode: z.string().max(50).optional(),
+  paymentMethod: z.enum(['online', 'onsite']).optional(),
 });
 
 export async function POST(req: Request) {
@@ -23,13 +31,25 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "UNAUTHORIZED" }, { status: 401 });
   }
 
+  const ip = sanitizeIp(
+    req.headers.get('x-forwarded-for'),
+    req.headers.get('x-real-ip'),
+  );
+  const rl = await bookingLimiter(ip);
+  if (!rl.ok) {
+    return NextResponse.json(
+      { error: 'TOO_MANY_REQUESTS' },
+      { status: 429, headers: { 'Retry-After': String(rl.retryAfterSec) } },
+    );
+  }
+
   const body = await req.json().catch(() => null);
   const parsed = schema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json({ error: "VALIDATION" }, { status: 400 });
   }
 
-  const { doctorId, serviceId, start, note } = parsed.data;
+  const { doctorId, serviceId, start, note, promoCode, paymentMethod } = parsed.data;
 
   // 1) Проверяем услугу и связку с врачом
   const service = await prisma.service.findUnique({
@@ -160,32 +180,113 @@ export async function POST(req: Request) {
     }
   }
 
-  // 6) Создаём бронь (пока PENDING)
+  // 6) Calculate server-side pricing
+  let quote;
   try {
-    const created = await prisma.booking.create({
-      data: {
-        doctorId,
-        userId: session.user.id,
-        serviceId,
-        startUtc,
-        endUtc,
-        status: "PENDING",
-        note: note ?? null,
-      },
-      select: { id: true },
+    quote = await calculateBookingQuote({
+      serviceIds: [serviceId],
+      promoCode,
+      userId: session.user.id,
+    });
+  } catch (e: unknown) {
+    return serverError('[BOOKINGS] quote calculation', e);
+  }
+
+  // 7) Создаём бронь + atomic promo redemption в транзакции
+  try {
+    const result = await prisma.$transaction(async (tx) => {
+      const booking = await tx.booking.create({
+        data: {
+          doctorId,
+          userId: session.user.id,
+          serviceId,
+          startUtc,
+          endUtc,
+          status: "PENDING",
+          note: note ?? null,
+          baseAmountCents: quote.baseAmountCents,
+          discountAmountCents: quote.discountAmountCents,
+          finalAmountCents: quote.finalAmountCents,
+          promoCodeId: quote.promoId,
+          promoCodeSnapshot: quote.promoValid ? promoCode?.trim() : null,
+          paymentMethod: paymentMethod ?? null,
+          serviceSnapshot: quote.services[0],
+        },
+        select: { id: true },
+      });
+
+      // Atomic promo reservation
+      if (quote.promoId && quote.promoValid) {
+        // Race-safe maxUses enforcement via raw SQL
+        const reserved: number = await tx.$executeRaw`
+          UPDATE "PromoCode"
+          SET "usedCount" = "usedCount" + 1, "updatedAt" = NOW()
+          WHERE id = ${quote.promoId}
+            AND "isActive" = true
+            AND ("maxUses" IS NULL OR "usedCount" < "maxUses")
+        `;
+        if (reserved !== 1) {
+          throw new Error('PROMO_EXHAUSTED');
+        }
+
+        await tx.promoRedemption.create({
+          data: {
+            promoCodeId: quote.promoId,
+            userId: session.user.id,
+            bookingId: booking.id,
+            discountPercentSnapshot: quote.discountPercent,
+            discountCentsSnapshot: quote.discountCentsFixed,
+            baseAmountCents: quote.baseAmountCents,
+            discountAmountCents: quote.discountAmountCents,
+            finalAmountCents: quote.finalAmountCents,
+          },
+        });
+      }
+
+      return booking;
     });
 
-    return NextResponse.json({ ok: true, id: created.id });
+    return NextResponse.json({
+      ok: true,
+      id: result.id,
+      baseAmountCents: quote.baseAmountCents,
+      discountAmountCents: quote.discountAmountCents,
+      finalAmountCents: quote.finalAmountCents,
+      currency: quote.currency,
+      promoApplied: quote.promoValid,
+    });
   } catch (error: any) {
-    // Handle unique constraint violation
+    // Promo exhausted (atomic check failed)
+    if (error.message === 'PROMO_EXHAUSTED') {
+      return NextResponse.json(
+        { error: 'PROMO_EXHAUSTED', message: 'Промокод исчерпан' },
+        { status: 409 },
+      );
+    }
+
+    // Unique constraint violations (P2002)
     if (error.code === 'P2002') {
+      const target = Array.isArray(error.meta?.target) ? error.meta.target.join(',') : String(error.meta?.target ?? '');
+      if (target.includes('one_promo_per_user')) {
+        return NextResponse.json(
+          { error: 'PROMO_ALREADY_USED', message: 'Вы уже использовали этот промокод' },
+          { status: 409 },
+        );
+      }
+      if (target.includes('bookingId')) {
+        return NextResponse.json(
+          { error: 'PROMO_ALREADY_ON_BOOKING', message: 'К этой записи уже применён промокод' },
+          { status: 409 },
+        );
+      }
+      // Default: slot collision
       return NextResponse.json(
         { error: "SLOT_TAKEN", message: "Это время уже занято. Пожалуйста, выберите другое время." },
         { status: 409 }
       );
     }
-    logger.error('[BOOKINGS] Error creating booking', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+
+    return serverError('[BOOKINGS] Error creating booking', error);
   }
 }
 
@@ -206,8 +307,10 @@ export async function GET(req: Request) {
   // Admin filters
   const query = url.searchParams.get("query") ?? "";
   const doctorId = url.searchParams.get("doctorId");
+  const userId = url.searchParams.get("userId");
   const serviceId = url.searchParams.get("serviceId");
   const status = url.searchParams.get("status");
+  const dateFilter = url.searchParams.get("date");
   const page = Math.max(1, Number(url.searchParams.get("page") ?? 1));
   const pageSize = Math.min(100, Math.max(1, Number(url.searchParams.get("pageSize") ?? 50)));
 
@@ -224,17 +327,35 @@ export async function GET(req: Request) {
 
   // Admin filters (only apply if not requesting "mine")
   if (returnAdminFormat) {
+    if (userId) where.userId = userId;
     if (doctorId) where.doctorId = doctorId;
     if (serviceId) where.serviceId = serviceId;
     if (status) where.status = status;
 
-    // Search by client name, email, phone or booking ID
+    // Date filter
+    if (dateFilter) {
+      const now = new Date();
+      const todayStart = startOfDay(now);
+      if (dateFilter === "today") {
+        where.startUtc = { gte: todayStart, lt: addDays(todayStart, 1) };
+      } else if (dateFilter === "tomorrow") {
+        where.startUtc = { gte: addDays(todayStart, 1), lt: addDays(todayStart, 2) };
+      } else if (dateFilter === "week") {
+        where.startUtc = { gte: todayStart, lt: addDays(endOfWeek(now, { weekStartsOn: 1 }), 1) };
+      }
+    }
+
+    // Search by client name, email, phone, doctor, service or booking ID
     if (query) {
       where.OR = [
         { id: { contains: query, mode: "insensitive" as const } },
         { user: { name: { contains: query, mode: "insensitive" as const } } },
         { user: { email: { contains: query, mode: "insensitive" as const } } },
         { user: { phone: { contains: query, mode: "insensitive" as const } } },
+        { clientName: { contains: query, mode: "insensitive" as const } },
+        { clientPhone: { contains: query, mode: "insensitive" as const } },
+        { doctor: { user: { name: { contains: query, mode: "insensitive" as const } } } },
+        { service: { name: { contains: query, mode: "insensitive" as const } } },
       ];
     }
   }
@@ -286,6 +407,11 @@ export async function GET(req: Request) {
           status: true,
         },
       },
+      baseAmountCents: true,
+      discountAmountCents: true,
+      finalAmountCents: true,
+      promoCodeSnapshot: true,
+      paymentMethod: true,
     },
     orderBy: { startUtc: "desc" },
     skip: (page - 1) * pageSize,
@@ -310,6 +436,11 @@ export async function GET(req: Request) {
     doctorId: b.doctor.id,
     doctorImage: b.doctor.user.image,
     paymentStatus: b.payment?.status || null,
+    baseAmountCents: b.baseAmountCents,
+    discountAmountCents: b.discountAmountCents,
+    finalAmountCents: b.finalAmountCents,
+    promoCodeSnapshot: b.promoCodeSnapshot,
+    paymentMethod: b.paymentMethod,
     // Legacy format for backward compatibility
     service: {
       id: b.service.id,

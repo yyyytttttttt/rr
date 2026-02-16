@@ -20,7 +20,6 @@ const ArrowRight = ({ className = "" }) => (
 
 // Слайды со слайдерами и их классы навигации
 const SLIDER_SLIDES = {
-  0: { prev: 'nav-slide-0-prev', next: 'nav-slide-0-next' },
   2: { prev: 'nav-slide-2-prev', next: 'nav-slide-2-next' },
   3: { prev: 'nav-slide-3-prev', next: 'nav-slide-3-next' },
   4: { prev: 'nav-slide-4-prev', next: 'nav-slide-4-next' },

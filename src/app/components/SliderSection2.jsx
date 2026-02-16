@@ -131,13 +131,6 @@ function SliderSection2({ children }) {
           </Swiper>
 
         </MotionConfig>
-
-        {/* выравнивание высоты карточек */}
-        <style jsx global>{`
-          .equalize-swiper .swiper-wrapper { align-items: stretch; }
-          .equalize-swiper .swiper-slide { height: auto; display: flex; }
-          .translate-z-0 { transform: translateZ(0); }
-        `}</style>
       </div>
     </div>
   )

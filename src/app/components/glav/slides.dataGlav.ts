@@ -3,40 +3,7 @@ import { Slide } from "../../types/GlavProps"
 export const slides = [
   { id: 'hero', type: 'component', component: 'Fsection' },
 
-  {
-    id: 'news',
-    type: 'static',
-    images: {
-      default: '/images/sl2.png',
-      xs: '/images/mobile2.png',
-      oneK: '/images/hero-1k.png',
-      fourXL: '/images/sl2.png',
-    },
-   
-    desktop: {
-      pos: 'left',
-      title: 'Новости клиники',
-      lines: [
-        'Мы не просто ведём соцсети —',
-        'мы создаём пространство, где вы',
-        'можете читать, вдохновляться,',
-        'выбирать и чувствовать себя',
-        'частью чего-то настоящего.',
-      ],
-      buttons: [{ label: 'Перейти в раздел', variant: 'ghost', href: '/News' }],
-
-    },
-    mobile: {
-      title: 'Новости клиники',
-      text: [
-        'Мы не просто ведём соцсети — мы создаём ',
-        'пространство, где вы можете читать, вдохновляться, ',
-        'выбирать и чувствовать себя частью чего-то ',
-        'настоящего.',
-      ],
-      buttons: [{ label: 'Перейти в раздел', variant: 'ghost', href: '/News' }],
-    },
-  },
+  { id: 'news', type: 'sliderNews' },
 
   {
     id: 'center',
@@ -51,11 +18,13 @@ export const slides = [
         'ограничений и в своём ритме.',
 
       ],
+      
       buttons: [
         { label: 'Перейти в раздел', variant: 'ghost', href: '/Propuski' },
 
       ],
     },
+    
     mobile: {
       title: ['Твой билет к особому преображению '],
       text: [
@@ -68,6 +37,7 @@ export const slides = [
         { label: 'Перейти в раздел', variant: 'ghost', href: '/Propuski' },
       ],
     },
+    
   },
 
   {
@@ -151,11 +121,12 @@ export const slides = [
     id: 'news',
     type: 'static',
     images: {
-      default: '/images/sl1000.png',
+      default: '/images/ULRTAHD2.png',
       xs: '/images/sl1000.png',
       oneK: '/images/sl1000.png',
       fourXL: '/images/sl1000.png',
     },
+    
 
     desktop: {
       pos: 'left',
@@ -182,48 +153,17 @@ export const slides = [
       buttons: [{ label: 'Перейти в раздел', variant: 'ghost', href: '/profile' }],
     },
   },
+  
   {
     id: 'news',
     type: 'static',
     images: {
-      default: '/images/slslnew.png',
-      xs: '/images/sl90.png',
-      oneK: '/images/sl90.png',
-      fourXL: '/images/sl90.png',
-    },
-
-    desktop: {
-      pos: 'left',
-      title: ['Контакты и адрес —', 'в одном месте'],
-      lines: [
-        'Мы сделали электронную визитку,',
-        'которую удобно сохранить',
-        'и легко отправить.',
-      ],
-      buttons: [{ label: 'Скачать', variant: 'ghost', href: '/how-to-find' },{label:'Перейти в раздел',variant:'primary', href: '/how-to-find'}],
-
-    },
-    mobile: {
-      title: ['Контакты — одним касанием'],
-      text: [
-        'Мы сделали электронную визитку, ',
-        'которую удобно сохранить и легко  ',
-        'отправить.  ',
-
-      ],
-      buttons: [{ label: 'Перейти в раздел', variant: 'ghost', href: '/how-to-find' },],
-    },
-
-  },
-  {
-    id: 'news',
-    type: 'static',
-    images: {
-      default: '/images/sl920.png',
+      default: '/images/16pro.png',
       xs: '/images/sl902.png',
       oneK: '/images/sl902.png',
       fourXL: '/images/sl902.png',
     },
+    objectFit: 'object-contain',
 
     desktop: {
       pos: 'left',

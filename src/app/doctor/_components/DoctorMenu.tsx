@@ -71,13 +71,13 @@ export default function DoctorMenu({ setOpen, currentView }: Props) {
         animate={{ x: 0 }}
         exit={{ x: "-100%" }}
         transition={{ type: "spring", damping: 30, stiffness: 300 }}
-        className="absolute left-0 top-0 h-full w-full max-w-[clamp(400px,90vw,500px)] bg-[#FFFCF6] shadow-2xl overflow-y-auto"
+        className="absolute left-0 top-0 h-full w-full max-w-[min(90vw,400px)] sm:max-w-[min(85vw,450px)] md:max-w-[500px] bg-[#FFFCF6] shadow-2xl overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="p-[1.5rem]">
+        <div className="p-5 sm:p-6">
           {/* Header */}
-          <div className="flex items-center justify-between mb-[1.5rem]">
-            <h2 className="text-2xl font-ManropeBold text-[#4F5338] whitespace-nowrap">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl sm:text-2xl font-ManropeBold text-[#4F5338]">
               Кабинет врача
             </h2>
             <button
@@ -92,11 +92,11 @@ export default function DoctorMenu({ setOpen, currentView }: Props) {
           </div>
 
           {/* Navigation */}
-          <nav className="space-y-[1.5rem]" role="navigation" aria-label="Навигация врача">
+          <nav className="space-y-5" role="navigation" aria-label="Навигация врача">
             {Object.entries(groupedMenu).map(([groupName, items]) => (
               <section key={groupName}>
                 {/* Group title */}
-                <div className="flex items-center gap-2 mb-3 px-2">
+                <div className="flex items-center gap-2 mb-2 px-2">
                   <h3 className="text-xs font-ManropeBold text-[#967450] uppercase tracking-wider whitespace-nowrap">
                     {groupName}
                   </h3>
@@ -104,24 +104,24 @@ export default function DoctorMenu({ setOpen, currentView }: Props) {
                 </div>
 
                 {/* Group items */}
-                <ul className="space-y-1.5">
+                <ul className="space-y-2">
                   {items.map((item) => {
                     const isActive = currentView === item.view;
                     return (
                       <li key={item.view}>
                         <button
                           onClick={() => handleNavigate(item.view)}
-                          className={`w-full flex items-center gap-3 px-4 py-3 rounded-3xl transition-colors ${
+                          className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all ${
                             isActive
-                              ? "bg-[#5C6744] text-white"
-                              : "text-[#4F5338] hover:bg-[#F5F0E4]"
+                              ? "bg-[#5C6744] text-white shadow-md"
+                              : "text-[#636846] hover:bg-[#F5F0E4]"
                           }`}
                           aria-current={isActive ? "page" : undefined}
                         >
                           <span className="text-2xl flex-shrink-0" aria-hidden="true">
                             {item.icon}
                           </span>
-                          <span className="text-base font-ManropeMedium text-left flex-1 leading-[var(--leading-tight)]">
+                          <span className="text-sm sm:text-base font-ManropeMedium text-left flex-1">
                             {item.label}
                           </span>
                           {isActive && (
@@ -139,16 +139,16 @@ export default function DoctorMenu({ setOpen, currentView }: Props) {
           </nav>
 
           {/* Footer actions */}
-          <div className="mt-[2rem] pt-[1.5rem] border-t border-[#E8E2D5] space-y-2">
+          <div className="mt-8 pt-6 border-t border-[#E8E2D5] space-y-2">
             {/* На главную */}
             <a
               href="/"
-              className="flex items-center gap-3 px-4 py-3 rounded-3xl text-[#967450] hover:bg-[#F5F0E4] transition-colors"
+              className="flex items-center gap-3 px-4 py-3 rounded-2xl text-[#967450] hover:bg-[#F5F0E4] transition-colors"
             >
               <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2} aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
               </svg>
-              <span className="text-base font-ManropeMedium">
+              <span className="text-sm sm:text-base font-ManropeMedium">
                 На главную
               </span>
             </a>
@@ -156,12 +156,12 @@ export default function DoctorMenu({ setOpen, currentView }: Props) {
             {/* Выйти */}
             <button
               onClick={handleSignOut}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-3xl text-[#C74545] hover:bg-[#FFF5F5] transition-colors"
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-[#C74545] hover:bg-red-50 transition-colors"
             >
               <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2} aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
               </svg>
-              <span className="text-base font-ManropeMedium">
+              <span className="text-sm sm:text-base font-ManropeMedium">
                 Выйти
               </span>
             </button>

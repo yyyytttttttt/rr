@@ -884,7 +884,7 @@ export default function ClientCalendar({
   return (
     <div className="min-h-screen bg-[#FFFCF3] pb-[clamp(4rem,3rem+4vw,6rem)]">
       <Toaster position="top-center" />
-      <div className="mx-auto px-[clamp(0.75rem,0.5rem+1vw,1.5rem)] sm:px-6 lg:px-8 py-[clamp(1rem,0.5rem+2vw,2rem)]">
+      <div className="mx-auto px-4 py-6 sm:py-8">
         {/* Десктопный заголовок */}
         {!isMobile && (
           <h1 className="text-2xl font-ManropeBold text-[#4F5338] mb-6">

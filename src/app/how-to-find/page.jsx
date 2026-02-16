@@ -6,7 +6,7 @@ export default function HowToFindPage() {
   return (
     <LayoutOverlay3 title="Как нас найти">
       <main className="min-h-screen ">
-        <div className="mx-auto max-w-[1920px] px-8 lg:px-[134px] pb-24">
+        <div className="mx-auto max-w-[1920px] px-[4%] lg:px-[134px] pb-24">
           {/* Хлебные крошки */}
           <nav className="pt-[0%] text-[clamp(0.875rem,0.8077rem+0.2885vw,1.125rem)] text-[#636846] font-ManropeRegular">
             <ol className="flex items-center gap-2">
@@ -21,14 +21,14 @@ export default function HowToFindPage() {
           </nav>
 
           {/* Верхний блок: Контакты + Как добраться */}
-          <section className="mt-10 grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <section className="mt-6 sm:mt-10 grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-8">
             {/* Контакты (светлый блок) */}
             <div className="rounded-[22px] bg-[#EFEBE3] ring-1 ring-[#4F5338]/10 p-8 lg:p-10">
               <h1 className="text-[20px] sm:text-[28px] lg:text-[32px] font-ManropeSemiBold tracking-[-0.02em] text-[#2F2D28]">
                 Контакты
               </h1>
 
-              <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-10">
+              <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-10">
                 {/* Адрес */}
                 <div>
                   <div className="text-[16px] font-ManropeMedium text-[#2F2D28]">
@@ -39,7 +39,7 @@ export default function HowToFindPage() {
                     г. Балашиха, ул. Белякова, 2В
                   </div>
 
-                  <div className="mt-5 text-[16px] font-ManropeMedium text-[#2F2D28]">
+                  <div className="mt-3 sm:mt-5 text-[16px] font-ManropeMedium text-[#2F2D28]">
                     Ориентир
                   </div>
                   <div className="mt-2 text-[14px] leading-[1.5] font-ManropeRegular text-[#2F2D28]/65">
@@ -50,7 +50,7 @@ export default function HowToFindPage() {
 
                 {/* Время работы */}
                 <div>
-                  <div className="text-[16px] font-ManropeMedium text-[#2F2D28]">
+                  <div className="mt-3 sm:mt-5 text-[16px] font-ManropeMedium text-[#2F2D28]">
                     Время работы
                   </div>
                   <div className="mt-2 text-[14px] leading-[1.6] font-ManropeRegular text-[#2F2D28]/65">
@@ -61,10 +61,10 @@ export default function HowToFindPage() {
                 </div>
               </div>
 
-              <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 gap-10">
+              <div className="mt-3 sm:mt-10 grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-10">
                 {/* Телефоны */}
                 <div>
-                  <div className="text-[16px] font-ManropeMedium text-[#2F2D28]">
+                  <div className=" text-[16px] font-ManropeMedium text-[#2F2D28]">
                     Телефоны
                   </div>
 
@@ -124,7 +124,7 @@ export default function HowToFindPage() {
           </section>
 
           {/* Карта */}
-          <section className="mt-10">
+          <section className="mt-5 sm:mt-10">
             <YandexMap
               center={[55.796289, 37.938474]}
               zoom={13}

@@ -81,9 +81,6 @@ export default function GuestBookingModal({ isOpen, onClose }) {
   const [isAnimating, setIsAnimating] = useState(false);
   const [tabDirection, setTabDirection] = useState('forward');
 
-  // API URL (определяется после монтирования)
-  const [apiUrl, setApiUrl] = useState('');
-
   // Списки для выбора
   const [categories, setCategories] = useState([]);
   const [services, setServices] = useState([]);
@@ -106,21 +103,15 @@ export default function GuestBookingModal({ isOpen, onClose }) {
     note: ''
   });
 
-  // Определение API URL после монтирования (избегаем hydration mismatch)
+  // Загрузка при открытии
   useEffect(() => {
-    const isLocalhost = window.location.hostname === 'localhost';
-    setApiUrl(isLocalhost ? '' : (process.env.NEXT_PUBLIC_API_URL || 'https://novay-y.com'));
-  }, []);
-
-  // Анимация и загрузка при открытии
-  useEffect(() => {
-    if (isOpen && apiUrl !== null) {
+    if (isOpen) {
       setIsAnimating(true);
       loadCategories();
     } else {
       setIsAnimating(false);
     }
-  }, [isOpen, apiUrl]);
+  }, [isOpen]);
 
   // Загрузка услуг при выборе категорий
   useEffect(() => {
@@ -151,7 +142,7 @@ export default function GuestBookingModal({ isOpen, onClose }) {
 
   const loadCategories = async () => {
     try {
-      const response = await fetch(`${apiUrl}/api/services/categories`);
+      const response = await fetch(`/api/services/categories`);
       const data = await response.json();
       setCategories(data.categories || []);
     } catch (error) {
@@ -165,7 +156,7 @@ export default function GuestBookingModal({ isOpen, onClose }) {
       const allServices = [];
 
       for (const categoryId of categoryIds) {
-        const response = await fetch(`${apiUrl}/api/services/catalog?categoryId=${categoryId}`);
+        const response = await fetch(`/api/services/catalog?categoryId=${categoryId}`);
         const data = await response.json();
         if (data.services) {
           allServices.push(...data.services);
@@ -189,7 +180,7 @@ export default function GuestBookingModal({ isOpen, onClose }) {
       const allDoctors = [];
 
       for (const serviceId of serviceIds) {
-        const response = await fetch(`${apiUrl}/api/services/${serviceId}/doctors`);
+        const response = await fetch(`/api/services/${serviceId}/doctors`);
         const data = await response.json();
         if (data.doctors) {
           allDoctors.push(...data.doctors);
@@ -224,7 +215,7 @@ export default function GuestBookingModal({ isOpen, onClose }) {
         const dayStr = day.toISOString().split('T')[0]; // YYYY-MM-DD
 
         const response = await fetch(
-          `${apiUrl}/api/doctor/slots?doctorId=${formData.doctorId}&serviceId=${firstServiceId}&day=${dayStr}`
+          `/api/doctor/slots?doctorId=${formData.doctorId}&serviceId=${firstServiceId}&day=${dayStr}`
         );
         const data = await response.json();
 
@@ -262,7 +253,7 @@ export default function GuestBookingModal({ isOpen, onClose }) {
       // Используем первую выбранную услугу (в будущем можно создавать несколько записей)
       const firstServiceId = formData.serviceIds[0];
 
-      const response = await fetch(`${apiUrl}/api/bookings/guest`, {
+      const response = await fetch(`/api/bookings/guest`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -515,7 +506,7 @@ export default function GuestBookingModal({ isOpen, onClose }) {
         onClick={(e) => e.stopPropagation()}
       >
         {/* Заголовок */}
-        <div className="flex justify-between items-center p-4 sm:p-6 border-b border-[#EEE7DC]">
+        <div className="sticky top-0 z-10 bg-white flex justify-between items-center p-4 sm:p-6 border-b border-[#EEE7DC]">
           <h2 className="text-xl sm:text-2xl font-Manrope-SemiBold text-[#4F5338]">
             Записаться на прием
           </h2>
@@ -528,11 +519,11 @@ export default function GuestBookingModal({ isOpen, onClose }) {
         </div>
 
         {/* Вкладки */}
-        <div className="flex border-b border-[#EEE7DC] px-4 sm:px-6">
+        <div className="sticky top-[57px] sm:top-[73px] z-10 bg-white flex border-b border-[#EEE7DC] px-4 sm:px-6 overflow-x-auto">
           <button
             type="button"
             onClick={() => handleTabChange('service')}
-            className={`px-3 sm:px-4 py-3 sm:py-4 text-sm sm:text-base font-ManropeMedium transition-all duration-300 relative ${
+            className={`px-3 sm:px-4 py-3 sm:py-4 text-sm sm:text-base font-ManropeMedium whitespace-nowrap transition-all duration-300 relative ${
               activeTab === 'service'
                 ? 'text-[#4F5338]'
                 : 'text-[#636846] hover:text-[#4F5338]'
@@ -547,7 +538,7 @@ export default function GuestBookingModal({ isOpen, onClose }) {
             type="button"
             onClick={() => canGoToDoctor && handleTabChange('doctor')}
             disabled={!canGoToDoctor}
-            className={`px-3 sm:px-4 py-3 sm:py-4 text-sm sm:text-base font-ManropeMedium transition-all duration-300 relative ${
+            className={`px-3 sm:px-4 py-3 sm:py-4 text-sm sm:text-base font-ManropeMedium whitespace-nowrap transition-all duration-300 relative ${
               activeTab === 'doctor'
                 ? 'text-[#4F5338]'
                 : canGoToDoctor
@@ -564,7 +555,7 @@ export default function GuestBookingModal({ isOpen, onClose }) {
             type="button"
             onClick={() => canGoToTime && handleTabChange('time')}
             disabled={!canGoToTime}
-            className={`px-3 sm:px-4 py-3 sm:py-4 text-sm sm:text-base font-ManropeMedium transition-all duration-300 relative ${
+            className={`px-3 sm:px-4 py-3 sm:py-4 text-sm sm:text-base font-ManropeMedium whitespace-nowrap transition-all duration-300 relative ${
               activeTab === 'time'
                 ? 'text-[#4F5338]'
                 : canGoToTime
@@ -581,7 +572,7 @@ export default function GuestBookingModal({ isOpen, onClose }) {
             type="button"
             onClick={() => canGoToContact && handleTabChange('contact')}
             disabled={!canGoToContact}
-            className={`px-3 sm:px-4 py-3 sm:py-4 text-sm sm:text-base font-ManropeMedium transition-all duration-300 relative ${
+            className={`px-3 sm:px-4 py-3 sm:py-4 text-sm sm:text-base font-ManropeMedium whitespace-nowrap transition-all duration-300 relative ${
               activeTab === 'contact'
                 ? 'text-[#4F5338]'
                 : canGoToContact
@@ -598,7 +589,7 @@ export default function GuestBookingModal({ isOpen, onClose }) {
             type="button"
             onClick={() => canGoToSummary && handleTabChange('summary')}
             disabled={!canGoToSummary}
-            className={`px-3 sm:px-4 py-3 sm:py-4 text-sm sm:text-base font-ManropeMedium transition-all duration-300 relative ${
+            className={`px-3 sm:px-4 py-3 sm:py-4 text-sm sm:text-base font-ManropeMedium whitespace-nowrap transition-all duration-300 relative ${
               activeTab === 'summary'
                 ? 'text-[#4F5338]'
                 : canGoToSummary

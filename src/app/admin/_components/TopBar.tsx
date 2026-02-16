@@ -2,7 +2,6 @@
 
 type View =
   | "specialists.schedule"
-  | "specialists.manage"
   | "specialists.base"
   | "clients.base"
   | "clients.bookings"
@@ -18,7 +17,6 @@ type Props = {
 };
 
 const VIEW_ACTIONS: Partial<Record<View, { label: string; icon: string }>> = {
-  "specialists.manage": { label: "Добавить запись", icon: "+" },
   "specialists.base": { label: "Добавить специалиста", icon: "+" },
   "clients.bookings": { label: "Добавить запись", icon: "+" },
   "services.manage": { label: "Создать услугу", icon: "+" },

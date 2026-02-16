@@ -15,7 +15,7 @@ import Image from 'next/image'
  * ]
  */
 
-function BeforeAfterHero({ before, after, initial = 50, className = '' }) {
+export function BeforeAfterHero({ before, after, initial = 50, className = '' }) {
   const wrapRef = useRef(null)
   const [pos, setPos] = useState(initial) // 0..100
   const draggingRef = useRef(false)

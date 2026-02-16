@@ -37,13 +37,15 @@ export default async function RootLayout({ children }) {
           dangerouslySetInnerHTML={{
             __html: `
       (function(){
+        var t;
         function set(){
           var vh = window.innerHeight * 0.01;
           document.documentElement.style.setProperty('--app-vh', vh + 'px');
         }
+        function debounced(){ clearTimeout(t); t = setTimeout(set, 100); }
         set();
-        window.addEventListener('resize', set, { passive:true });
-        window.addEventListener('orientationchange', set, { passive:true });
+        window.addEventListener('resize', debounced, { passive:true });
+        window.addEventListener('orientationchange', function(){ setTimeout(set, 150); }, { passive:true });
       })();`,
           }}
         />

@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 
 type View =
   | "specialists.schedule"
-  | "specialists.manage"
   | "specialists.base"
   | "clients.base"
   | "clients.bookings"
@@ -31,7 +30,6 @@ const MENU_STRUCTURE = [
     icon: "👨‍⚕️",
     items: [
       { view: "specialists.schedule" as View, label: "Смотреть занятость", icon: "📅" },
-      { view: "specialists.manage" as View, label: "Управление записями", icon: "📋" },
       { view: "specialists.base" as View, label: "База специалистов", icon: "👥" },
     ],
   },

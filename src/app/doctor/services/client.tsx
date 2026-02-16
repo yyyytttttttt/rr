@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
@@ -31,6 +31,18 @@ export default function DoctorServicesClient({ doctorId, doctorName }: Props) {
   const [searchLinked, setSearchLinked] = useState("");
   const [searchAvailable, setSearchAvailable] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   useEffect(() => {
     loadServices();
@@ -153,45 +165,80 @@ export default function DoctorServicesClient({ doctorId, doctorName }: Props) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#FFFCF3] px-[clamp(1rem,0.5385rem+2.0513vw,3rem)] py-[clamp(2rem,1.7692rem+1.0256vw,3rem)] flex items-center justify-center">
+      <div className="min-h-screen bg-[#FFFCF3] px-4 py-6 sm:py-8 flex items-center justify-center">
         <p className="text-[clamp(1rem,0.9423rem+0.2564vw,1.25rem)] font-ManropeRegular text-[#636846]">Загрузка...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#FFFCF3] px-[clamp(1rem,0.5385rem+2.0513vw,3rem)] py-[clamp(2rem,1.7692rem+1.0256vw,3rem)]">
+    <div className="min-h-screen bg-[#FFFCF3] px-4 py-6 sm:py-8">
       {/* Заголовок */}
-      <h1 className="text-[clamp(1.5rem,1.2692rem+1.0256vw,2.5rem)] font-ManropeBold text-[#4F5338] mb-[clamp(1rem,0.8846rem+0.5128vw,1.5rem)]">
-        Мои услуги
-      </h1>
+      
 
-      {/* Category filter */}
-      <div className="mb-[clamp(1.5rem,1.2692rem+1.0256vw,2.5rem)] flex gap-2 flex-wrap">
-        <button
-          onClick={() => setCategoryFilter(null)}
-          className={`px-4 py-2 rounded-[12px] text-[clamp(0.875rem,0.8077rem+0.2885vw,1.125rem)] font-ManropeRegular transition-colors ${
-            categoryFilter === null
-              ? "bg-[#5C6744] text-white"
-              : "bg-[#F5F0E4] text-[#636846] hover:bg-[#E8E2D5]"
-          }`}
-        >
-          Все категории
-        </button>
-        {categories.map((cat) => (
-          <button
-            key={cat.id}
-            onClick={() => setCategoryFilter(cat.id)}
-            className={`px-4 py-2 rounded-[12px] text-[clamp(0.875rem,0.8077rem+0.2885vw,1.125rem)] font-ManropeRegular transition-colors ${
-              categoryFilter === cat.id
-                ? "bg-[#5C6744] text-white"
-                : "bg-[#F5F0E4] text-[#636846] hover:bg-[#E8E2D5]"
-            }`}
-          >
-            {cat.name}
-          </button>
-        ))}
-      </div>
+      {/* Category filter dropdown */}
+      {categories.length > 0 && (
+        <div className="mb-6" ref={dropdownRef}>
+          <label className="block text-xs font-ManropeMedium text-[#967450] uppercase tracking-wider mb-2">
+            Категория
+          </label>
+          <div className="relative inline-block w-full sm:w-auto sm:min-w-[280px]">
+            <button
+              type="button"
+              onClick={() => setDropdownOpen((v) => !v)}
+              className={`w-full flex items-center justify-between gap-3 pl-4 pr-3 py-2.5 bg-white border rounded-xl text-sm font-ManropeMedium transition-all ${
+                dropdownOpen
+                  ? "border-[#5C6744] ring-2 ring-[#5C6744]/20"
+                  : "border-[#E8E2D5] hover:border-[#C4BEAE]"
+              } ${categoryFilter ? "text-[#4F5338]" : "text-[#636846]"}`}
+            >
+              <span className="truncate">
+                {categoryFilter
+                  ? categories.find((c) => c.id === categoryFilter)?.name ?? "Все категории"
+                  : "Все категории"}
+              </span>
+              <svg
+                className={`w-4 h-4 flex-shrink-0 text-[#636846] transition-transform duration-200 ${dropdownOpen ? "rotate-180" : ""}`}
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2.5}
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+
+            {dropdownOpen && (
+              <div className="absolute z-50 mt-1.5 w-full min-w-[240px] bg-white border border-[#E8E2D5] rounded-xl shadow-xl overflow-hidden">
+                <div className="max-h-72 overflow-y-auto py-1.5">
+                  {[{ id: null, name: "Все категории" }, ...categories].map((item) => {
+                    const isSelected = categoryFilter === item.id;
+                    return (
+                      <button
+                        type="button"
+                        key={item.id ?? "__all__"}
+                        onClick={() => { setCategoryFilter(item.id); setDropdownOpen(false); }}
+                        className={`w-full flex items-center justify-between gap-2 px-4 py-2.5 text-sm transition-colors ${
+                          isSelected
+                            ? "bg-[#F0EDDF] text-[#4F5338] font-ManropeSemiBold"
+                            : "text-[#4F5338] font-ManropeMedium hover:bg-[#FAF8F2]"
+                        }`}
+                      >
+                        <span className="truncate">{item.name}</span>
+                        {isSelected && (
+                          <svg className="w-4 h-4 flex-shrink-0 text-[#5C6744]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       <div className="grid lg:grid-cols-2 gap-[clamp(1.5rem,1.1538rem+1.5385vw,3rem)]">
         {/* Linked services */}

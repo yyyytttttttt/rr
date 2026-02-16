@@ -18,9 +18,11 @@ type BookingDetails = {
   clientName: string;
   clientEmail: string;
   clientPhone: string;
+  clientImage: string | null;
   doctorName: string;
   doctorImage: string | null;
   serviceName: string;
+  durationMin: number;
   startUtc: string;
   endUtc: string;
   status: string;
@@ -28,6 +30,11 @@ type BookingDetails = {
   priceCents: number;
   currency: string;
   paymentStatus: string | null;
+  baseAmountCents?: number | null;
+  discountAmountCents?: number | null;
+  finalAmountCents?: number | null;
+  promoCodeSnapshot?: string | null;
+  paymentMethod?: string | null;
 };
 
 export default function BookingDetailsModal({ open, onClose, bookingId, onSuccess }: Props) {
@@ -173,30 +180,30 @@ export default function BookingDetailsModal({ open, onClose, bookingId, onSucces
                 </div>
 
                 {/* Client Info */}
-                <div className="bg-[#FFFCF3] rounded-[clamp(0.75rem,0.6346rem+0.5128vw,1.25rem)] p-[clamp(1rem,0.8846rem+0.5128vw,1.5rem)]">
-                  <h3 className="text-[clamp(0.875rem,0.8077rem+0.2885vw,1.125rem)] font-ManropeBold text-[#4F5338] mb-[clamp(0.75rem,0.6346rem+0.5128vw,1.25rem)]">Клиент</h3>
-                  <div className="space-y-[clamp(0.5rem,0.4423rem+0.2564vw,0.75rem)]">
-                    <div className="flex items-center gap-2">
-                      <span className="text-[#636846]">👤</span>
-                      <span className="font-ManropeMedium text-[clamp(0.875rem,0.8077rem+0.2885vw,1.125rem)] text-[#4F5338]">{booking.clientName}</span>
-                    </div>
-                    {booking.clientEmail && (
-                      <div className="flex items-center gap-2">
-                        <span className="text-[#636846]">📧</span>
-                        <a href={`mailto:${booking.clientEmail}`} className="text-[clamp(0.875rem,0.8077rem+0.2885vw,1.125rem)] font-ManropeRegular text-[#967450] hover:underline">
-                          {booking.clientEmail}
-                        </a>
+                <div className="bg-[#F5F0E4] rounded-[clamp(0.75rem,0.6346rem+0.5128vw,1.25rem)] p-[clamp(1rem,0.8846rem+0.5128vw,1.5rem)]">
+                  <p className="text-[clamp(0.75rem,0.7115rem+0.1538vw,0.875rem)] font-ManropeRegular text-[#636846] mb-2">Клиент</p>
+                  <div className="flex items-center gap-3 mb-2">
+                    {booking.clientImage ? (
+                      <img src={booking.clientImage} alt={booking.clientName} className="w-10 h-10 rounded-full object-cover shrink-0" />
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-[#5C6744] flex items-center justify-center text-white font-ManropeBold shrink-0">
+                        {booking.clientName.charAt(0).toUpperCase()}
                       </div>
                     )}
-                    {booking.clientPhone && (
-                      <div className="flex items-center gap-2">
-                        <span className="text-[#636846]">📞</span>
-                        <a href={`tel:${booking.clientPhone}`} className="text-[clamp(0.875rem,0.8077rem+0.2885vw,1.125rem)] font-ManropeRegular text-[#967450] hover:underline">
-                          {booking.clientPhone}
-                        </a>
-                      </div>
-                    )}
+                    <p className="text-[clamp(0.875rem,0.8077rem+0.2885vw,1.125rem)] font-ManropeSemiBold text-[#4F5338]">
+                      {booking.clientName}
+                    </p>
                   </div>
+                  {booking.clientPhone && (
+                    <p className="text-[clamp(0.875rem,0.8077rem+0.2885vw,1.125rem)] font-ManropeRegular text-[#636846]">
+                      📞 <a href={`tel:${booking.clientPhone}`} className="hover:underline">{booking.clientPhone}</a>
+                    </p>
+                  )}
+                  {booking.clientEmail && (
+                    <p className="text-[clamp(0.875rem,0.8077rem+0.2885vw,1.125rem)] font-ManropeRegular text-[#636846]">
+                      ✉️ <a href={`mailto:${booking.clientEmail}`} className="hover:underline">{booking.clientEmail}</a>
+                    </p>
+                  )}
                 </div>
 
                 {/* Doctor Info */}
@@ -222,6 +229,14 @@ export default function BookingDetailsModal({ open, onClose, bookingId, onSucces
                       <div className="text-[clamp(0.75rem,0.6923rem+0.2564vw,1rem)] font-ManropeRegular text-[#636846] mb-1">Услуга</div>
                       <div className="font-ManropeMedium text-[clamp(0.875rem,0.8077rem+0.2885vw,1.125rem)] text-[#4F5338]">{booking.serviceName}</div>
                     </div>
+                    <div className="flex flex-wrap gap-4">
+                      {booking.durationMin > 0 && (
+                        <div>
+                          <div className="text-[clamp(0.75rem,0.6923rem+0.2564vw,1rem)] font-ManropeRegular text-[#636846]">Длительность</div>
+                          <div className="font-ManropeSemiBold text-[clamp(0.875rem,0.8077rem+0.2885vw,1.125rem)] text-[#4F5338]">{booking.durationMin} мин</div>
+                        </div>
+                      )}
+                    </div>
                     <div>
                       <div className="text-[clamp(0.75rem,0.6923rem+0.2564vw,1rem)] font-ManropeRegular text-[#636846] mb-1">Дата и время</div>
                       <div className="font-ManropeMedium text-[clamp(0.875rem,0.8077rem+0.2885vw,1.125rem)] text-[#4F5338]">
@@ -245,12 +260,44 @@ export default function BookingDetailsModal({ open, onClose, bookingId, onSucces
                 <div className="bg-[#FFFCF3] rounded-[clamp(0.75rem,0.6346rem+0.5128vw,1.25rem)] p-[clamp(1rem,0.8846rem+0.5128vw,1.5rem)]">
                   <h3 className="text-[clamp(0.875rem,0.8077rem+0.2885vw,1.125rem)] font-ManropeBold text-[#4F5338] mb-[clamp(0.75rem,0.6346rem+0.5128vw,1.25rem)]">Оплата</h3>
                   <div className="space-y-[clamp(0.5rem,0.4423rem+0.2564vw,0.75rem)]">
+                    {/* Base price (show only if there's a discount) */}
+                    {booking.discountAmountCents != null && booking.discountAmountCents > 0 && (
+                      <div className="flex justify-between items-center">
+                        <span className="text-[clamp(0.875rem,0.8077rem+0.2885vw,1.125rem)] font-ManropeRegular text-[#636846]">Стоимость:</span>
+                        <span className="font-ManropeRegular text-[clamp(0.875rem,0.8077rem+0.2885vw,1.125rem)] text-[#636846]">
+                          {((booking.baseAmountCents ?? booking.priceCents) / 100).toLocaleString("ru-RU")} {booking.currency}
+                        </span>
+                      </div>
+                    )}
+                    {/* Promo/discount */}
+                    {booking.discountAmountCents != null && booking.discountAmountCents > 0 && (
+                      <div className="flex justify-between items-center">
+                        <span className="text-[clamp(0.875rem,0.8077rem+0.2885vw,1.125rem)] font-ManropeRegular text-[#5C6744]">
+                          Скидка{booking.promoCodeSnapshot ? ` (${booking.promoCodeSnapshot})` : ''}:
+                        </span>
+                        <span className="font-ManropeMedium text-[clamp(0.875rem,0.8077rem+0.2885vw,1.125rem)] text-[#5C6744]">
+                          -{(booking.discountAmountCents / 100).toLocaleString("ru-RU")} {booking.currency}
+                        </span>
+                      </div>
+                    )}
+                    {/* Final amount */}
                     <div className="flex justify-between items-center">
-                      <span className="text-[clamp(0.875rem,0.8077rem+0.2885vw,1.125rem)] font-ManropeRegular text-[#636846]">Стоимость:</span>
+                      <span className="text-[clamp(0.875rem,0.8077rem+0.2885vw,1.125rem)] font-ManropeRegular text-[#636846]">
+                        {booking.discountAmountCents ? 'Итого:' : 'Стоимость:'}
+                      </span>
                       <span className="font-ManropeBold text-[clamp(0.875rem,0.8077rem+0.2885vw,1.125rem)] text-[#4F5338]">
-                        {(booking.priceCents / 100).toLocaleString("ru-RU")} {booking.currency}
+                        {((booking.finalAmountCents ?? booking.priceCents) / 100).toLocaleString("ru-RU")} {booking.currency}
                       </span>
                     </div>
+                    {/* Payment method */}
+                    {booking.paymentMethod && (
+                      <div className="flex justify-between items-center">
+                        <span className="text-[clamp(0.875rem,0.8077rem+0.2885vw,1.125rem)] font-ManropeRegular text-[#636846]">Способ оплаты:</span>
+                        <span className="font-ManropeMedium text-[clamp(0.875rem,0.8077rem+0.2885vw,1.125rem)] text-[#4F5338]">
+                          {booking.paymentMethod === 'online' ? 'Онлайн' : 'На месте'}
+                        </span>
+                      </div>
+                    )}
                     <div className="flex justify-between items-center">
                       <span className="text-[clamp(0.875rem,0.8077rem+0.2885vw,1.125rem)] font-ManropeRegular text-[#636846]">Статус оплаты:</span>
                       <span className={`font-ManropeMedium text-[clamp(0.875rem,0.8077rem+0.2885vw,1.125rem)] ${booking.paymentStatus === "PAID" ? "text-[var(--admin-payment-paid)]" : "text-[#636846]"}`}>
@@ -259,6 +306,15 @@ export default function BookingDetailsModal({ open, onClose, bookingId, onSucces
                     </div>
                   </div>
                 </div>
+                {/* Promo badge for admin */}
+                {booking.promoCodeSnapshot && (
+                  <div className="flex items-center gap-2 px-[clamp(1rem,0.8846rem+0.5128vw,1.5rem)] py-[clamp(0.5rem,0.4423rem+0.2564vw,0.75rem)] bg-[#EAF4EA] rounded-[clamp(0.5rem,0.4423rem+0.2564vw,0.75rem)]">
+                    <span className="text-[clamp(0.875rem,0.8077rem+0.2885vw,1.125rem)]">🏷️</span>
+                    <span className="text-[clamp(0.875rem,0.8077rem+0.2885vw,1.125rem)] font-ManropeMedium text-[#2E7D32]">
+                      Промокод: {booking.promoCodeSnapshot}
+                    </span>
+                  </div>
+                )}
 
                 {/* Status Actions */}
                 {booking.status !== "CANCELED" && booking.status !== "COMPLETED" && (
