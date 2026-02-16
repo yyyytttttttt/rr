@@ -7,9 +7,7 @@ function edgeRandomBase64(bytes: number): string {
   const buf = new Uint8Array(bytes);
   crypto.getRandomValues(buf);
   // btoa-safe: convert Uint8Array → binary string → base64
-  let binary = '';
-  for (let i = 0; i < buf.length; i++) binary += String.fromCharCode(buf[i]);
-  return btoa(binary);
+  return btoa(Array.from(buf, (b) => String.fromCodePoint(b)).join(''));
 }
 
 const CSP_STRICT = process.env.CSP_STRICT === '1';
