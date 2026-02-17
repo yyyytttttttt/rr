@@ -4,12 +4,13 @@ import Image from 'next/image'
 import React from 'react'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { Pagination, Navigation } from 'swiper/modules'
-
+import { useRouter } from 'next/navigation'
 import 'swiper/css'
 import 'swiper/css/pagination'
 import 'swiper/css/navigation'
 
 const SliderSection5 = () => {
+  const router = useRouter()
     const projects = useMemo(
     () => [
       { title: 'Инъекционная косметология', subTitile:'Врач-косметолог,',subTitile1:'дерматовенеролог, трихолог', image: '/images/us10.png' },
@@ -42,7 +43,7 @@ const SliderSection5 = () => {
           480: { slidesPerView: 1.25, spaceBetween: 20 },
           768: { slidesPerView: 2, spaceBetween: 24 },
           1220: { slidesPerView: 3, spaceBetween: 12 },
-          1536: { slidesPerView: 5, spaceBetween: 20 },
+          1836: { slidesPerView: 5, spaceBetween: 20 },
         }}
         pagination={{
           el: '.projects-pagination',
@@ -102,7 +103,7 @@ const SliderSection5 = () => {
                       <div className=' w-full h-auto'>
                         <svg className='w-full h-auto' xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 52 52" fill="none">
                         <rect width="52" height="52" rx="26" fill="#F7EFE5"/>
-                        <path d="M20 32L32 20M32 20H22.25M32 20V29.75" stroke="#967450" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M20 32L32 20M32 20H22.25M32 20V29.75" stroke="#967450" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
                       </div>
                   </div>
@@ -112,8 +113,8 @@ const SliderSection5 = () => {
         ))}
       </Swiper>
       <div className='w-full flex justify-center'>
-        <button className='text-white  bg-[#636846] font-ManropeRegular text-[clamp(0.75rem,0.6346rem+0.5128vw,1.25rem)] cursor-pointer transition-all duration-500 hover:scale-105 px-6 py-3 rounded-[5px]'>
-            Перейти в  раздел
+        <button onClick={() => router.push('/Team/')}  className='text-white  bg-[#636846] mt-4 font-ManropeRegular text-[clamp(0.75rem,0.6346rem+0.5128vw,1.25rem)] cursor-pointer transition-all duration-500 hover:scale-105 px-6 py-3 rounded-[5px]'>
+            Перейти в раздел
         </button>
 
       </div>

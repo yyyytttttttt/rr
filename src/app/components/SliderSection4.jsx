@@ -15,11 +15,11 @@ export default function ProjectsSlider() {
 
   const projects = useMemo(
     () => [
-      { title: 'Эстетическая\nкосметология', image: '/images/us1.png' },
-      { title: 'Аппаратная\nкосметология', image: '/images/us3.png' },
-      { title: 'Инъекционная\nкосметология', image: '/images/us2.png' },
-      { title: 'Трихология', image: '/images/us1.png' },
-      { title: 'Массажная\nтерапия', image: '/images/us3.png' },
+      { title: 'Эстетическая\nкосметология', image: '/images/x.png' },
+      { title: 'Аппаратная\nкосметология', image: '/images/x.png' },
+      { title: 'Инъекционная\nкосметология', image: '/images/x.png' },
+      { title: 'Трихология', image: '/images/x.png' },
+      { title: 'Массажная\nтерапия', image: '/images/x.png' },
     ],
     []
   )
@@ -27,7 +27,7 @@ export default function ProjectsSlider() {
   return (
     <section className="relative z-10 w-full h-app flex flex-col justify-center px-4 sm:px-6">
       {/* Slider area */}
-      <div className="w-full max-w-[1920px] mx-auto">
+      <div className="w-full max-w-[1920px] px-[2%] mx-auto">
         <Swiper
           className="w-full"
           modules={[Navigation]}
@@ -87,17 +87,17 @@ export default function ProjectsSlider() {
         </div>
       </div>
 
-      {/* Text block below slider — mobile only */}
-      <div className="w-full max-w-[1920px] mx-auto mt-12 px-1 md:hidden">
+      {/* Text block below slider */}
+      <div className="w-full max-w-[1920px] px-[2%] mx-auto mt-12 px-1">
         <h2 className="text-[clamp(1.25rem,1rem+1vw,2.25rem)] font-ManropeBold text-[#2b2b2b] leading-tight">
           Наши услуги
         </h2>
-        <p className="mt-3 text-[14px] font-ManropeRegular leading-relaxed text-[#6A7058]">
+        <p className="mt-3 text-[16px] font-ManropeRegular leading-relaxed text-[#6A7058]">
           Красота, спокойствие и уверенность — всё начинается с заботы о себе. Выбери то, что откликается именно тебе.
         </p>
         <button
           onClick={() => router.push('/Servic/')}
-          className="mt-5 w-full inline-flex items-center justify-center rounded-xl px-8 py-3.5 border border-[#C4BAA8] text-[clamp(0.8125rem,0.7rem+0.5vw,1.0625rem)] font-ManropeMedium text-[#636846] transition-all duration-300 hover:bg-[#636846] hover:text-white hover:border-[#636846] cursor-pointer"
+          className="mt-5 inline-flex items-center justify-center rounded-xl px-8 py-3.5 border border-[#C4BAA8] text-[clamp(0.8125rem,0.7rem+0.5vw,1.0625rem)] font-ManropeMedium text-[#636846] transition-all duration-300 hover:bg-[#636846] hover:text-white hover:border-[#636846] cursor-pointer"
         >
           Перейти в раздел
         </button>

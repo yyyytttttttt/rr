@@ -118,7 +118,7 @@ function SliderSection2({ children }) {
               320: { slidesPerView: 1.6, spaceBetween: 8 },
               480: { slidesPerView: 1.5, spaceBetween: 10 },
               768: { slidesPerView: 1.9, spaceBetween: 12 },
-              1150: { slidesPerView: 2.2, spaceBetween: 14 },
+              1150: { slidesPerView: 2, spaceBetween: 14 },
             }}
             onSlideChange={(s) => setActive(s.realIndex)}
             className="equalize-swiper will-change-transform"

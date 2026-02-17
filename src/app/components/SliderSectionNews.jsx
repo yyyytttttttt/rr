@@ -15,11 +15,11 @@ export default function SliderSectionNews() {
 
   const cards = useMemo(
     () => [
-      { title: 'Живой\nбаланс', image: '/images/nb5.png' },
-      { title: 'Новое\nсияние', image: '/images/nb1.png' },
-      { title: 'Улыбка\nдуши', image: '/images/nb6.png' },
-      { title: 'Тихая\nсила', image: '/images/nb3.png' },
-      { title: 'Живой\nбаланс', image: '/images/nb5.png' },
+      { title: 'Живой\nбаланс', image: '/images/u1.png' },
+      { title: 'Новое\nсияние', image: '/images/u1.png' },
+      { title: 'Улыбка\nдуши', image: '/images/u1.png' },
+      { title: 'Тихая\nсила', image: '/images/u1.png' },
+      { title: 'Живой\nбаланс', image: '/images/u1.png' },
     ],
     []
   )
@@ -27,7 +27,7 @@ export default function SliderSectionNews() {
   return (
     <section className="relative z-10 w-full h-app flex flex-col justify-center px-4 sm:px-6">
       {/* Slider area */}
-      <div className="w-full max-w-[1920px] mx-auto">
+      <div className="w-full max-w-[1920px] px-[2%] mx-auto">
         <Swiper
           className="w-full"
           modules={[Navigation]}
@@ -39,7 +39,7 @@ export default function SliderSectionNews() {
             480: { slidesPerView: 2.5, spaceBetween: 14 },
             640: { slidesPerView: 3, spaceBetween: 16 },
             1024: { slidesPerView: 4, spaceBetween: 20 },
-            1280: { slidesPerView: 4.5, spaceBetween: 20 },
+            1280: { slidesPerView: 4.1, spaceBetween: 20 },
           }}
           navigation={{
             prevEl: '.nav-slide-news-prev',
@@ -88,7 +88,7 @@ export default function SliderSectionNews() {
       </div>
 
       {/* Text block below slider */}
-      <div className="w-full max-w-[1920px] mx-auto mt-8 md:mt-10 px-1">
+      <div className="w-full max-w-[1920px] px-[2%] mx-auto mt-8 md:mt-10 px-1">
         <h2 className="text-[clamp(1.25rem,1rem+1vw,2.25rem)] font-ManropeBold text-[#2b2b2b] leading-tight">
           Новости клиники
         </h2>

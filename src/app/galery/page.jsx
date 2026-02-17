@@ -10,38 +10,38 @@ import DirectionSelect from "../components/galeryPage/DirectionSelect";
 const GALLERY_SECTIONS = [
   {
     categoryId: "tricho",
-    categoryName: "Trichology",
+    categoryName: "Трихология",
     items: [
       {
-        title: "PRP Hair Therapy",
-        desc: "Injection-based scalp stimulation to support hair growth and quality",
-        before: "https://www.innersourcemedicine.com/wp-content/uploads/2023/06/scalp-full-416x416.jpg",
-        after: "https://prp-london.com/images/mesotherapy-hair-scalp-london.webp",
+        title: "PRP-терапия волос",
+        desc: "Инъекционная стимуляция кожи головы для поддержки роста и качества волос",
+        before: "/images/sl51.png",
+        after: "/images/sl52.png",
       },
       {
-        title: "Scalp Mesotherapy",
-        desc: "A course of micro-injections to improve follicle nourishment and scalp condition",
-        before: "https://prp-london.com/images/mesotherapy-hair-scalp-london.webp",
-        after: "https://www.innersourcemedicine.com/wp-content/uploads/2023/06/scalp-full-416x416.jpg",
+        title: "Мезотерапия кожи головы",
+        desc: "Курс микроинъекций для улучшения питания фолликулов и состояния кожи головы",
+        before: "/images/sl53.png",
+        after: "/images/sl54.png",
       },
     ],
   },
 
   {
     categoryId: "inject",
-    categoryName: "Injectable Cosmetology",
+    categoryName: "Инъекционная косметология",
     items: [
       {
-        title: "Dermal Fillers",
-        desc: "Volume and contour correction — lips, cheekbones, jawline",
-        before: "https://valleyderm.com/wp-content/uploads/2024/02/dermal-fillers-2-min.jpg",
-        after: "https://puraestheticsandwellness.com/wp-content/uploads/2025/05/dermal_fillers_session.webp",
+        title: "Филлеры",
+        desc: "Коррекция объёма и контура — губы, скулы, подбородок",
+        before: "/images/sl50.png",
+        after: "/images/sl55.png",
       },
       {
-        title: "Biorevitalization",
-        desc: "Deep hydration, improved skin texture and tone",
-        before: "https://iniyaclinic.com/wp-content/uploads/elementor/thumbs/profhilo-treatment-qspaz0qx183grzdt4zfbfo7buc7izdzrnkyb35ippc.jpg",
-        after: "https://iniyaclinic.com/wp-content/uploads/2024/05/skin-booster.png",
+        title: "Биоревитализация",
+        desc: "Глубокое увлажнение, улучшение текстуры и тона кожи",
+        before: "/images/sl54.png",
+        after: "/images/sl50.png",
       },
     ],
   },
@@ -71,7 +71,7 @@ export default function ServicesPage() {
   const [activeId, setActiveId] = useState("all");
 
   const options = useMemo(() => {
-    const base = [{ id: "all", label: "All" }];
+    const base = [{ id: "all", label: "Все" }];
     const fromSections = GALLERY_SECTIONS.map((s) => ({
       id: s.categoryId,
       label: s.categoryName,

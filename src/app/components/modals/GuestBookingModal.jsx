@@ -4,6 +4,60 @@ import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import toast from 'react-hot-toast';
 
+// Стилизованные SVG-иконки для категорий (замена emoji)
+const CATEGORY_ICONS = {
+  // По emoji
+  '💆': (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="8" r="5"/><path d="M3 21v-2a7 7 0 0 1 7-7h4a7 7 0 0 1 7 7v2"/>
+    </svg>
+  ),
+  '💆‍♀️': (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M6 19v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><path d="M16 7a4 4 0 1 1-3-3.87"/><path d="M20 4l-2 2m0-2 2 2"/>
+    </svg>
+  ),
+  '💆‍♂️': (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M6 19v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><path d="M16 7a4 4 0 1 1-3-3.87"/><path d="M20 4l-2 2m0-2 2 2"/>
+    </svg>
+  ),
+  '💅': (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 3c-1.2 0-2.4.6-3 1.7L6 10c-.5.8-.1 1.8.8 2.1l2.2.7v5.7a2.5 2.5 0 0 0 5 0v-5.7l2.2-.7c.9-.3 1.3-1.3.8-2.1l-3-5.3C14.4 3.6 13.2 3 12 3z"/>
+    </svg>
+  ),
+  '💇': (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="6" cy="19" r="2"/><circle cx="18" cy="19" r="2"/><path d="M12 2c-3 0-5 2.5-5 5.5S10 15 12 18c2-3 5-5 5-10.5S15 2 12 2z"/><path d="m4 17 5-8"/><path d="m20 17-5-8"/>
+    </svg>
+  ),
+  '💉': (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="m18 2 4 4"/><path d="m17 7 3-3"/><path d="M19 9 8.7 19.3c-1 1-2.5 1-3.4 0l-.6-.6c-1-1-1-2.5 0-3.4L15 5"/><path d="m9 11 4 4"/><path d="m5 19-3 3"/><path d="m14 4 5 5"/>
+    </svg>
+  ),
+  '🧴': (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M10 2h4v3h-4z"/><path d="M8 5h8v3a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2V5z"/><rect x="7" y="10" width="10" height="11" rx="2"/><path d="M12 14v3"/>
+    </svg>
+  ),
+};
+
+function CategoryIcon({ icon }) {
+  if (!icon) return null;
+  const svg = CATEGORY_ICONS[icon];
+  if (svg) {
+    return <span className="inline-flex items-center justify-center w-5 h-5 text-[#5C6744] mr-2">{svg}</span>;
+  }
+  // Fallback: если иконка не найдена — скрываем (на случай новых emoji)
+  return <span className="inline-flex items-center justify-center w-5 h-5 text-[#5C6744] mr-2">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z"/><path d="m9 12 2 2 4-4"/>
+    </svg>
+  </span>;
+}
+
 // Кастомный Select компонент
 function CustomSelect({ value, onChange, options, placeholder, disabled }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -612,7 +666,7 @@ export default function GuestBookingModal({ isOpen, onClose }) {
                 <span className="mb-1.5 sm:mb-2 block text-sm sm:text-base font-ManropeMedium text-[#4F5338]">
                   Категории {formData.categoryIds.length > 0 && `(${formData.categoryIds.length})`}
                 </span>
-                <div className="space-y-2">
+                <div className="space-y-2 max-h-[25vh] sm:max-h-[30vh] overflow-y-auto">
                   {categories.map((category) => {
                     const isSelected = formData.categoryIds.includes(category.id);
                     return (
@@ -630,8 +684,8 @@ export default function GuestBookingModal({ isOpen, onClose }) {
                         onChange={() => toggleCategory(category.id)}
                         className="w-5 h-5 rounded border-[#EEE7DC] text-[#5C6744] focus:ring-[#5C6744] focus:ring-offset-0 cursor-pointer"
                       />
-                      <span className="text-sm sm:text-base font-ManropeRegular text-[#636846] flex-1">
-                        {category.icon && <span className="mr-2">{category.icon}</span>}
+                      <span className="text-sm sm:text-base font-ManropeRegular text-[#636846] flex-1 flex items-center">
+                        <CategoryIcon icon={category.icon} />
                         {category.name}
                       </span>
                     </label>
@@ -657,7 +711,7 @@ export default function GuestBookingModal({ isOpen, onClose }) {
                     </p>
                   </div>
                 ) : (
-                  <div className="space-y-2 max-h-[300px] overflow-y-auto">
+                  <div className="space-y-2 max-h-[25vh] sm:max-h-[30vh] overflow-y-auto">
                     {services.map((service) => {
                       const isSelected = formData.serviceIds.includes(service.id);
                       return (
