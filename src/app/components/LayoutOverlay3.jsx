@@ -12,7 +12,7 @@ export default function Layout({ children, title }) {
   return (
     <div>
       {/* Верхняя панель */}
-      <header className="flex justify-between items-start mb-[2%] w-full px-[4%] py-3 z-50">
+      <header className="flex justify-between items-start mb-[2%] w-full px-[4%] py-3 z-0">
         <div className="group flex gap-2 items-center transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] w-[20%] sm:w-[15%] md:w-[12%] lg:w-[8%]">
           
           {/* ✅ ЛОГО -> НА ГЛАВНУЮ */}
@@ -60,7 +60,7 @@ export default function Layout({ children, title }) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.6, ease: [0.33, 1, 0.68, 1] }}
-              className="font-[spaceagecyrillic-regular] w-[50%] text-end text-[clamp(1.25rem,0.9615rem+1.2821vw,2.5rem)] text-[#967450]"
+              className="font-[spaceagecyrillic-regular] w-[50%] text-end text-[clamp(1.25rem,0.9615rem+1.2821vw,2.5rem)] text-[#967450] uppercase"
             >
               {title}
             </motion.p>

@@ -9,7 +9,7 @@ function Topbar (){
     return(
         
 
-      <div className="fixed  top-4 left-0 right-0 flex justify-between items-center w-full px-[4%] z-50">
+      <div className="fixed  top-4 left-0 right-0 flex justify-between items-center w-full px-[4%] z-[1000]">
         <div className="group flex gap-2 items-center transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] w-[20%] sm:w-[15%] md:w-[12%] lg:w-[8%]">
           <div className="w-[50%]">
             <Image

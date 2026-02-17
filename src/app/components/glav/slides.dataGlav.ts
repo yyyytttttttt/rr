@@ -122,9 +122,9 @@ export const slides = [
     type: 'static',
     images: {
       default: '/images/ULRTAHD2.png',
-      xs: '/images/sl1000.png',
-      oneK: '/images/sl1000.png',
-      fourXL: '/images/sl1000.png',
+      xs: '/images/sk3.png',
+      oneK: '/images/sk3.png',
+      fourXL: '/images/sk3.png',
     },
     
 
@@ -159,11 +159,11 @@ export const slides = [
     type: 'static',
     images: {
       default: '/images/16pro.png',
-      xs: '/images/sl902.png',
-      oneK: '/images/sl902.png',
-      fourXL: '/images/sl902.png',
+      xs: '/images/sk.png',
+      oneK: '/images/sk.png',
+      fourXL: '/images/sk.png',
     },
-    objectFit: 'object-contain',
+    objectFit: 'object-contain md:object-cover',
 
     desktop: {
       pos: 'left',

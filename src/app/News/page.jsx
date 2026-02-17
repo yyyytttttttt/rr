@@ -86,7 +86,7 @@ export default function FullPageScroll() {
   
 
   const texts = useMemo(() => ([
-    { tit: 'Новости' },
+    { tit: 'НОВОСТИ' },
    
    
   ]), [])

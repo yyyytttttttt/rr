@@ -13,9 +13,9 @@ export default function AboutUsPage() {
   const texts = useMemo(
     () => [
       { tit: 'О НАС' },
-      { tit: 'Наш подход' },
-      { tit: 'Что нас отличает' },
-      { tit: 'И главное' },
+      { tit: 'НАШ ПОДХОД' },
+      { tit: 'ЧТО НАС ОТЛИЧАЕТ' },
+      { tit: 'И ГЛАВНОЕ' },
     ],
     []
   )

@@ -47,7 +47,7 @@ function Menu  ({ setOpen }) {
         <motion.div
           onClick={(e) => e.stopPropagation()}
           className="absolute max-w-[92%] left-[4%]   top-[2%]  py-[2%]  rounded-[40px]
-                     bg-[rgba(27,27,27,0.85)] text-[#E3DECD] flex flex-col  justify-center px-[2%]   "
+                     bg-[#1B1B1B] text-[#E3DECD] flex flex-col  justify-center px-[2%] z-999   "
           variants={panelVariants}
           initial="initial"
           animate="animate"
@@ -190,7 +190,7 @@ function Menu  ({ setOpen }) {
         <motion.div
           onClick={(e) => e.stopPropagation()}
           className="absolute max-w-[92%] left-[4%]   top-[2%]  py-[2%]  rounded-[20px]
-                     bg-[rgba(27,27,27,0.85)] text-[#E3DECD] flex flex-col  justify-center px-[2%]   "
+                     bg-[#1B1B1B] text-[#E3DECD] flex flex-col  justify-center px-[2%]  z-999 "
           variants={panelVariants}
           initial="initial"
           animate="animate"
@@ -333,7 +333,7 @@ function Menu  ({ setOpen }) {
         <motion.div
           onClick={(e) => e.stopPropagation()}
           className="absolute max-w-[92%] left-[4%]   top-[2%]  py-8 rounded-[20px]
-                     bg-[rgba(27,27,27,0.85)] text-[#E3DECD] flex flex-col  justify-center px-8   "
+                     bg-[#1B1B1B] text-[#E3DECD] flex flex-col  justify-center px-8  z-999 "
           variants={panelVariants}
           initial="initial"
           animate="animate"
