@@ -58,7 +58,7 @@ export default function ProjectsSlider() {
         >
           {projects.map((proj, index) => (
             <SwiperSlide key={index}>
-              <div className="relative w-full aspect-[3/4] overflow-hidden rounded-2xl cursor-pointer transition-transform duration-200 hover:scale-[1.02]">
+              <div className="relative w-full aspect-[3/4] xl:aspect-[4/5] overflow-hidden rounded-2xl cursor-pointer transition-transform duration-200 hover:scale-[1.02]">
                 <Image
                   src={proj.image}
                   alt={proj.title.replace('\n', ' ')}
@@ -78,10 +78,10 @@ export default function ProjectsSlider() {
         </Swiper>
 
         {/* Progress bar */}
-        <div className="mt-5">
-          <div className="relative h-[4px] w-full rounded-full bg-[#D9D4C9]">
+        <div className="mt-3 xl:mt-4">
+          <div className="relative h-[3px] w-full rounded-full bg-[#D9D4C9]">
             <div
-              className="absolute top-0 h-[4px] rounded-full bg-[#636846] transition-all duration-300"
+              className="absolute top-0 h-[3px] rounded-full bg-[#636846] transition-all duration-300"
               style={{ width: '40%', left: `${progress * 60}%` }}
             />
           </div>
@@ -89,16 +89,16 @@ export default function ProjectsSlider() {
       </div>
 
       {/* Text block below slider */}
-      <div className="w-full max-w-[1920px] px-[2%] mx-auto mt-4 md:mt-5">
-        <h2 className="text-[clamp(1.25rem,1rem+1vw,2.25rem)] font-ManropeBold text-[#2b2b2b] leading-tight">
+      <div className="w-full max-w-[1920px] px-[2%] mx-auto mt-3 xl:mt-4">
+        <h2 className="text-[clamp(1.25rem,1rem+1vw,2rem)] font-ManropeBold text-[#2b2b2b] leading-tight">
           Наши услуги
         </h2>
-        <p className="mt-3 text-[clamp(0.8125rem,0.7rem+0.5vw,1.125rem)] font-ManropeRegular leading-relaxed text-[#6A7058] max-w-[600px]">
+        <p className="mt-2 text-[clamp(0.8125rem,0.7rem+0.5vw,1rem)] font-ManropeRegular leading-relaxed text-[#6A7058] max-w-[600px]">
           Красота, спокойствие и уверенность — всё начинается с заботы о себе. Выбери то, что откликается именно тебе.
         </p>
         <button
           onClick={() => router.push('/Servic/')}
-          className="mt-5 w-full md:w-auto inline-flex items-center justify-center rounded-xl px-8 py-3.5 border border-[#C4BAA8] text-[clamp(0.8125rem,0.7rem+0.5vw,1.0625rem)] font-ManropeMedium text-[#636846] transition-all duration-300 hover:bg-[#636846] hover:text-white hover:border-[#636846] cursor-pointer"
+          className="mt-3 w-full md:w-auto inline-flex items-center justify-center rounded-xl px-8 py-3 border border-[#C4BAA8] text-[clamp(0.8125rem,0.7rem+0.5vw,1.0625rem)] font-ManropeMedium text-[#636846] transition-all duration-300 hover:bg-[#636846] hover:text-white hover:border-[#636846] cursor-pointer"
         >
           Перейти в раздел
         </button>
