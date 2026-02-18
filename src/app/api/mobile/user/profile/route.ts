@@ -30,6 +30,19 @@ export async function GET(request: NextRequest) {
         birthDate: true,
         role: true,
         createdAt: true,
+        doctor: {
+          select: {
+            id: true,
+            title: true,
+            rating: true,
+            reviewCount: true,
+            tzid: true,
+            bufferMin: true,
+            slotDurationMin: true,
+            minLeadMin: true,
+            gridStepMin: true,
+          },
+        },
       },
     });
 

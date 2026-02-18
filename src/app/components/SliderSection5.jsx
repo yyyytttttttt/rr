@@ -43,7 +43,7 @@ const SliderSection5 = () => {
           480: { slidesPerView: 1.25, spaceBetween: 20 },
           768: { slidesPerView: 2, spaceBetween: 24 },
           1220: { slidesPerView: 3, spaceBetween: 12 },
-          1836: { slidesPerView: 3, spaceBetween: 20 },
+          1836: { slidesPerView: 4, spaceBetween: 20 },
         }}
         pagination={{
           el: '.projects-pagination',
