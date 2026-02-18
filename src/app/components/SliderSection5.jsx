@@ -1,124 +1,123 @@
 'use client'
-import { useMemo, useRef } from 'react'
-import Image from 'next/image'
-import React from 'react'
-import { Swiper, SwiperSlide } from 'swiper/react'
-import { Pagination, Navigation } from 'swiper/modules'
+
+import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
+import { Swiper, SwiperSlide } from 'swiper/react'
+import { Navigation } from 'swiper/modules'
+
 import 'swiper/css'
-import 'swiper/css/pagination'
 import 'swiper/css/navigation'
 
 const SliderSection5 = () => {
   const router = useRouter()
-    const projects = useMemo(
+  const [progress, setProgress] = useState(0)
+
+  const specialists = useMemo(
     () => [
-      { title: 'Инъекционная косметология', subTitile:'Врач-косметолог,',subTitile1:'дерматовенеролог, трихолог', image: '/images/us10.png' },
-      { title: 'Инъекционная косметология', subTitile:'Врач-косметолог,',subTitile1:'дерматовенеролог, трихолог', image: '/images/us10.png' },
-      { title: 'Инъекционная косметология', subTitile:'Врач-косметолог,',subTitile1:'дерматовенеролог, трихолог', image: '/images/us10.png' },
-      { title: 'Инъекционная косметология', subTitile:'Врач-косметолог,',subTitile1:'дерматовенеролог, трихолог', image: '/images/us10.png' },
-      { title: 'Инъекционная косметология', subTitile:'Врач-косметолог,',subTitile1:'дерматовенеролог, трихолог', image: '/images/us10.png' },
-      { title: 'Инъекционная косметология', subTitile:'Врач-косметолог,',subTitile1:'дерматовенеролог, трихолог', image: '/images/us10.png' },
-      { title: 'Инъекционная косметология', subTitile:'Врач-косметолог,',subTitile1:'дерматовенеролог, трихолог', image: '/images/us10.png' },
-      { title: 'Инъекционная косметология', subTitile:'Врач-косметолог,',subTitile1:'дерматовенеролог, трихолог', image: '/images/us10.png' },
-      { title: 'Инъекционная косметология', subTitile:'Врач-косметолог,',subTitile1:'дерматовенеролог, трихолог', image: '/images/us10.png' },
-      { title: 'Инъекционная косметология', subTitile:'Врач-косметолог,',subTitile1:'дерматовенеролог, трихолог', image: '/images/us10.png' },
+      { name: 'Екатерина Иванова', role: 'Врач-косметолог,\nдерматовенеролог', experience: '5 лет опыта', image: '/images/fot.png' },
+      { name: 'Анна Петрова', role: 'Врач-косметолог,\nтрихолог', experience: '8 лет опыта', image: '/images/fot.png' },
+      { name: 'Мария Сидорова', role: 'Дерматовенеролог,\nкосметолог', experience: '6 лет опыта', image: '/images/fot.png' },
+      { name: 'Ольга Козлова', role: 'Врач-косметолог,\nдерматолог', experience: '10 лет опыта', image: '/images/fot.png' },
+      { name: 'Наталья Волкова', role: 'Трихолог,\nкосметолог', experience: '4 года опыта', image: '/images/fot.png' },
+      { name: 'Елена Морозова', role: 'Врач-косметолог,\nдерматовенеролог', experience: '7 лет опыта', image: '/images/fot.png' },
     ],
     []
   )
+
   return (
-    <div className=' relative z-10 w-full h-app flex flex-col items-center justify-center px-4'>
-         <Swiper
-        className="  w-full mb-4  "
-        modules={[Pagination, Navigation]}
-        loop
-        grabCursor={true}
-        centeredSlides
-        watchSlidesProgress
-        speed={650}
-        spaceBetween={20}
-        slidesPerView={5}
-        breakpoints={{
-          320: { slidesPerView: 1.1, spaceBetween: 6 },
-          480: { slidesPerView: 1.25, spaceBetween: 20 },
-          768: { slidesPerView: 2, spaceBetween: 24 },
-          1220: { slidesPerView: 3, spaceBetween: 12 },
-          1836: { slidesPerView: 4, spaceBetween: 20 },
-        }}
-        pagination={{
-          el: '.projects-pagination',
-          clickable: true,
-          renderBullet: (index, className) =>
-            `<span class="${className} projects-bullet"></span>`,
-        }}
-        navigation={{
-          prevEl: '.nav-slide-4-prev',
-          nextEl: '.nav-slide-4-next',
-        }}
-        onBeforeInit={(sw) => {
-          sw.params.navigation.prevEl = '.nav-slide-4-prev'
-          sw.params.navigation.nextEl = '.nav-slide-4-next'
-        }}
-        onInit={(sw) => {
-          sw.navigation.init()
-          sw.navigation.update()
-        }}
-      >
-        {projects.map((proj, index) => (
-          <SwiperSlide key={index} className="!h-auto pb-2 xs:pb-0">
-            <article className=" relative overflow-hidden shadow-xl  mx-auto rounded-3xl transition-all duration-300">
-              {/* Адаптивная высота без fixed: через aspect-ratio */}
-              <div className="relative w-full aspect-5/4">
+    <section className="relative z-10 w-full h-app flex flex-col justify-center px-4 sm:px-6">
+      {/* Slider area */}
+      <div className="w-full max-w-[1920px] px-[2%] mx-auto">
+        <Swiper
+          className="w-full"
+          modules={[Navigation]}
+          speed={500}
+          spaceBetween={12}
+          slidesPerView={2}
+          breakpoints={{
+            320: { slidesPerView: 1.4, spaceBetween: 10 },
+            480: { slidesPerView: 2, spaceBetween: 14 },
+            640: { slidesPerView: 2.5, spaceBetween: 16 },
+            1024: { slidesPerView: 3.5, spaceBetween: 20 },
+            1280: { slidesPerView: 4, spaceBetween: 20 },
+            1500: { slidesPerView: 4.2, spaceBetween: 22 },
+          }}
+          navigation={{
+            prevEl: '.nav-slide-5-prev',
+            nextEl: '.nav-slide-5-next',
+          }}
+          onBeforeInit={(sw) => {
+            sw.params.navigation.prevEl = '.nav-slide-5-prev'
+            sw.params.navigation.nextEl = '.nav-slide-5-next'
+          }}
+          onInit={(sw) => {
+            sw.navigation.init()
+            sw.navigation.update()
+          }}
+          onProgress={(_sw, p) => setProgress(p)}
+        >
+          {specialists.map((spec, index) => (
+            <SwiperSlide key={index}>
+              <div className="relative w-full aspect-[3/4] overflow-hidden rounded-2xl cursor-pointer transition-transform duration-200 hover:scale-[1.02]">
                 <Image
-                  src={proj.image}
-                  alt={proj.title}
+                  src={spec.image}
+                  alt={spec.name}
                   fill
-                  sizes="(max-width: 480px) 92vw, (max-width: 1024px) 48vw, 32vw"
-                  quality={100}
-                  className="object-cover transition-transform duration-500 "
-                  priority={index === 0}
+                  sizes="(max-width: 640px) 70vw, (max-width: 1024px) 40vw, 25vw"
+                  className="object-cover"
+                  quality={90}
+                  priority={index <= 1}
                 />
-              </div>
-
-              {/* Оверлей */}
-              <div className="pointer-events-none absolute inset-0  from-transparent via-black/30 to-black/70" />
-
-              {/* Подпись */}
-              <div className=" z-20">
-                <div className="px-6 py-[8%]  flex flex-col  text-[#636846]  text-start  ">
-                  <div className=''>
-                      <div className='font-ManropeBold text-[clamp(1rem,0.7692rem+1.0256vw,2rem)]'>{proj.title}</div>
-                      <div className='font-ManropeRegular text-[clamp(0.75rem,0.5769rem+0.7692vw,1.5rem)]'>
-                          <div >{proj.subTitile}</div>
-                          <div >{proj.subTitile1}</div>
-                      </div>
+                {/* Experience badge */}
+                <div className="absolute top-3 left-3 z-10">
+                  <span className="inline-block bg-[#FFFCF3]/90 backdrop-blur-sm text-[#967450] px-3 py-1.5 rounded-lg text-[clamp(0.6875rem,0.6rem+0.4vw,0.875rem)] font-ManropeMedium">
+                    {spec.experience}
+                  </span>
+                </div>
+                {/* Gradient overlay */}
+                <div className="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+                {/* Text */}
+                <div className="absolute bottom-4 left-4 right-4 z-10">
+                  <div className="text-[clamp(0.9375rem,0.8rem+0.6vw,1.25rem)] font-ManropeBold leading-tight text-white">
+                    {spec.name}
+                  </div>
+                  <div className="mt-1 text-[clamp(0.75rem,0.65rem+0.45vw,0.9375rem)] font-ManropeRegular leading-snug text-white/80 whitespace-pre-line">
+                    {spec.role}
                   </div>
                 </div>
               </div>
-              <div className='w-full'>
-                  <div className='z-20 absolute top-4 left-2'>
-                    <p className='text-[#967450] bg-[#FFFCF3] px-4 py-2 text-[clamp(0.6875rem,0.5577rem+0.5769vw,1.25rem)]'>5 лет опыта</p>
-                  </div>
-                  <div className='w-[7%] z-20 absolute top-4 right-2'>
-                      <div className=' w-full h-auto'>
-                        <svg className='w-full h-auto' xmlns="http://www.w3.org/2000/svg" width="52" height="52" viewBox="0 0 52 52" fill="none">
-                        <rect width="52" height="52" rx="26" fill="#F7EFE5"/>
-                        <path d="M20 32L32 20M32 20H22.25M32 20V29.75" stroke="#967450" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                      </div>
-                  </div>
-              </div>
-            </article>
-          </SwiperSlide>
-        ))}
-      </Swiper>
-      <div className='w-full flex justify-center'>
-        <button onClick={() => router.push('/Team/')}  className='text-white  bg-[#636846] mt-4 font-ManropeRegular text-[clamp(0.75rem,0.6346rem+0.5128vw,1.25rem)] cursor-pointer transition-all duration-500 hover:scale-105 px-6 py-3 rounded-[5px]'>
-            Перейти в раздел
-        </button>
+            </SwiperSlide>
+          ))}
+        </Swiper>
 
+        {/* Progress bar */}
+        <div className="mt-5">
+          <div className="relative h-[4px] w-full rounded-full bg-[#D9D4C9]">
+            <div
+              className="absolute top-0 h-[4px] rounded-full bg-[#636846] transition-all duration-300"
+              style={{ width: '40%', left: `${progress * 60}%` }}
+            />
+          </div>
+        </div>
       </div>
-    </div>
+
+      {/* Text block below slider */}
+      <div className="w-full max-w-[1920px] px-[2%] mx-auto mt-4 md:mt-5">
+        <h2 className="text-[clamp(1.25rem,1rem+1vw,2.25rem)] font-ManropeBold text-[#2b2b2b] leading-tight">
+          Наши специалисты
+        </h2>
+        <p className="mt-3 text-[clamp(0.8125rem,0.7rem+0.5vw,1.125rem)] font-ManropeRegular leading-relaxed text-[#6A7058] max-w-[600px]">
+          Команда профессионалов с многолетним опытом, которые помогут вам подобрать индивидуальный подход к красоте и здоровью.
+        </p>
+        <button
+          onClick={() => router.push('/Team/')}
+          className="mt-5 w-full md:w-auto inline-flex items-center justify-center rounded-xl px-8 py-3.5 border border-[#C4BAA8] text-[clamp(0.8125rem,0.7rem+0.5vw,1.0625rem)] font-ManropeMedium text-[#636846] transition-all duration-300 hover:bg-[#636846] hover:text-white hover:border-[#636846] cursor-pointer"
+        >
+          Перейти в раздел
+        </button>
+      </div>
+    </section>
   )
 }
 

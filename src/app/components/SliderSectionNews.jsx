@@ -40,6 +40,7 @@ export default function SliderSectionNews() {
             640: { slidesPerView: 3, spaceBetween: 16 },
             1024: { slidesPerView: 4, spaceBetween: 20 },
             1280: { slidesPerView: 4.1, spaceBetween: 20 },
+            1500: { slidesPerView: 4.3, spaceBetween: 22 },
           }}
           navigation={{
             prevEl: '.nav-slide-news-prev',
@@ -88,7 +89,7 @@ export default function SliderSectionNews() {
       </div>
 
       {/* Text block below slider */}
-      <div className="w-full max-w-[1920px] px-[2%] mx-auto mt-8 md:mt-10 px-1">
+      <div className="w-full max-w-[1920px] px-[2%] mx-auto mt-4 md:mt-5">
         <h2 className="text-[clamp(1.25rem,1rem+1vw,2.25rem)] font-ManropeBold text-[#2b2b2b] leading-tight">
           Новости клиники
         </h2>
