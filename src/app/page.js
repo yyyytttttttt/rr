@@ -33,11 +33,10 @@ export default function FullPageFeed() {
   const [active, setActive] = useState(0)
   const [rendered, setRendered] = useState(() => new Set([0, 1, 2]))
 
-  // null = ещё не определили, ждём mount
-  const [isTouch, setIsTouch] = useState(null)
-
-  useEffect(() => {
-    setIsTouch('ontouchstart' in window || navigator.maxTouchPoints > 0)
+  // Detect touch on first render (client only)
+  const isTouch = useMemo(() => {
+    if (typeof window === 'undefined') return null
+    return 'ontouchstart' in window || navigator.maxTouchPoints > 0
   }, [])
 
   const handleSlideChange = useCallback((s) => {

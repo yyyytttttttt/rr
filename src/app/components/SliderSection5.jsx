@@ -43,7 +43,7 @@ const SliderSection5 = () => {
             1280: { slidesPerView: 4, spaceBetween: 20 },
             1500: { slidesPerView: 4.2, spaceBetween: 22 },
           }}
-          navigation={{п
+          navigation={{
             prevEl: '.nav-slide-5-prev',
             nextEl: '.nav-slide-5-next',
           }}

@@ -1,10 +1,10 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 import Image from "next/image";
+import Link from "next/link";
 import ProfileMenu from "./ProfileMenu";
 
 type View = "home" | "booking" | "healthpasses" | "history" | "gifts" | "settings";
@@ -64,18 +64,7 @@ function PanelSkeleton() {
 }
 
 export default function ProfileContent({ view, panelProps, user }: Props) {
-  const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
-
-  const handleBack = () => {
-    // Always go back to previous page in browser history
-    if (typeof window !== "undefined" && window.history.length > 1) {
-      window.history.back();
-    } else {
-      // Fallback to main page if no history
-      router.push("/");
-    }
-  };
 
   return (
     <main className="flex-1 pb-20 md:pb-6 lg:pb-0">
@@ -86,7 +75,7 @@ export default function ProfileContent({ view, panelProps, user }: Props) {
               {/* Левая часть: Лого + Меню */}
               <div className="flex items-center gap-2 sm:gap-3">
                 {/* Logo */}
-                <a href="/" className="flex items-center shrink-0">
+                <Link href="/" className="flex items-center shrink-0">
                   <Image
                     src="/images/logo.png"
                     alt="Логотип"
@@ -95,7 +84,7 @@ export default function ProfileContent({ view, panelProps, user }: Props) {
                     className="w-9 h-9 sm:w-11 sm:h-11"
                     priority
                   />
-                </a>
+                </Link>
 
                 {/* Menu Button */}
                 <button
@@ -112,9 +101,11 @@ export default function ProfileContent({ view, panelProps, user }: Props) {
               {/* Правый блок: аватар + имя */}
               <div className="flex items-center gap-2 sm:gap-3">
                 {user?.image ? (
-                  <img
-                    src={user?.image}
-                    alt={"Аватар"}
+                  <Image
+                    src={user.image}
+                    alt="Аватар"
+                    width={40}
+                    height={40}
                     className="h-8 w-8 sm:h-9 sm:w-9 md:h-10 md:w-10 rounded-full object-cover ring-2 ring-white"
                   />
                 ) : (
