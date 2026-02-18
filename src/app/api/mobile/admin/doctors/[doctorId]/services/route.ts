@@ -18,7 +18,7 @@ export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ doctorId: string }> }
 ) {
-  const auth = requireAuth(req, ['ADMIN']);
+  const auth = requireAuth(req, ['ADMIN', 'DOCTOR']);
 
   if ('error' in auth) {
     return auth.error;
@@ -28,8 +28,16 @@ export async function GET(
 
   logger.debug('[MOBILE_ADMIN_DOCTOR_SERVICES] GET', { doctorId });
 
-  // Only ADMIN can access this endpoint
-  if (auth.payload.role !== 'ADMIN') {
+  // DOCTOR can only access their own services
+  if (auth.payload.role === 'DOCTOR') {
+    const ownDoctor = await prisma.doctor.findUnique({
+      where: { userId: auth.payload.userId },
+      select: { id: true },
+    });
+    if (!ownDoctor || ownDoctor.id !== doctorId) {
+      return NextResponse.json({ error: "Доступ запрещен" }, { status: 403 });
+    }
+  } else if (auth.payload.role !== 'ADMIN') {
     return NextResponse.json({ error: "Доступ запрещен" }, { status: 403 });
   }
 
@@ -87,7 +95,7 @@ export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ doctorId: string }> }
 ) {
-  const auth = requireAuth(req, ['ADMIN']);
+  const auth = requireAuth(req, ['ADMIN', 'DOCTOR']);
 
   if ('error' in auth) {
     return auth.error;
@@ -97,8 +105,16 @@ export async function POST(
 
   logger.debug('[MOBILE_ADMIN_DOCTOR_SERVICES] POST', { doctorId });
 
-  // Only ADMIN can access this endpoint
-  if (auth.payload.role !== 'ADMIN') {
+  // DOCTOR can only link services to themselves
+  if (auth.payload.role === 'DOCTOR') {
+    const ownDoctor = await prisma.doctor.findUnique({
+      where: { userId: auth.payload.userId },
+      select: { id: true },
+    });
+    if (!ownDoctor || ownDoctor.id !== doctorId) {
+      return NextResponse.json({ error: "Доступ запрещен" }, { status: 403 });
+    }
+  } else if (auth.payload.role !== 'ADMIN') {
     return NextResponse.json({ error: "Доступ запрещен" }, { status: 403 });
   }
 

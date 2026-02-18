@@ -12,7 +12,7 @@ export async function DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ doctorId: string; serviceId: string }> }
 ) {
-  const auth = requireAuth(req, ['ADMIN']);
+  const auth = requireAuth(req, ['ADMIN', 'DOCTOR']);
 
   if ('error' in auth) {
     return auth.error;
@@ -22,8 +22,16 @@ export async function DELETE(
 
   console.log("[MOBILE_ADMIN_DOCTOR_SERVICE_DELETE] DELETE request for doctor:", doctorId, "service:", serviceId);
 
-  // Only ADMIN can access this endpoint
-  if (auth.payload.role !== 'ADMIN') {
+  // DOCTOR can only unlink their own services
+  if (auth.payload.role === 'DOCTOR') {
+    const ownDoctor = await prisma.doctor.findUnique({
+      where: { userId: auth.payload.userId },
+      select: { id: true },
+    });
+    if (!ownDoctor || ownDoctor.id !== doctorId) {
+      return NextResponse.json({ error: "Доступ запрещен" }, { status: 403 });
+    }
+  } else if (auth.payload.role !== 'ADMIN') {
     return NextResponse.json({ error: "Доступ запрещен" }, { status: 403 });
   }
 

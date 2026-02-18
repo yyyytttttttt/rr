@@ -23,7 +23,7 @@ const SLIDER_SLIDES = {
   1: { prev: 'nav-slide-news-prev', next: 'nav-slide-news-next' },
   2: { prev: 'nav-slide-2-prev', next: 'nav-slide-2-next' },
   3: { prev: 'nav-slide-3-prev', next: 'nav-slide-3-next' },
-  4: { prev: 'nav-slide-4-prev', next: 'nav-slide-4-next' },
+  4: { prev: 'nav-slide-5-prev', next: 'nav-slide-5-next' },
 }
 
 function BottomNav({ activeSlide = 0 }) {
